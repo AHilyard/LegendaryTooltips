@@ -1,0 +1,41 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="CC BY-NC-ND 4.0"
+
+[[mods]]
+modId="legendarytooltips"
+version="${version}"
+displayName="Legendary Tooltips"
+displayURL="https://anthonyhilyard.com/"
+updateJSONURL="https://mc-curse-update-checker.herokuapp.com/532127"
+logoFile="icon.png"
+authors="Grend"
+description='''Gives rare items a fancy tooltip and adds additional tooltip configuration options.'''
+
+[[dependencies.legendarytooltips]]
+	modId="forge"
+	mandatory=true
+	versionRange="[36,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.legendarytooltips]]
+	modId="minecraft"
+	mandatory=true
+	versionRange="[1.16.5]"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.legendarytooltips]]
+	modId="iceberg"
+	mandatory=true
+	versionRange="[1.0.10,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.legendarytooltips]]
+	modId="equipmentcompare"
+	mandatory=false
+	versionRange="[1.2.3,)"
+	ordering="NONE"
+	side="BOTH"

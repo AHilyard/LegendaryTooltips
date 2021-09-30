@@ -1,0 +1,93 @@
+buildscript {
+	repositories {
+		maven { url = 'https://files.minecraftforge.net/maven' }
+		jcenter()
+		mavenCentral()
+	}
+	dependencies {
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+	}
+}
+apply plugin: 'net.minecraftforge.gradle'
+
+archivesBaseName = name + '-' + mcVersion
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
+
+minecraft {
+	mappings channel: 'official', version: project.mcVersion
+
+	runs {
+		client {
+			properties 'forge.logging.markers': ''
+			properties 'forge.logging.console.level': 'debug'
+			properties 'terminal.ansi': 'true'
+			workingDirectory project.file('run').canonicalPath
+			source sourceSets.main
+
+			mods {
+				legendarytooltips {
+					source sourceSets.main
+				}
+			}
+		}
+	}
+}
+
+repositories {
+	maven {
+		name = "CurseMaven"
+		url "https://www.cursemaven.com"
+	}
+}
+
+// Process resources on build
+processResources {
+	// This will ensure that this task is redone when the versions change.
+	inputs.property 'version', project.version
+
+	// Replace stuff in mods.toml, nothing else
+	from(sourceSets.main.resources.srcDirs) {
+		include 'META-INF/mods.toml'
+
+		// Replace version
+		expand 'version':project.version
+	}
+
+	// Copy everything else except the mods.toml
+	from(sourceSets.main.resources.srcDirs) {
+		exclude 'META-INF/mods.toml'
+	}
+}
+
+configurations {
+	provided
+}
+
+sourceSets {
+	main {
+		resources {
+			srcDir 'src/generated/resources'
+		}
+		compileClasspath += configurations.provided
+	}
+}
+
+dependencies {
+	minecraft 'net.minecraftforge:forge:' + project.properties.mcVersion + '-' + forgeVersion
+
+	compile 'curse.maven:iceberg-520110:3476658'
+}
+
+jar {
+	manifest {
+		attributes(["Specification-Title": project.name,
+					"Specification-Vendor": project.author,
+					"Specification-Version": "24.0",
+					"Implementation-Title": project.name,
+					"Implementation-Version": project.version,
+					"Implementation-Vendor" : project.author,
+					"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
+	}
+}
