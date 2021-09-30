@@ -1,2 +1,2 @@
 # LegendaryTooltips
-A mod for Minecraft 1.16.5 that makes it easier to compare equipment.
+A mod for Minecraft that adds fancy tooltips for rare items as well as tooltip customization options.
