@@ -89,6 +89,12 @@ public class LegendaryTooltips
 	}
 
 	@SubscribeEvent
+	public static void onPreTooltipEvent(RenderTooltipEvent.Pre event)
+	{
+		TooltipDecor.setCachedLines(event.getLines());
+	}
+
+	@SubscribeEvent
 	public static void onTooltipColorEvent(RenderTooltipEvent.Color event)
 	{
 		Pair<Integer, Integer> borderColors = itemFrameColors(event.getStack(), Pair.of(event.getBorderStart(), event.getBorderEnd()));

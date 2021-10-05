@@ -11,12 +11,14 @@ import com.electronwill.nightconfig.core.Config;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import net.minecraft.item.Item;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Rarity;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Color;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
@@ -58,7 +60,7 @@ public class LegendaryTooltipsConfig
 		put("epic", Rarity.EPIC);
 	}};
 
-	private static final Map<Item, Integer> frameLevelCache = new HashMap<Item, Integer>();
+	private static final Map<ItemStack, Integer> frameLevelCache = new HashMap<ItemStack, Integer>();
 
 	static
 	{
@@ -94,7 +96,9 @@ public class LegendaryTooltipsConfig
 							"   Tag - $ followed by tag name.  Examples: $forge:stone or $planks\n" +
 							"   Mod name - @ followed by mod identifier.  Examples: @spoiledeggs\n" +
 							"   Rarity - ! followed by item's rarity.  This is ONLY vanilla rarities.  Examples: !uncommon, !rare, !epic\n" +
-							"   Item name color - # followed by color hex code, the hex code must match exactly.  Examples: #23F632");
+							"   Item name color - # followed by color hex code, the hex code must match exactly.  Examples: #23F632\n" +
+							"   Display name - % followed by any text.  Will match any item with this text in its tooltip display name.  Examples: %[Uncommon]\n" +
+							"   Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: ^Rarity: Legendary");
 		build.push("definitions");
 
 		level0Items = build.comment(" List of level 0 custom border entries.  Each entry can be an item name, a tag, a mod name, a rarity level, or an item name color.").defineListAllowEmpty(Arrays.asList("level0_entries"), () -> Arrays.asList("!epic"), e -> validateCustomBorderEntry((String)e) );
@@ -107,16 +111,16 @@ public class LegendaryTooltipsConfig
 
 	public int getFrameLevelForItem(ItemStack item)
 	{
-		if (frameLevelCache.containsKey(item.getItem()))
+		if (frameLevelCache.containsKey(item))
 		{
-			return frameLevelCache.get(item.getItem());
+			return frameLevelCache.get(item);
 		}
 
 		Map<Integer, List<? extends String>> levelEntries = new HashMap<Integer, List<? extends String>>(){{
 			put(0, level0Items.get());
-			put(1, level0Items.get());
-			put(2, level0Items.get());
-			put(3, level0Items.get());
+			put(1, level1Items.get());
+			put(2, level2Items.get());
+			put(3, level3Items.get());
 		}};
 
 		// Check each level from 0 to 3 for matches for this item, from most specific to least.
@@ -160,18 +164,41 @@ public class LegendaryTooltipsConfig
 						found = true;
 					}
 				}
+				else if (entry.startsWith("%"))
+				{
+					if (item.getDisplayName().getString().contains(entry.substring(1)))
+					{
+						found = true;
+					}
+				}
+				else if (entry.startsWith("^"))
+				{
+					Minecraft mc = Minecraft.getInstance();
+					List<ITextComponent> lines = item.getTooltipLines(mc.player, ITooltipFlag.TooltipFlags.ADVANCED);
+					String tooltipText = "";
+					
+					// Skip title line.
+					for (int n = 1; n < lines.size(); n++)
+					{
+						tooltipText += lines.get(n).getString() + '\n';
+					}
+					if (tooltipText.contains(entry.substring(1)))
+					{
+						found = true;
+					}
+				}
 
 				if (found)
 				{
 					// Add to cache.
-					frameLevelCache.put(item.getItem(), i);
+					frameLevelCache.put(item, i);
 					return i;
 				}
 			}
 		}
 		
 		// Add to cache.
-		frameLevelCache.put(item.getItem(), 4);
+		frameLevelCache.put(item, 4);
 		return 4;
 	}
 
@@ -181,14 +208,11 @@ public class LegendaryTooltipsConfig
 		if (value.startsWith("$"))
 		{
 			return ResourceLocation.isValidResourceLocation(value.substring(1));
-			//return ItemTags.getAllTags().getTag(new ResourceLocation(value.substring(1))) != null;
 		}
 		// If this is a mod, check that mod is loaded.
 		else if (value.startsWith("@"))
 		{
 			return true;
-			// TODO: Make sure mods are loaded at this point...
-			//return ModList.get().isLoaded(value.substring(1));
 		}
 		// If this is a rarity, make sure it's a valid one.
 		else if (value.startsWith("!"))
@@ -199,6 +223,11 @@ public class LegendaryTooltipsConfig
 		else if (value.startsWith("#"))
 		{
 			return Color.parseColor(value) != null;
+		}
+		// Text matches are always considered valid.
+		else if (value.startsWith("%") || value.startsWith("^"))
+		{
+			return true;
 		}
 		// Otherwise it's an item, so just make sure it's a value resource location.
 		else

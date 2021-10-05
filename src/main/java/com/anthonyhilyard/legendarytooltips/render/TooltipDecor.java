@@ -11,6 +11,7 @@ import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.Style;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.anthonyhilyard.iceberg.util.GuiHelper;
@@ -27,6 +28,8 @@ public class TooltipDecor
 
 	private static int shineTimer = 0;
 
+	private static List<ITextProperties> cachedPreWrapLines = new ArrayList<>();
+
 	public static void setCurrentTooltipBorderStart(int color)
 	{
 		currentTooltipBorderStart = color;
@@ -35,6 +38,12 @@ public class TooltipDecor
 	public static void setCurrentTooltipBorderEnd(int color)
 	{
 		currentTooltipBorderEnd = color;
+	}
+
+	public static void setCachedLines(List<? extends ITextProperties> lines)
+	{
+		cachedPreWrapLines.clear();
+		cachedPreWrapLines.addAll(lines);
 	}
 
 	public static void updateTimer()
@@ -77,7 +86,7 @@ public class TooltipDecor
 
 	public static void drawBorder(MatrixStack matrixStack, int x, int y, int width, int height, ItemStack item, List<? extends ITextProperties> lines, FontRenderer font, int frameLevel, boolean comparison)
 	{
-		// If this is a comparison tooltip, we need to draw the actual lines first.
+		// If this is a comparison tooltip, we need to draw the actual border lines first.
 		if (comparison)
 		{
 			matrixStack.pushPose();
@@ -94,15 +103,15 @@ public class TooltipDecor
 		}
 
 		// If the separate name border is enabled, draw it now.
-		if (LegendaryTooltipsConfig.INSTANCE.nameSeparator.get())
+		if (LegendaryTooltipsConfig.INSTANCE.nameSeparator.get() && !cachedPreWrapLines.isEmpty())
 		{
 			// Determine and store the number of "title lines".
-			ITextProperties textLine = lines.get(0);
+			ITextProperties textLine = cachedPreWrapLines.get(0);
 			List<ITextProperties> wrappedLine = font.getSplitter().splitLines(textLine, width, Style.EMPTY);
 			int titleLineCount = wrappedLine.size();
 
 			// Only do this if there's more lines below the title.
-			if (lines.size() > titleLineCount)
+			if (cachedPreWrapLines.size() > titleLineCount)
 			{
 				// If this is a comparison tooltip, we need to move this separator down to the proper position.
 				int offset = 0;
@@ -177,7 +186,7 @@ public class TooltipDecor
 		if (width >= 48)
 		{
 			// Render top central embellishment.
-			AbstractGui.blit(matrixStack, x + (width / 2) - 24, y - 9, 8, 0, 48, 8, 64, 64);
+			AbstractGui.blit(matrixStack, x + (width / 2) - 24, y - 9, 8, frameLevel * 16, 48, 8, 64, 64);
 
 			// Render bottom central embellishment.
 			AbstractGui.blit(matrixStack, x + (width / 2) - 24, y + height - 8 + 9, 8, frameLevel * 16 + 8, 48, 8, 64, 64);
