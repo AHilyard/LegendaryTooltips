@@ -1,10 +1,11 @@
 package com.anthonyhilyard.legendarytooltips;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.ChatFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.event.TickEvent;
@@ -12,8 +13,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
+import java.util.List;
+
 import com.anthonyhilyard.iceberg.events.RenderTooltipExtEvent;
 import com.anthonyhilyard.iceberg.util.ItemColor;
+import com.anthonyhilyard.iceberg.util.StringRecomposer;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -41,7 +45,7 @@ public class LegendaryTooltips
 		}
 		else if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
 		{
-			Color rarityColor = ItemColor.getColorForItem(item, Color.fromLegacyFormat(TextFormatting.WHITE));
+			TextColor rarityColor = ItemColor.getColorForItem(item, TextColor.fromLegacyFormat(ChatFormatting.WHITE));
 
 			float[] hsbVals = new float[3];
 			java.awt.Color.RGBtoHSB((rarityColor.getValue() >> 16) & 0xFF, (rarityColor.getValue() >> 8) & 0xFF, (rarityColor.getValue() >> 0) & 0xFF, hsbVals);
@@ -55,8 +59,8 @@ public class LegendaryTooltips
 				addHue = true;
 			}
 			
-			Color startColor = Color.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f, hsbVals[1], hsbVals[2]).getRGB());
-			Color endColor = Color.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f, hsbVals[1], hsbVals[2]).getRGB());
+			TextColor startColor = TextColor.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f, hsbVals[1], hsbVals[2]).getRGB());
+			TextColor endColor = TextColor.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f, hsbVals[1], hsbVals[2]).getRGB());
 
 			return Pair.of(startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF));
 		}
@@ -73,25 +77,35 @@ public class LegendaryTooltips
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.screen != null)
 		{
-			if (mc.screen instanceof ContainerScreen)
+			if (mc.screen instanceof AbstractContainerScreen)
 			{
-				if (((ContainerScreen<?>)mc.screen).getSlotUnderMouse() != null && 
-					((ContainerScreen<?>)mc.screen).getSlotUnderMouse().hasItem())
+				if (((AbstractContainerScreen<?>)mc.screen).getSlotUnderMouse() != null && 
+					((AbstractContainerScreen<?>)mc.screen).getSlotUnderMouse().hasItem())
 				{
-					if (lastTooltipItem != ((ContainerScreen<?>)mc.screen).getSlotUnderMouse().getItem())
+					if (lastTooltipItem != ((AbstractContainerScreen<?>)mc.screen).getSlotUnderMouse().getItem())
 					{
 						TooltipDecor.resetTimer();
-						lastTooltipItem = ((ContainerScreen<?>)mc.screen).getSlotUnderMouse().getItem();
+						lastTooltipItem = ((AbstractContainerScreen<?>)mc.screen).getSlotUnderMouse().getItem();
 					}
 				}
 			}
 		}
 	}
 
+	@SuppressWarnings("removal")
 	@SubscribeEvent
 	public static void onPreTooltipEvent(RenderTooltipEvent.Pre event)
 	{
-		TooltipDecor.setCachedLines(event.getLines());
+		List<? extends FormattedText> standinLines;
+		if (!event.getComponents().isEmpty())
+		{
+			standinLines = StringRecomposer.recompose(event.getComponents());
+		}
+		else
+		{
+			standinLines = event.getLines();
+		}
+		TooltipDecor.setCachedLines(standinLines);
 	}
 
 	@SubscribeEvent
@@ -122,6 +136,7 @@ public class LegendaryTooltips
 		}
 	}
 
+	@SuppressWarnings("removal")
 	@SubscribeEvent
 	public static void onPostTooltipEvent(RenderTooltipEvent.PostText event)
 	{

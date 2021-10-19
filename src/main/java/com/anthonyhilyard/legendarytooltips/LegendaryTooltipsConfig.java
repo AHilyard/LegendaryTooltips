@@ -12,23 +12,20 @@ import com.electronwill.nightconfig.core.Config;
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.LongValue;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.fml.config.IConfigEvent;
 
-@Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.MOD)
 public class LegendaryTooltipsConfig
 {
 	public static final ForgeConfigSpec SPEC;
@@ -81,14 +78,14 @@ public class LegendaryTooltipsConfig
 
 		build.pop().comment(" Custom borders are broken into 4 \"levels\", with level 0 being intended for the \"best\" or \"rarest\" items.  Only level 0 has a custom border built-in, but 1-3 can be added with a resource pack.").push("custom_borders");
 		build.push("colors");
-		level0StartColor = build.comment(" The start border color of the level 0 custom border.").defineInRange("level0_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
-		level0EndColor = build.comment(" The end border color of the level 0 custom border.").defineInRange("level0_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
-		level1StartColor = build.comment(" The start border color of the level 1 custom border.").defineInRange("level1_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
-		level1EndColor = build.comment(" The end border color of the level 1 custom border.").defineInRange("level1_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
-		level2StartColor = build.comment(" The start border color of the level 2 custom border.").defineInRange("level2_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
-		level2EndColor = build.comment(" The end border color of the level 2 custom border.").defineInRange("level2_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
-		level3StartColor = build.comment(" The start border color of the level 3 custom border.").defineInRange("level3_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
-		level3EndColor = build.comment(" The end border color of the level 3 custom border.").defineInRange("level3_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
+		level0StartColor = build.comment(" The start border color of the level 0 custom border.  Can be entered as a hex code in the format \"0xAARRGGBB\".").defineInRange("level0_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
+		level0EndColor = build.comment(" The end border color of the level 0 custom border.  Can be entered as a hex code in the format \"0xAARRGGBB\".").defineInRange("level0_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
+		level1StartColor = build.comment(" The start border color of the level 1 custom border.  Can be entered as a hex code in the format \"0xAARRGGBB\".").defineInRange("level1_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
+		level1EndColor = build.comment(" The end border color of the level 1 custom border.  Can be entered as a hex code in the format \"0xAARRGGBB\".").defineInRange("level1_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
+		level2StartColor = build.comment(" The start border color of the level 2 custom border.  Can be entered as a hex code in the format \"0xAARRGGBB\".").defineInRange("level2_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
+		level2EndColor = build.comment(" The end border color of the level 2 custom border.  Can be entered as a hex code in the format \"0xAARRGGBB\".").defineInRange("level2_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
+		level3StartColor = build.comment(" The start border color of the level 3 custom border.  Can be entered as a hex code in the format \"0xAARRGGBB\".").defineInRange("level3_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
+		level3EndColor = build.comment(" The end border color of the level 3 custom border.  Can be entered as a hex code in the format \"0xAARRGGBB\".").defineInRange("level3_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
 
 
 		build.pop().comment(" Entry types:\n" + 
@@ -137,8 +134,8 @@ public class LegendaryTooltipsConfig
 				}
 				else if (entry.startsWith("#"))
 				{
-					Color entryColor = Color.parseColor(entry);
-					if (entryColor.equals(ItemColor.getColorForItem(item, Color.fromRgb(0xFFFFFF))))
+					TextColor entryColor = TextColor.parseColor(entry);
+					if (entryColor.equals(ItemColor.getColorForItem(item, TextColor.fromRgb(0xFFFFFF))))
 					{
 						found = true;
 					}
@@ -174,7 +171,7 @@ public class LegendaryTooltipsConfig
 				else if (entry.startsWith("^"))
 				{
 					Minecraft mc = Minecraft.getInstance();
-					List<ITextComponent> lines = item.getTooltipLines(mc.player, ITooltipFlag.TooltipFlags.ADVANCED);
+					List<Component> lines = item.getTooltipLines(mc.player, TooltipFlag.Default.ADVANCED);
 					String tooltipText = "";
 					
 					// Skip title line.
@@ -222,7 +219,7 @@ public class LegendaryTooltipsConfig
 		// If this is a hex color, ensure it's in a valid format.
 		else if (value.startsWith("#"))
 		{
-			return Color.parseColor(value) != null;
+			return TextColor.parseColor(value) != null;
 		}
 		// Text matches are always considered valid.
 		else if (value.startsWith("%") || value.startsWith("^"))
@@ -237,7 +234,7 @@ public class LegendaryTooltipsConfig
 	}
 
 	@SubscribeEvent
-	public static void onLoad(ModConfig.Reloading e)
+	public static void onLoad(IConfigEvent e)
 	{
 		if (e.getConfig().getModId().equals(Loader.MODID))
 		{

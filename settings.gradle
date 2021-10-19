@@ -1,0 +1,2 @@
+// Set the root project name so that the workspace folder name doesn't mess stuff up.
+rootProject.name = "LegendaryTooltips"
