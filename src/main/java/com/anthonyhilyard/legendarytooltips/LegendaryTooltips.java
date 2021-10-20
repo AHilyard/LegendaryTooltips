@@ -26,7 +26,8 @@ public class LegendaryTooltips
 	@SuppressWarnings("unused")
 	public static final Logger LOGGER = LogManager.getLogger();
 
-	private static final int STANDARD = 4;
+	public static final int STANDARD = -1;
+	public static final int NUM_FRAMES = 16;
 
 	private static ItemStack lastTooltipItem = null;
 
@@ -36,8 +37,18 @@ public class LegendaryTooltips
 		int frameLevel = LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(item);
 		if (frameLevel != STANDARD)
 		{
-			return Pair.of(LegendaryTooltipsConfig.INSTANCE.getCustomBorderStartColor(frameLevel),
-						   LegendaryTooltipsConfig.INSTANCE.getCustomBorderEndColor(frameLevel));
+			int startColor = LegendaryTooltipsConfig.INSTANCE.getCustomBorderStartColor(frameLevel);
+			int endColor = LegendaryTooltipsConfig.INSTANCE.getCustomBorderEndColor(frameLevel);
+
+			if (startColor == -1)
+			{
+				startColor = defaults.getLeft();
+			}
+			if (endColor == -1)
+			{
+				endColor = defaults.getRight();
+			}
+			return Pair.of(startColor, endColor);
 		}
 		else if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
 		{

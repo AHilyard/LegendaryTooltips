@@ -39,19 +39,10 @@ public class LegendaryTooltipsConfig
 	public final BooleanValue tooltipShadow;
 	public final BooleanValue shineEffect;
 
-	public final LongValue level0StartColor;
-	public final LongValue level0EndColor;
-	public final LongValue level1StartColor;
-	public final LongValue level1EndColor;
-	public final LongValue level2StartColor;
-	public final LongValue level2EndColor;
-	public final LongValue level3StartColor;
-	public final LongValue level3EndColor;
+	public final LongValue[] startColors = new LongValue[LegendaryTooltips.NUM_FRAMES];
+	public final LongValue[] endColors = new LongValue[LegendaryTooltips.NUM_FRAMES];
 	
-	public final ConfigValue<List<? extends String>> level0Items;
-	public final ConfigValue<List<? extends String>> level1Items;
-	public final ConfigValue<List<? extends String>> level2Items;
-	public final ConfigValue<List<? extends String>> level3Items;
+	private final List<ConfigValue<List<? extends String>>> itemSelectors = new ArrayList<ConfigValue<List<? extends String>>>(LegendaryTooltips.NUM_FRAMES);
 
 	private static final Map<String, Rarity> rarities = new HashMap<String, Rarity>() {{
 		put("common", Rarity.COMMON);
@@ -79,17 +70,13 @@ public class LegendaryTooltipsConfig
 		tooltipShadow = build.comment(" If enabled, tooltips will display a drop shadow.").define("tooltip_shadow", true);
 		shineEffect = build.comment(" If enabled, items showing a custom border will have a special shine effect when hovered over.").define("shine_effect", true);
 
-		build.pop().comment(" Custom borders are broken into 4 \"levels\", with level 0 being intended for the \"best\" or \"rarest\" items.  Only level 0 has a custom border built-in, but 1-3 can be added with a resource pack.").push("custom_borders");
-		build.push("colors");
-		level0StartColor = build.comment(" The start border color of the level 0 custom border.").defineInRange("level0_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
-		level0EndColor = build.comment(" The end border color of the level 0 custom border.").defineInRange("level0_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
-		level1StartColor = build.comment(" The start border color of the level 1 custom border.").defineInRange("level1_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
-		level1EndColor = build.comment(" The end border color of the level 1 custom border.").defineInRange("level1_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
-		level2StartColor = build.comment(" The start border color of the level 2 custom border.").defineInRange("level2_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
-		level2EndColor = build.comment(" The end border color of the level 2 custom border.").defineInRange("level2_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
-		level3StartColor = build.comment(" The start border color of the level 3 custom border.").defineInRange("level3_start_color", 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
-		level3EndColor = build.comment(" The end border color of the level 3 custom border.").defineInRange("level3_end_color", 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
-
+		build.pop().comment(String.format(" Custom borders are broken into %d \"levels\", with level 0 being intended for the \"best\" or \"rarest\" items. Only level 0 has a custom border built-in, but others can be added with resource packs.", LegendaryTooltips.NUM_FRAMES)).push("custom_borders");
+		build.comment(" The start and end border colors of each levels' borders. Note that they can be entered as a hex code in the format \"0xAARRGGBB\" for convenience.").push("colors");
+		for (int i = 0; i < LegendaryTooltips.NUM_FRAMES; i++)
+		{
+			startColors[i] = build.defineInRange(String.format("level%d_start_color", i), 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
+			endColors[i] = build.defineInRange(String.format("level%d_end_color", i), 0xFF5A3A1DL, 0x00000000L, 0xFFFFFFFFL);
+		}
 
 		build.pop().comment(" Entry types:\n" + 
 							"   Item name - Use item name for vanilla items or include mod name for modded items.  Examples: minecraft:stick, iron_ore\n" +
@@ -98,13 +85,18 @@ public class LegendaryTooltipsConfig
 							"   Rarity - ! followed by item's rarity.  This is ONLY vanilla rarities.  Examples: !uncommon, !rare, !epic\n" +
 							"   Item name color - # followed by color hex code, the hex code must match exactly.  Examples: #23F632\n" +
 							"   Display name - % followed by any text.  Will match any item with this text in its tooltip display name.  Examples: %[Uncommon]\n" +
-							"   Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: ^Rarity: Legendary");
+							"   Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: ^Rarity: Legendary\n" +
+							"   PLEASE NOTE: Lower frame levels take precedence, so if two levels match the same item, that item will display the lower numbered frame!");
 		build.push("definitions");
 
-		level0Items = build.comment(" List of level 0 custom border entries.  Each entry can be an item name, a tag, a mod name, a rarity level, or an item name color.").defineListAllowEmpty(Arrays.asList("level0_entries"), () -> Arrays.asList("!epic"), e -> validateCustomBorderEntry((String)e) );
-		level1Items = build.comment(" List of level 1 custom border entries.  Each entry can be an item name, a tag, a mod name, a rarity level, or an item name color.").defineListAllowEmpty(Arrays.asList("level1_entries"), () -> new ArrayList<String>(), e -> validateCustomBorderEntry((String)e) );
-		level2Items = build.comment(" List of level 2 custom border entries.  Each entry can be an item name, a tag, a mod name, a rarity level, or an item name color.").defineListAllowEmpty(Arrays.asList("level2_entries"), () -> new ArrayList<String>(), e -> validateCustomBorderEntry((String)e) );
-		level3Items = build.comment(" List of level 3 custom border entries.  Each entry can be an item name, a tag, a mod name, a rarity level, or an item name color.").defineListAllowEmpty(Arrays.asList("level3_entries"), () -> new ArrayList<String>(), e -> validateCustomBorderEntry((String)e) );
+		// Level 0 by default applies to epic and rare items.
+		itemSelectors.add(build.defineListAllowEmpty(Arrays.asList("level0_entries"), () -> Arrays.asList("!epic", "!rare"), e -> validateCustomBorderEntry((String)e) ));
+
+		// Other levels don't apply to anything by default.
+		for (int i = 1; i < LegendaryTooltips.NUM_FRAMES; i++)
+		{
+			itemSelectors.add(build.defineListAllowEmpty(Arrays.asList(String.format("level%d_entries", i)), () -> new ArrayList<String>(), e -> validateCustomBorderEntry((String)e) ));
+		}
 		
 		build.pop().pop().pop();
 	}
@@ -116,19 +108,12 @@ public class LegendaryTooltipsConfig
 			return frameLevelCache.get(item);
 		}
 
-		Map<Integer, List<? extends String>> levelEntries = new HashMap<Integer, List<? extends String>>(){{
-			put(0, level0Items.get());
-			put(1, level1Items.get());
-			put(2, level2Items.get());
-			put(3, level3Items.get());
-		}};
-
 		// Check each level from 0 to 3 for matches for this item, from most specific to least.
 		String itemResourceLocation = item.getItem().getRegistryName().toString();
 
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < LegendaryTooltips.NUM_FRAMES; i++)
 		{
-			for (String entry : levelEntries.get(i))
+			for (String entry : itemSelectors.get(i).get())
 			{
 				boolean found = false;
 				if (entry.equals(itemResourceLocation) || entry.equals(itemResourceLocation.replace("minecraft:", "")))
@@ -198,8 +183,8 @@ public class LegendaryTooltipsConfig
 		}
 		
 		// Add to cache.
-		frameLevelCache.put(item, 4);
-		return 4;
+		frameLevelCache.put(item, LegendaryTooltips.STANDARD);
+		return LegendaryTooltips.STANDARD;
 	}
 
 	private static boolean validateCustomBorderEntry(String value)
@@ -248,44 +233,20 @@ public class LegendaryTooltipsConfig
 
 	public int getCustomBorderStartColor(int level)
 	{
-		Long value = -1L;
-		switch (level)
+		if (level >= 0 && level <= 15 && startColors[level] != null)
 		{
-			case 0:
-				value = level0StartColor.get().longValue();
-				break;
-			case 1:
-				value = level1StartColor.get().longValue();
-				break;
-			case 2:
-				value = level2StartColor.get().longValue();
-				break;
-			case 3:
-				value = level3StartColor.get().longValue();
-				break;
+			return (int)startColors[level].get().longValue();
 		}
-		return (int)value.longValue();
+		return -1;
 	}
 
 	public int getCustomBorderEndColor(int level)
 	{
-		Long value = -1L;
-		switch (level)
+		if (level >= 0 && level <= 15 && endColors[level] != null)
 		{
-			case 0:
-				value = level0EndColor.get().longValue();
-				break;
-			case 1:
-				value = level1EndColor.get().longValue();
-				break;
-			case 2:
-				value = level2EndColor.get().longValue();
-				break;
-			case 3:
-				value = level3EndColor.get().longValue();
-				break;
+			return (int)endColors[level].get().longValue();
 		}
-		return (int)value.longValue();
+		return -1;
 	}
 
 }
