@@ -1,6 +1,8 @@
 package com.anthonyhilyard.legendarytooltips.render;
 
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
@@ -14,10 +16,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.anthonyhilyard.iceberg.util.GuiHelper;
+import com.anthonyhilyard.legendarytooltips.LegendaryTooltips;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig;
 import com.anthonyhilyard.legendarytooltips.Loader;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+
+import org.lwjgl.opengl.GL11;
 
 public class TooltipDecor
 {
@@ -100,7 +106,6 @@ public class TooltipDecor
 
 			// Now draw a separator under the "equipped" badge.
 			drawSeparator(poseStack, x - 3 + 1, y - 3 + 1 + 10, width, currentTooltipBorderStart);
-			Loader.LOGGER.info("Drawing Equipped separator at y = {}", 0 - 3 + 1 + 10);
 		}
 
 		// If the separate name border is enabled, draw it now.
@@ -112,7 +117,6 @@ public class TooltipDecor
 			int titleLineCount = wrappedLine.size();
 
 			// Only do this if there's more lines below the title.
-			Loader.LOGGER.info("cachedPreWrapLines.size() = {}, titleLineCount = {}", cachedPreWrapLines.size(), titleLineCount);
 			if (cachedPreWrapLines.size() > titleLineCount)
 			{
 				// If this is a comparison tooltip, we need to move this separator down to the proper position.
@@ -124,11 +128,10 @@ public class TooltipDecor
 
 				// Now draw the separator under the title.
 				drawSeparator(poseStack, x - 3 + 1, y - 3 + 1 + (titleLineCount * 10) + 1 + offset, width, currentTooltipBorderStart);
-				Loader.LOGGER.info("Drawing title separator at y = {} (comparison = {})", 0 - 3 + 1 + (titleLineCount * 10) + 1 + offset, comparison);
 			}
 		}
 
-		if (frameLevel >= 4 || frameLevel < 0)
+		if (frameLevel >= LegendaryTooltips.NUM_FRAMES || frameLevel < 0)
 		{
 			return;
 		}
@@ -169,30 +172,39 @@ public class TooltipDecor
 		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 		RenderSystem.setShaderTexture(0, TEXTURE_TOOLTIP_BORDERS);
 
+		// We have to bind the texture to be able to query it, so do that.
+		Minecraft mc = Minecraft.getInstance();
+		AbstractTexture borderTexture = mc.textureManager.getTexture(TEXTURE_TOOLTIP_BORDERS);
+		borderTexture.bind();
+
+		// Grab the width and height of the texture.  This should be 128x128, but old resource packs could still be using 64x64.
+		int textureWidth = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+		int textureHeight = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+
 		// Here we will overlay a 6-patch border over the tooltip to make it look fancy.
 		poseStack.pushPose();
 		poseStack.translate(0, 0, 410.0);
 
 		// Render top-left corner.
-		GuiComponent.blit(poseStack, x - 6, y - 6, 0, frameLevel * 16, 8, 8, 64, 64);
+		GuiComponent.blit(poseStack, x - 6, y - 6, (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
 
 		// Render top-right corner.
-		GuiComponent.blit(poseStack, x + width - 8 + 6, y - 6, 56, frameLevel * 16, 8, 8, 64, 64);
+		GuiComponent.blit(poseStack, x + width - 8 + 6, y - 6, 56 + (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
 
 		// Render bottom-left corner.
-		GuiComponent.blit(poseStack, x - 6, y + height - 8 + 6, 0, frameLevel * 16 + 8, 8, 8, 64, 64);
+		GuiComponent.blit(poseStack, x - 6, y + height - 8 + 6, (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
 
 		// Render bottom-right corner.
-		GuiComponent.blit(poseStack, x + width - 8 + 6, y + height - 8 + 6, 56, frameLevel * 16 + 8, 8, 8, 64, 64);
+		GuiComponent.blit(poseStack, x + width - 8 + 6, y + height - 8 + 6, 56 + (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
 
 		// Only render central embellishments if the tooltip is 48 pixels wide or more.
 		if (width >= 48)
 		{
 			// Render top central embellishment.
-			GuiComponent.blit(poseStack, x + (width / 2) - 24, y - 9, 8, frameLevel * 16, 48, 8, 64, 64);
+			GuiComponent.blit(poseStack, x + (width / 2) - 24, y - 9, 8 + (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight, 48, 8, textureWidth, textureHeight);
 
 			// Render bottom central embellishment.
-			GuiComponent.blit(poseStack, x + (width / 2) - 24, y + height - 8 + 9, 8, frameLevel * 16 + 8, 48, 8, 64, 64);
+			GuiComponent.blit(poseStack, x + (width / 2) - 24, y + height - 8 + 9, 8 + (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight + 8, 48, 8, textureWidth, textureHeight);
 		}
 
 		poseStack.popPose();
