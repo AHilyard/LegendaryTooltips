@@ -1,44 +1,24 @@
-buildscript {
-	repositories {
-		maven { url = 'https://files.minecraftforge.net/maven' }
-		jcenter()
-		mavenCentral()
-	}
-	dependencies {
-		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-	}
+plugins {
+	id 'fabric-loom' version '0.9-SNAPSHOT'
+	id 'maven-publish'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
 
-archivesBaseName = project.name + '-' + mcVersion
+sourceCompatibility = JavaVersion.VERSION_16
+targetCompatibility = JavaVersion.VERSION_16
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+archivesBaseName = project.name + '-' + project.mcVersion + '-fabric'
 
-minecraft {
-	mappings channel: 'official', version: project.mcVersion
-
-	runs {
-		client {
-			properties 'forge.logging.markers': ''
-			properties 'forge.logging.console.level': 'debug'
-			properties 'terminal.ansi': 'true'
-			workingDirectory project.file('run').canonicalPath
-			source sourceSets.main
-
-			mods {
-				legendarytooltips {
-					source sourceSets.main
-				}
-			}
-		}
-	}
-}
+sourceSets.main.java.srcDirs += 'java'
+sourceSets.main.resources.srcDirs += 'resources'
 
 repositories {
 	maven {
 		name = "CurseMaven"
 		url "https://www.cursemaven.com"
+	}
+	maven {
+		name = "Cloth API"
+		url = "https://maven.shedaniel.me/"
 	}
 }
 
@@ -51,10 +31,34 @@ sourceSets {
 }
 
 dependencies {
-	minecraft 'net.minecraftforge:forge:' + project.properties.mcVersion + '-' + forgeVersion
+	minecraft "com.mojang:minecraft:${project.mcVersion}"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricVersion}"
+	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.clothVersion}") { exclude(group: "net.fabricmc.fabric-api") }
 
-	compileOnly 'curse.maven:iceberg-520110:3496382'
-	runtimeOnly 'curse.maven:iceberg-520110:3496382'
+	modImplementation "curse.maven:iceberg-539382:3508667"
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/${project.name.toLowerCase()}.accesswidener")
+}
+
+processResources {
+	inputs.property 'version', project.version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = "UTF-8"
+	it.options.release = 16
+}
+
+java {
+	withSourcesJar()
 }
 
 jar {

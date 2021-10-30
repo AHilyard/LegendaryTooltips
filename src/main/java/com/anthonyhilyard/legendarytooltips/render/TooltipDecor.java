@@ -1,6 +1,7 @@
 package com.anthonyhilyard.legendarytooltips.render;
 
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -10,7 +11,6 @@ import net.minecraft.util.Mth;
 import com.mojang.math.Matrix4f;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraftforge.fmlclient.gui.GuiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,13 +71,13 @@ public class TooltipDecor
 		
 		poseStack.pushPose();
 		Matrix4f mat = poseStack.last().pose();
-		GuiUtils.drawGradientRect(mat, 390, x - 1,         y + height + 4, x + width + 4, y + height + 5, shadowColor, shadowColor);
-		GuiUtils.drawGradientRect(mat, 390, x + width + 4, y - 1,          x + width + 5, y + height + 5, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(mat, 390, x - 1,         y + height + 4, x + width + 4, y + height + 5, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(mat, 390, x + width + 4, y - 1,          x + width + 5, y + height + 5, shadowColor, shadowColor);
 
-		GuiUtils.drawGradientRect(mat, 390, x + width + 3, y + height + 3, x + width + 4, y + height + 4, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(mat, 390, x + width + 3, y + height + 3, x + width + 4, y + height + 4, shadowColor, shadowColor);
 
-		GuiUtils.drawGradientRect(mat, 390, x,             y + height + 5, x + width + 5, y + height + 6, shadowColor, shadowColor);
-		GuiUtils.drawGradientRect(mat, 390, x + width + 5, y,              x + width + 6, y + height + 5, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(mat, 390, x,             y + height + 5, x + width + 5, y + height + 6, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(mat, 390, x + width + 5, y,              x + width + 6, y + height + 5, shadowColor, shadowColor);
 		poseStack.popPose();
 	}
 
@@ -90,7 +90,7 @@ public class TooltipDecor
 		poseStack.popPose();
 	}
 
-	public static void drawBorder(PoseStack poseStack, int x, int y, int width, int height, ItemStack item, List<? extends FormattedText> lines, Font font, int frameLevel, boolean comparison)
+	public static void drawBorder(PoseStack poseStack, int x, int y, int width, int height, ItemStack item, List<? extends ClientTooltipComponent> lines, Font font, int frameLevel, boolean comparison)
 	{
 		// If this is a comparison tooltip, we need to draw the actual border lines first.
 		if (comparison)
@@ -98,10 +98,10 @@ public class TooltipDecor
 			poseStack.pushPose();
 			Matrix4f mat = poseStack.last().pose();
 
-			GuiUtils.drawGradientRect(mat, 400, x - 3, y - 3 + 1, x - 3 + 1, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
-			GuiUtils.drawGradientRect(mat, 400, x + width + 2, y - 3 + 1, x + width + 3, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
-			GuiUtils.drawGradientRect(mat, 400, x - 3, y - 3, x + width + 3, y - 3 + 1, currentTooltipBorderStart, currentTooltipBorderStart);
-			GuiUtils.drawGradientRect(mat, 400, x - 3, y + height + 2, x + width + 3, y + height + 3, currentTooltipBorderEnd, currentTooltipBorderEnd);
+			GuiHelper.drawGradientRect(mat, 400, x - 3, y - 3 + 1, x - 3 + 1, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
+			GuiHelper.drawGradientRect(mat, 400, x + width + 2, y - 3 + 1, x + width + 3, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
+			GuiHelper.drawGradientRect(mat, 400, x - 3, y - 3, x + width + 3, y - 3 + 1, currentTooltipBorderStart, currentTooltipBorderStart);
+			GuiHelper.drawGradientRect(mat, 400, x - 3, y + height + 2, x + width + 3, y + height + 3, currentTooltipBorderEnd, currentTooltipBorderEnd);
 			poseStack.popPose();
 
 			// Now draw a separator under the "equipped" badge.
@@ -109,7 +109,7 @@ public class TooltipDecor
 		}
 
 		// If the separate name border is enabled, draw it now.
-		if (LegendaryTooltipsConfig.INSTANCE.nameSeparator.get() && !cachedPreWrapLines.isEmpty())
+		if (LegendaryTooltipsConfig.INSTANCE.nameSeparator && !cachedPreWrapLines.isEmpty())
 		{
 			// Determine and store the number of "title lines".
 			FormattedText textLine = cachedPreWrapLines.get(0);
@@ -136,7 +136,7 @@ public class TooltipDecor
 			return;
 		}
 
-		if (LegendaryTooltipsConfig.INSTANCE.shineEffect.get())
+		if (LegendaryTooltipsConfig.INSTANCE.shineEffect)
 		{
 			// Draw shiny effect here.
 			poseStack.pushPose();
@@ -162,8 +162,8 @@ public class TooltipDecor
 				int verticalMin = y - 3 + 1;
 				int verticalMax = y + height + 3 - 1;
 				int verticalInterval = (int)Mth.lerp(interval * interval, verticalMax, verticalMin);
-				GuiUtils.drawGradientRect(mat, 402, x - 3, Math.max(verticalInterval - 12, verticalMin), x - 3 + 1, Math.min(verticalInterval, verticalMax), 0x00FFFFFF, 0x00FFFFFF | alpha);
-				GuiUtils.drawGradientRect(mat, 402, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
+				GuiHelper.drawGradientRect(mat, 402, x - 3, Math.max(verticalInterval - 12, verticalMin), x - 3 + 1, Math.min(verticalInterval, verticalMax), 0x00FFFFFF, 0x00FFFFFF | alpha);
+				GuiHelper.drawGradientRect(mat, 402, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
 			}
 			
 			poseStack.popPose();
@@ -174,7 +174,7 @@ public class TooltipDecor
 
 		// We have to bind the texture to be able to query it, so do that.
 		Minecraft mc = Minecraft.getInstance();
-		AbstractTexture borderTexture = mc.textureManager.getTexture(TEXTURE_TOOLTIP_BORDERS);
+		AbstractTexture borderTexture = mc.getTextureManager().getTexture(TEXTURE_TOOLTIP_BORDERS);
 		borderTexture.bind();
 
 		// Grab the width and height of the texture.  This should be 128x128, but old resource packs could still be using 64x64.

@@ -1,39 +1,45 @@
 package com.anthonyhilyard.legendarytooltips;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextColor;
+import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.ChatFormatting;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderTooltipEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
 import java.util.List;
 
-import com.anthonyhilyard.iceberg.events.RenderTooltipExtEvent;
+import com.anthonyhilyard.iceberg.events.RenderTickEvents;
+import com.anthonyhilyard.iceberg.events.RenderTooltipEvents;
+import com.anthonyhilyard.iceberg.events.RenderTooltipEvents.ColorResult;
 import com.anthonyhilyard.iceberg.util.ItemColor;
 import com.anthonyhilyard.iceberg.util.StringRecomposer;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-@Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.FORGE, value = Dist.CLIENT)
-public class LegendaryTooltips
+public class LegendaryTooltips implements ClientModInitializer
 {
-	@SuppressWarnings("unused")
-	public static final Logger LOGGER = LogManager.getLogger();
-
 	public static final int STANDARD = -1;
 	public static final int NUM_FRAMES = 16;
 
 	private static ItemStack lastTooltipItem = null;
+
+	@Override
+	public void onInitializeClient()
+	{
+		LegendaryTooltipsConfig.init();
+
+		RenderTooltipEvents.PRE.register(LegendaryTooltips::onPreTooltipEvent);
+		RenderTooltipEvents.COLOR.register(LegendaryTooltips::onTooltipColorEvent);
+		RenderTooltipEvents.POST.register(LegendaryTooltips::onPostTooltipEvent);
+		RenderTickEvents.START.register(LegendaryTooltips::onRenderTick);
+	}
 
 	private static Pair<Integer, Integer> itemFrameColors(ItemStack item, Pair<Integer, Integer> defaults)
 	{
@@ -54,7 +60,7 @@ public class LegendaryTooltips
 			}
 			return Pair.of(startColor, endColor);
 		}
-		else if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
+		else if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity)
 		{
 			TextColor rarityColor = ItemColor.getColorForItem(item, TextColor.fromLegacyFormat(ChatFormatting.WHITE));
 
@@ -79,98 +85,73 @@ public class LegendaryTooltips
 		return defaults;
 	}
 
-	@SubscribeEvent
-	@SuppressWarnings("generic")
-	public static void onRenderTick(TickEvent.RenderTickEvent event)
+	public static void onRenderTick(float timer)
 	{
+		Minecraft client = Minecraft.getInstance();
 		TooltipDecor.updateTimer();
 
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.screen != null)
+		if (client.screen != null)
 		{
-			if (mc.screen instanceof AbstractContainerScreen)
+			if (client.screen instanceof AbstractContainerScreen)
 			{
-				if (((AbstractContainerScreen<?>)mc.screen).getSlotUnderMouse() != null && 
-					((AbstractContainerScreen<?>)mc.screen).getSlotUnderMouse().hasItem())
+				if (((AbstractContainerScreen<?>)client.screen).hoveredSlot != null &&
+					((AbstractContainerScreen<?>)client.screen).hoveredSlot.hasItem())
 				{
-					if (lastTooltipItem != ((AbstractContainerScreen<?>)mc.screen).getSlotUnderMouse().getItem())
+					if (lastTooltipItem != ((AbstractContainerScreen<?>)client.screen).hoveredSlot.getItem())
 					{
 						TooltipDecor.resetTimer();
-						lastTooltipItem = ((AbstractContainerScreen<?>)mc.screen).getSlotUnderMouse().getItem();
+						lastTooltipItem = ((AbstractContainerScreen<?>)client.screen).hoveredSlot.getItem();
 					}
 				}
 			}
 		}
 	}
 
-	@SuppressWarnings("removal")
-	@SubscribeEvent
-	public static void onPreTooltipEvent(RenderTooltipEvent.Pre event)
+	public static InteractionResult onPreTooltipEvent(ItemStack stack, List<ClientTooltipComponent> components, PoseStack poseStack, int x, int y, int screenWidth, int screenHeight, int maxWidth, Font font, boolean comparison)
 	{
-		List<? extends FormattedText> standinLines;
-		if (!event.getComponents().isEmpty())
-		{
-			standinLines = StringRecomposer.recompose(event.getComponents());
-		}
-		else
-		{
-			standinLines = event.getLines();
-		}
+		List<? extends FormattedText> standinLines = StringRecomposer.recompose(components);
 		TooltipDecor.setCachedLines(standinLines);
+		return InteractionResult.PASS;
 	}
 
-	@SubscribeEvent
-	public static void onTooltipColorEvent(RenderTooltipEvent.Color event)
+	public static ColorResult onTooltipColorEvent(ItemStack stack, List<ClientTooltipComponent> components, PoseStack poseStack, int x, int y, Font font, int background, int borderStart, int borderEnd, boolean comparison)
 	{
-		Pair<Integer, Integer> borderColors = itemFrameColors(event.getStack(), Pair.of(event.getBorderStart(), event.getBorderEnd()));
+		ColorResult result;
+		Pair<Integer, Integer> borderColors = itemFrameColors(stack, Pair.of(borderStart, borderEnd));
 
 		// Every tooltip will send a color event before a posttext event, so we can store the color here.
 		TooltipDecor.setCurrentTooltipBorderStart(borderColors.getLeft());
 		TooltipDecor.setCurrentTooltipBorderEnd(borderColors.getRight());
 
 		// If this is a comparison tooltip, we will make the border transparent here so that we can redraw it later.
-		boolean comparison = false;
-		if (event instanceof RenderTooltipExtEvent.Color)
-		{
-			comparison = ((RenderTooltipExtEvent.Color)event).isComparison();
-		}
-
 		if (comparison)
 		{
-			event.setBorderStart(0);
-			event.setBorderEnd(0);
+			result = new ColorResult(background, 0, 0);
 		}
 		else
 		{
-			event.setBorderStart(borderColors.getLeft());
-			event.setBorderEnd(borderColors.getRight());
+			result = new ColorResult(background, borderColors.getLeft(), borderColors.getRight());
 		}
+
+		return result;
 	}
 
-	@SuppressWarnings("removal")
-	@SubscribeEvent
-	public static void onPostTooltipEvent(RenderTooltipEvent.PostText event)
+	public static void onPostTooltipEvent(ItemStack stack, List<ClientTooltipComponent> components, PoseStack poseStack, int x, int y, Font font, int width, int height, boolean comparison)
 	{
 		// If tooltip shadows are enabled, draw one now.
-		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow.get())
+		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow)
 		{
-			TooltipDecor.drawShadow(event.getMatrixStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight());
-		}
-
-		boolean comparison = false;
-		if (event instanceof RenderTooltipExtEvent.PostText)
-		{
-			comparison = ((RenderTooltipExtEvent.PostText)event).isComparison();
+			TooltipDecor.drawShadow(poseStack, x, y, width, height);
 		}
 
 		// If this is a rare item, draw special border.
 		if (comparison)
 		{
-			TooltipDecor.drawBorder(event.getMatrixStack(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11, event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()), comparison);
+			TooltipDecor.drawBorder(poseStack, x, y - 11, width, height + 11, stack, components, font, LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(stack), comparison);
 		}
 		else
 		{
-			TooltipDecor.drawBorder(event.getMatrixStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()), comparison);
+			TooltipDecor.drawBorder(poseStack, x, y, width, height, stack, components, font, LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(stack), comparison);
 		}
 	}
 }
