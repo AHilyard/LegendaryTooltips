@@ -37,7 +37,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricVersion}"
 	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.clothVersion}") { exclude(group: "net.fabricmc.fabric-api") }
 
-	modImplementation "curse.maven:iceberg-539382:3508667"
+	modImplementation "curse.maven:iceberg-539382:3512009"
 }
 
 loom {
