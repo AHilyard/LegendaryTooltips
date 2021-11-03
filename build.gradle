@@ -53,8 +53,8 @@ sourceSets {
 dependencies {
 	minecraft 'net.minecraftforge:forge:' + project.properties.mcVersion + '-' + forgeVersion
 
-	compileOnly 'curse.maven:iceberg-520110:3496382'
-	runtimeOnly 'curse.maven:iceberg-520110:3496382'
+	compileOnly 'curse.maven:iceberg-520110:3513166'
+	runtimeOnly 'curse.maven:iceberg-520110:3513166'
 }
 
 jar {

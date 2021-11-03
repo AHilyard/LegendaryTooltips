@@ -8,19 +8,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.HashMap;
 
-import com.anthonyhilyard.iceberg.util.ItemColor;
+import com.anthonyhilyard.iceberg.util.Selectors;
 import com.electronwill.nightconfig.core.Config;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
@@ -75,7 +71,7 @@ public class LegendaryTooltipsConfig
 		shineEffect = build.comment(" If enabled, items showing a custom border will have a special shine effect when hovered over.").define("shine_effect", true);
 
 		build.pop().comment(String.format(" Custom borders are broken into %d \"levels\", with level 0 being intended for the \"best\" or \"rarest\" items. Only level 0 has a custom border built-in, but others can be added with resource packs.", LegendaryTooltips.NUM_FRAMES)).push("custom_borders");
-		build.comment(" The start and end border colors of each levels' borders. Note that they can be entered as a hex code in the format \"0xAARRGGBB\" for convenience.").push("colors");
+		build.comment(" The start and end border colors of each levels' borders. Note that they can be entered as a hex code in the format \"0xAARRGGBB\" or \"0xRRGGBB\" for convenience.").push("colors");
 		for (int i = 0; i < LegendaryTooltips.NUM_FRAMES; i++)
 		{
 			startColors[i] = build.defineInRange(String.format("level%d_start_color", i), 0xFF996922L, 0x00000000L, 0xFFFFFFFFL);
@@ -118,8 +114,6 @@ public class LegendaryTooltipsConfig
 		}
 
 		// Check each level from 0 to 3 for matches for this item, from most specific to least.
-		String itemResourceLocation = item.getItem().getRegistryName().toString();
-
 		for (int i = 0; i < LegendaryTooltips.NUM_FRAMES; i++)
 		{
 			if (i < framePriorities.get().size())
@@ -127,65 +121,7 @@ public class LegendaryTooltipsConfig
 				int frameIndex = framePriorities.get().get(i);
 				for (String entry : itemSelectors.get(frameIndex).get())
 				{
-					boolean found = false;
-					if (entry.equals(itemResourceLocation) || entry.equals(itemResourceLocation.replace("minecraft:", "")))
-					{
-						found = true;
-					}
-					else if (entry.startsWith("#"))
-					{
-						TextColor entryColor = TextColor.parseColor(entry);
-						if (entryColor.equals(ItemColor.getColorForItem(item, TextColor.fromRgb(0xFFFFFF))))
-						{
-							found = true;
-						}
-					}
-					else if (entry.startsWith("!"))
-					{
-						if (item.getRarity() == rarities.get(entry.substring(1)))
-						{
-							found = true;
-						}
-					}
-					else if (entry.startsWith("@"))
-					{
-						if (itemResourceLocation.startsWith(entry.substring(1) + ":"))
-						{
-							found = true;
-						}
-					}
-					else if (entry.startsWith("$"))
-					{
-						if (ItemTags.getAllTags().getTagOrEmpty(new ResourceLocation(entry.substring(1))).getValues().contains(item.getItem()))
-						{
-							found = true;
-						}
-					}
-					else if (entry.startsWith("%"))
-					{
-						if (item.getDisplayName().getString().contains(entry.substring(1)))
-						{
-							found = true;
-						}
-					}
-					else if (entry.startsWith("^"))
-					{
-						Minecraft mc = Minecraft.getInstance();
-						List<Component> lines = item.getTooltipLines(mc.player, TooltipFlag.Default.ADVANCED);
-						String tooltipText = "";
-						
-						// Skip title line.
-						for (int n = 1; n < lines.size(); n++)
-						{
-							tooltipText += lines.get(n).getString() + '\n';
-						}
-						if (tooltipText.contains(entry.substring(1)))
-						{
-							found = true;
-						}
-					}
-
-					if (found)
+					if (Selectors.itemMatches(item, entry))
 					{
 						// Add to cache.
 						frameLevelCache.put(item, frameIndex);
@@ -248,7 +184,15 @@ public class LegendaryTooltipsConfig
 	{
 		if (level >= 0 && level <= 15 && startColors[level] != null)
 		{
-			return (int)startColors[level].get().longValue();
+			int startColor = (int)startColors[level].get().longValue();
+
+			// If alpha is 0 but the color isn't 0x00000000, assume alpha is intended to be 0xFF.
+			// Only downside is if users want black borders they'd have to specify "0xFF000000".
+			if (startColor > 0 && startColor <= 0xFFFFFF)
+			{
+				return startColor | (0xFF << 24);
+			}
+			return startColor;
 		}
 		return -1;
 	}
@@ -257,7 +201,15 @@ public class LegendaryTooltipsConfig
 	{
 		if (level >= 0 && level <= 15 && endColors[level] != null)
 		{
-			return (int)endColors[level].get().longValue();
+			int endColor = (int)endColors[level].get().longValue();
+
+			// If alpha is 0 but the color isn't 0x00000000, assume alpha is intended to be 0xFF.
+			// Only downside is if users want black borders they'd have to specify "0xFF000000".
+			if (endColor > 0 && endColor <= 0xFFFFFF)
+			{
+				return endColor | (0xFF << 24);
+			}
+			return endColor;
 		}
 		return -1;
 	}

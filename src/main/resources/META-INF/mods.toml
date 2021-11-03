@@ -29,7 +29,7 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.0.16,)"
+	versionRange="[1.0.24,)"
 	ordering="NONE"
 	side="BOTH"
 
