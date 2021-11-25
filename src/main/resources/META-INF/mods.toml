@@ -4,7 +4,7 @@ license="CC BY-NC-ND 4.0"
 
 [[mods]]
 modId="legendarytooltips"
-version="${version}"
+version="${file.jarVersion}"
 displayName="Legendary Tooltips"
 displayURL="https://anthonyhilyard.com/"
 updateJSONURL="https://mc-curse-update-checker.herokuapp.com/532127"
@@ -29,7 +29,7 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.0.10,)"
+	versionRange="[1.0.24,)"
 	ordering="NONE"
 	side="BOTH"
 
