@@ -50,7 +50,7 @@ sourceSets {
 dependencies {
 	minecraft 'net.minecraftforge:forge:' + project.properties.mcVersion + '-' + forgeVersion
 
-	compile 'curse.maven:iceberg-520110:3514231'
+	compile 'curse.maven:iceberg-520110:3537263'
 }
 
 jar {
