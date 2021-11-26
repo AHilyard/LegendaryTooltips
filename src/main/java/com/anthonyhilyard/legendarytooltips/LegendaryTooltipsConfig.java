@@ -14,9 +14,6 @@ import com.electronwill.nightconfig.core.Config;
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.network.chat.TextColor;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
@@ -43,13 +40,6 @@ public class LegendaryTooltipsConfig
 	private final ConfigValue<List<? extends Integer>> framePriorities;
 	
 	private static final List<ConfigValue<List<? extends String>>> itemSelectors = new ArrayList<ConfigValue<List<? extends String>>>(LegendaryTooltips.NUM_FRAMES);
-
-	private static final Map<String, Rarity> rarities = new HashMap<String, Rarity>() {{
-		put("common", Rarity.COMMON);
-		put("uncommon", Rarity.UNCOMMON);
-		put("rare", Rarity.RARE);
-		put("epic", Rarity.EPIC);
-	}};
 
 	private static final Map<ItemStack, Integer> frameLevelCache = new HashMap<ItemStack, Integer>();
 
@@ -84,24 +74,25 @@ public class LegendaryTooltipsConfig
 		framePriorities = build.defineList("priorities", () -> IntStream.rangeClosed(0, LegendaryTooltips.NUM_FRAMES - 1).boxed().collect(Collectors.toList()), e -> ((int)e >= 0 && (int)e < LegendaryTooltips.NUM_FRAMES));
 
 		build.pop().comment(" Entry types:\n" + 
-							"   Item name - Use item name for vanilla items or include mod name for modded items.  Examples: minecraft:stick, iron_ore\n" +
-							"   Tag - $ followed by tag name.  Examples: $forge:stone or $planks\n" +
-							"   Mod name - @ followed by mod identifier.  Examples: @spoiledeggs\n" +
-							"   Rarity - ! followed by item's rarity.  This is ONLY vanilla rarities.  Examples: !uncommon, !rare, !epic\n" +
-							"   Item name color - # followed by color hex code, the hex code must match exactly.  Examples: #23F632\n" +
-							"   Display name - % followed by any text.  Will match any item with this text in its tooltip display name.  Examples: %[Uncommon]\n" +
-							"   Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: ^Rarity: Legendary");
+							"   Item name - Use item name for vanilla items or include mod name for modded items.  Examples: \"minecraft:stick\", \"iron_ore\"\n" +
+							"   Tag - $ followed by tag name.  Examples: \"$forge:stone\" or \"$planks\"\n" +
+							"   Mod name - @ followed by mod identifier.  Examples: \"@spoiledeggs\"\n" +
+							"   Rarity - ! followed by item's rarity.  This is ONLY vanilla rarities.  Examples: \"!uncommon\", \"!rare\", \"!epic\"\n" +
+							"   Item name color - # followed by color hex code, the hex code must match exactly.  Examples: \"#23F632\"\n" +
+							"   Display name - % followed by any text.  Will match any item with this text in its tooltip display name.  Examples: \"%[Uncommon]\"\n" +
+							"   Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: \"^Legendary\"\n" +
+							"   NBT tag - & followed by tag name and optional comparator (=, >, <, or !=) and value, in the format <tag><comparator><value> or just <tag>.  Examples: \"&Damage=0\", \"&Tier>1\", \"&Broken\", \"&map!=128\"");
 		build.push("definitions");
 
 		itemSelectors.clear();
 
 		// Level 0 by default applies to epic and rare items.
-		itemSelectors.add(build.defineListAllowEmpty(Arrays.asList("level0_entries"), () -> Arrays.asList("!epic", "!rare"), e -> validateCustomBorderEntry((String)e) ));
+		itemSelectors.add(build.defineListAllowEmpty(Arrays.asList("level0_entries"), () -> Arrays.asList("!epic", "!rare"), e -> Selectors.validateSelector((String)e) ));
 
 		// Other levels don't apply to anything by default.
 		for (int i = 1; i < LegendaryTooltips.NUM_FRAMES; i++)
 		{
-			itemSelectors.add(build.defineListAllowEmpty(Arrays.asList(String.format("level%d_entries", i)), () -> new ArrayList<String>(), e -> validateCustomBorderEntry((String)e) ));
+			itemSelectors.add(build.defineListAllowEmpty(Arrays.asList(String.format("level%d_entries", i)), () -> new ArrayList<String>(), e -> Selectors.validateSelector((String)e) ));
 		}
 		build.pop().pop().pop();
 	}
@@ -134,40 +125,6 @@ public class LegendaryTooltipsConfig
 		// Add to cache.
 		frameLevelCache.put(item, LegendaryTooltips.STANDARD);
 		return LegendaryTooltips.STANDARD;
-	}
-
-	private static boolean validateCustomBorderEntry(String value)
-	{
-		// If this is a tag, check that it exists.
-		if (value.startsWith("$"))
-		{
-			return ResourceLocation.isValidResourceLocation(value.substring(1));
-		}
-		// If this is a mod, check that mod is loaded.
-		else if (value.startsWith("@"))
-		{
-			return true;
-		}
-		// If this is a rarity, make sure it's a valid one.
-		else if (value.startsWith("!"))
-		{
-			return rarities.keySet().contains(value.substring(1).toLowerCase());
-		}
-		// If this is a hex color, ensure it's in a valid format.
-		else if (value.startsWith("#"))
-		{
-			return TextColor.parseColor(value) != null;
-		}
-		// Text matches are always considered valid.
-		else if (value.startsWith("%") || value.startsWith("^"))
-		{
-			return true;
-		}
-		// Otherwise it's an item, so just make sure it's a value resource location.
-		else
-		{
-			return value == null || value == "" || ResourceLocation.isValidResourceLocation(value);
-		}
 	}
 
 	@SubscribeEvent
