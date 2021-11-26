@@ -31,7 +31,7 @@
 		"minecraft": "1.17.x",
 		"java": ">=16",
 		"cloth-config2": ">=5.0",
-		"iceberg": ">=1.0.23"
+		"iceberg": ">=1.0.26"
 	},
 	"suggests": {
 		"equipmentcompare": ">=1.2.7"
