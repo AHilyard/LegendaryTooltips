@@ -3,21 +3,18 @@ package com.anthonyhilyard.legendarytooltips;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.ChatFormatting;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.client.event.RenderTooltipEvent.GatherComponents;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
-import java.util.List;
-
 import com.anthonyhilyard.iceberg.events.RenderTooltipExtEvent;
 import com.anthonyhilyard.iceberg.util.ItemColor;
-import com.anthonyhilyard.iceberg.util.StringRecomposer;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -103,26 +100,16 @@ public class LegendaryTooltips
 		}
 	}
 
-	@SuppressWarnings("removal")
 	@SubscribeEvent
-	public static void onPreTooltipEvent(RenderTooltipEvent.Pre event)
+	public static void onGatherComponentsEvent(GatherComponents event)
 	{
-		List<? extends FormattedText> standinLines;
-		if (!event.getComponents().isEmpty())
-		{
-			standinLines = StringRecomposer.recompose(event.getComponents());
-		}
-		else
-		{
-			standinLines = event.getLines();
-		}
-		TooltipDecor.setCachedLines(standinLines);
+		TooltipDecor.setCachedLines(event.getTooltipElements());
 	}
 
 	@SubscribeEvent
 	public static void onTooltipColorEvent(RenderTooltipEvent.Color event)
 	{
-		Pair<Integer, Integer> borderColors = itemFrameColors(event.getStack(), Pair.of(event.getBorderStart(), event.getBorderEnd()));
+		Pair<Integer, Integer> borderColors = itemFrameColors(event.getItemStack(), Pair.of(event.getBorderStart(), event.getBorderEnd()));
 
 		// Every tooltip will send a color event before a posttext event, so we can store the color here.
 		TooltipDecor.setCurrentTooltipBorderStart(borderColors.getLeft());
@@ -147,30 +134,23 @@ public class LegendaryTooltips
 		}
 	}
 
-	@SuppressWarnings("removal")
 	@SubscribeEvent
-	public static void onPostTooltipEvent(RenderTooltipEvent.PostText event)
+	public static void onPostTooltipEvent(RenderTooltipExtEvent.Post event)
 	{
 		// If tooltip shadows are enabled, draw one now.
 		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow.get())
 		{
-			TooltipDecor.drawShadow(event.getMatrixStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight());
-		}
-
-		boolean comparison = false;
-		if (event instanceof RenderTooltipExtEvent.PostText)
-		{
-			comparison = ((RenderTooltipExtEvent.PostText)event).isComparison();
+			TooltipDecor.drawShadow(event.getPoseStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight());
 		}
 
 		// If this is a rare item, draw special border.
-		if (comparison)
+		if (event.isComparison())
 		{
-			TooltipDecor.drawBorder(event.getMatrixStack(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11, event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()), comparison);
+			TooltipDecor.drawBorder(event.getPoseStack(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11, event.getItemStack(), event.getFont(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getItemStack()), event.isComparison());
 		}
 		else
 		{
-			TooltipDecor.drawBorder(event.getMatrixStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()), comparison);
+			TooltipDecor.drawBorder(event.getPoseStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getItemStack(), event.getFont(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getItemStack()), event.isComparison());
 		}
 	}
 }

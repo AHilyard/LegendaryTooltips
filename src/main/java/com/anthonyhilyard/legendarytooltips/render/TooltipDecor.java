@@ -2,15 +2,16 @@ package com.anthonyhilyard.legendarytooltips.render;
 
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import com.mojang.math.Matrix4f;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
-import net.minecraftforge.fmlclient.gui.GuiUtils;
+import net.minecraftforge.client.gui.GuiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import com.anthonyhilyard.legendarytooltips.Loader;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Either;
 
 import org.lwjgl.opengl.GL11;
 
@@ -34,7 +36,7 @@ public class TooltipDecor
 
 	private static int shineTimer = 0;
 
-	private static List<FormattedText> cachedPreWrapLines = new ArrayList<>();
+	private static List<Either<FormattedText, TooltipComponent>> cachedPreWrapLines = new ArrayList<>();
 
 	public static void setCurrentTooltipBorderStart(int color)
 	{
@@ -46,7 +48,7 @@ public class TooltipDecor
 		currentTooltipBorderEnd = color;
 	}
 
-	public static void setCachedLines(List<? extends FormattedText> lines)
+	public static void setCachedLines(List<Either<FormattedText, TooltipComponent>>  lines)
 	{
 		cachedPreWrapLines.clear();
 		cachedPreWrapLines.addAll(lines);
@@ -90,7 +92,7 @@ public class TooltipDecor
 		poseStack.popPose();
 	}
 
-	public static void drawBorder(PoseStack poseStack, int x, int y, int width, int height, ItemStack item, List<? extends FormattedText> lines, Font font, int frameLevel, boolean comparison)
+	public static void drawBorder(PoseStack poseStack, int x, int y, int width, int height, ItemStack item, Font font, int frameLevel, boolean comparison)
 	{
 		// If this is a comparison tooltip, we need to draw the actual border lines first.
 		if (comparison)
@@ -111,23 +113,26 @@ public class TooltipDecor
 		// If the separate name border is enabled, draw it now.
 		if (LegendaryTooltipsConfig.INSTANCE.nameSeparator.get() && !cachedPreWrapLines.isEmpty())
 		{
-			// Determine and store the number of "title lines".
-			FormattedText textLine = cachedPreWrapLines.get(0);
-			List<FormattedText> wrappedLine = font.getSplitter().splitLines(textLine, width, Style.EMPTY);
-			int titleLineCount = wrappedLine.size();
-
-			// Only do this if there's more lines below the title.
-			if (cachedPreWrapLines.size() > titleLineCount)
+			// Determine and store the number of "title lines".  I guess it's always 1 now...?
+			FormattedText textLine = cachedPreWrapLines.get(0).left().get();
+			if (textLine != null)
 			{
-				// If this is a comparison tooltip, we need to move this separator down to the proper position.
-				int offset = 0;
-				if (comparison)
-				{
-					offset = 11;
-				}
+				List<FormattedCharSequence> wrappedLine = font.split(textLine, width);
+				int titleLineCount = wrappedLine.size();
 
-				// Now draw the separator under the title.
-				drawSeparator(poseStack, x - 3 + 1, y - 3 + 1 + (titleLineCount * 10) + 1 + offset, width, currentTooltipBorderStart);
+				// Only do this if there's more lines below the title.
+				if (cachedPreWrapLines.size() > titleLineCount)
+				{
+					// If this is a comparison tooltip, we need to move this separator down to the proper position.
+					int offset = 0;
+					if (comparison)
+					{
+						offset = 11;
+					}
+
+					// Now draw the separator under the title.
+					drawSeparator(poseStack, x - 3 + 1, y - 3 + 1 + (titleLineCount * 10) + 1 + offset, width, currentTooltipBorderStart);
+				}
 			}
 		}
 

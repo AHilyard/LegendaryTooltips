@@ -1,7 +1,6 @@
 buildscript {
 	repositories {
-		maven { url = 'https://files.minecraftforge.net/maven' }
-		jcenter()
+		maven { url = 'https://maven.minecraftforge.net' }
 		mavenCentral()
 	}
 	dependencies {
@@ -11,9 +10,9 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 
-archivesBaseName = project.name + '-' + mcVersion
+archivesBaseName = project.name + '-' + project.mcVersion
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
 	mappings channel: 'official', version: project.mcVersion
@@ -40,6 +39,9 @@ repositories {
 		name = "CurseMaven"
 		url "https://www.cursemaven.com"
 	}
+	flatDir {
+		dirs "./libs"
+	}
 }
 
 sourceSets {
@@ -51,9 +53,9 @@ sourceSets {
 }
 
 dependencies {
-	minecraft 'net.minecraftforge:forge:' + project.properties.mcVersion + '-' + forgeVersion
+	minecraft "net.minecraftforge:forge:${project.mcVersion}-${project.forgeVersion}"
 
-	implementation fg.deobf("curse.maven:iceberg-520110:3535443")
+	implementation fg.deobf("curse.maven:iceberg-520110:3549885")
 }
 
 jar {
