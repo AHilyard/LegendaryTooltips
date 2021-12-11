@@ -39,9 +39,6 @@ repositories {
 		name = "CurseMaven"
 		url "https://www.cursemaven.com"
 	}
-	flatDir {
-		dirs "./libs"
-	}
 }
 
 sourceSets {
@@ -55,7 +52,7 @@ sourceSets {
 dependencies {
 	minecraft "net.minecraftforge:forge:${project.mcVersion}-${project.forgeVersion}"
 
-	implementation fg.deobf("curse.maven:iceberg-520110:3549885")
+	implementation fg.deobf("curse.maven:iceberg-520110:3561115")
 }
 
 jar {
