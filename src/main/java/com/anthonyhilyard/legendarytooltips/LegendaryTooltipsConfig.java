@@ -57,7 +57,7 @@ public class LegendaryTooltipsConfig implements ConfigData
 			 "  Rarity - ! followed by item's rarity.  This is ONLY vanilla rarities.  Examples: \"!common\", \"!uncommon\", \"!rare\", \"!epic\"\n" +
 			 "  Item name color - # followed by color hex code, the hex code must match exactly.  Examples: \"#23F632\"\n" +
 			 "  Display name - % followed by any text.  Will match any item with this text in its tooltip display name.  Examples: \"%[Uncommon]\"\n" +
-			 "  Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: \"^Legendary\"" +
+			 "  Tooltip text - ^ followed by any text.  Will match any item with this text anywhere in the tooltip text (besides the name).  Examples: \"^Legendary\"\n" +
 			 "  NBT tag - & followed by tag name and optional comparator (=, >, <, or !=) and value, in the format <tag><comparator><value> or just <tag>. Examples: \"&Damage=0\", \"&Tier>1\", \"&Broken\", \"&map!=128\"")
 	private List<List<String>> itemSelectors = Stream.of(List.of(List.of("!rare", "!epic")), Collections.nCopies(LegendaryTooltips.NUM_FRAMES - 1, List.of(""))).flatMap(List::stream).collect(Collectors.toList());
 
