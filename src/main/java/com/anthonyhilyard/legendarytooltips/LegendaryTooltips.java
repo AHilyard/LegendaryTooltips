@@ -13,18 +13,19 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
+import com.anthonyhilyard.iceberg.events.GatherComponentsExtEvent;
 import com.anthonyhilyard.iceberg.events.RenderTooltipExtEvent;
 import com.anthonyhilyard.iceberg.util.ItemColor;
+import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameDefinition;
+import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameSource;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.FORGE, value = Dist.CLIENT)
 public class LegendaryTooltips
 {
-	@SuppressWarnings("unused")
 	public static final Logger LOGGER = LogManager.getLogger();
 
 	public static final int STANDARD = -1;
@@ -32,32 +33,38 @@ public class LegendaryTooltips
 
 	private static ItemStack lastTooltipItem = null;
 
-	private static Pair<Integer, Integer> itemFrameColors(ItemStack item, Pair<Integer, Integer> defaults)
+	private static FrameDefinition getDefinitionColors(ItemStack item, int defaultStartBorder, int defaultEndBorder, int defaultBackground)
 	{
-		// If we are displaying a custom "legendary" border, use a gold color for borders.
-		int frameLevel = LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(item);
-		if (frameLevel != STANDARD)
-		{
-			int startColor = LegendaryTooltipsConfig.INSTANCE.getCustomBorderStartColor(frameLevel);
-			int endColor = LegendaryTooltipsConfig.INSTANCE.getCustomBorderEndColor(frameLevel);
+		FrameDefinition result = LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(item);
 
-			if (startColor == -1)
+		// If we are displaying a custom border, use custom colors for borders and backgrounds, if available.
+		if (result.index() != STANDARD)
+		{
+			if (result.startBorder() == null)
 			{
-				startColor = defaults.getLeft();
+				result = new FrameDefinition(result.resource(), result.index(), defaultStartBorder, result.endBorder(), result.background(), FrameSource.NONE, 0);
 			}
-			if (endColor == -1)
+			if (result.endBorder() == null)
 			{
-				endColor = defaults.getRight();
+				result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), defaultEndBorder, result.background(), FrameSource.NONE, 0);
 			}
-			return Pair.of(startColor, endColor);
+			if (result.endBorder() == null)
+			{
+				result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), result.endBorder(), defaultBackground, FrameSource.NONE, 0);
+			}
 		}
+		// Otherwise, if the "match rarity" option is turned on, calculate some good-looking colors.
 		else if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
 		{
+			// First grab the item's name color.
 			TextColor rarityColor = ItemColor.getColorForItem(item, TextColor.fromLegacyFormat(ChatFormatting.WHITE));
 
+			// Convert the color from RGB to HSB for easier manipulation.
 			float[] hsbVals = new float[3];
 			java.awt.Color.RGBtoHSB((rarityColor.getValue() >> 16) & 0xFF, (rarityColor.getValue() >> 8) & 0xFF, (rarityColor.getValue() >> 0) & 0xFF, hsbVals);
 			boolean addHue = false;
+
+			// These hue ranges are arbitrarily decided.  I just think they look the best.
 			if (hsbVals[0] * 360 < 62)
 			{
 				addHue = false;
@@ -67,13 +74,23 @@ public class LegendaryTooltips
 				addHue = true;
 			}
 			
-			TextColor startColor = TextColor.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f, hsbVals[1], hsbVals[2]).getRGB());
-			TextColor endColor = TextColor.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f, hsbVals[1], hsbVals[2]).getRGB());
+			// The start color will hue-shift by 0.6%, and the end will hue-shift the opposite direction by 4%.
+			// This gives a very nice looking gradient, while still matching the name color quite well.
+			float startHue = addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f;
+			float endHue = addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f;
+			
+			// Ensure values stay between 0 and 1.
+			startHue = (startHue + 1.0f) % 1.0f;
+			endHue = (endHue + 1.0f) % 1.0f;
 
-			return Pair.of(startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF));
+			TextColor startColor = TextColor.fromRgb(java.awt.Color.getHSBColor(startHue, hsbVals[1], hsbVals[2]).getRGB());
+			TextColor endColor = TextColor.fromRgb(java.awt.Color.getHSBColor(endHue, hsbVals[1], hsbVals[2]).getRGB());
+			TextColor backgroundColor = TextColor.fromRgb(java.awt.Color.getHSBColor(hsbVals[0], hsbVals[1] * 0.9f, 0.06f).getRGB());
+
+			result = new FrameDefinition(result.resource(), result.index(), startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF), backgroundColor.getValue() & (0xF0FFFFFF), FrameSource.NONE, 0);
 		}
 
-		return defaults;
+		return result;
 	}
 
 	@SubscribeEvent
@@ -103,17 +120,22 @@ public class LegendaryTooltips
 	@SubscribeEvent
 	public static void onGatherComponentsEvent(GatherComponents event)
 	{
-		TooltipDecor.setCachedLines(event.getTooltipElements());
+		int index = 0;
+		if (event instanceof GatherComponentsExtEvent)
+		{
+			index = ((GatherComponentsExtEvent)event).getIndex();
+		}
+		TooltipDecor.setCachedLines(event.getTooltipElements(), index);
 	}
 
 	@SubscribeEvent
 	public static void onTooltipColorEvent(RenderTooltipEvent.Color event)
 	{
-		Pair<Integer, Integer> borderColors = itemFrameColors(event.getItemStack(), Pair.of(event.getBorderStart(), event.getBorderEnd()));
+		FrameDefinition frameDefinition = getDefinitionColors(event.getItemStack(), event.getBorderStart(), event.getBorderEnd(), event.getBackgroundStart());
 
 		// Every tooltip will send a color event before a posttext event, so we can store the color here.
-		TooltipDecor.setCurrentTooltipBorderStart(borderColors.getLeft());
-		TooltipDecor.setCurrentTooltipBorderEnd(borderColors.getRight());
+		TooltipDecor.setCurrentTooltipBorderStart(frameDefinition.startBorder());
+		TooltipDecor.setCurrentTooltipBorderEnd(frameDefinition.endBorder());
 
 		// If this is a comparison tooltip, we will make the border transparent here so that we can redraw it later.
 		boolean comparison = false;
@@ -129,9 +151,12 @@ public class LegendaryTooltips
 		}
 		else
 		{
-			event.setBorderStart(borderColors.getLeft());
-			event.setBorderEnd(borderColors.getRight());
+			event.setBorderStart(frameDefinition.startBorder());
+			event.setBorderEnd(frameDefinition.endBorder());
 		}
+
+		// Either way, set the background color now.
+		event.setBackground(frameDefinition.background());
 	}
 
 	@SubscribeEvent
@@ -140,17 +165,24 @@ public class LegendaryTooltips
 		// If tooltip shadows are enabled, draw one now.
 		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow.get())
 		{
-			TooltipDecor.drawShadow(event.getPoseStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight());
+			if (event.isComparison())
+			{
+				TooltipDecor.drawShadow(event.getPoseStack(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11);
+			}
+			else
+			{
+				TooltipDecor.drawShadow(event.getPoseStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight());
+			}
 		}
 
 		// If this is a rare item, draw special border.
 		if (event.isComparison())
 		{
-			TooltipDecor.drawBorder(event.getPoseStack(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11, event.getItemStack(), event.getFont(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getItemStack()), event.isComparison());
+			TooltipDecor.drawBorder(event.getPoseStack(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11, event.getItemStack(), event.getFont(), LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(event.getItemStack()), event.isComparison(), event.getIndex());
 		}
 		else
 		{
-			TooltipDecor.drawBorder(event.getPoseStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getItemStack(), event.getFont(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getItemStack()), event.isComparison());
+			TooltipDecor.drawBorder(event.getPoseStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getItemStack(), event.getFont(), LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(event.getItemStack()), event.isComparison(), event.getIndex());
 		}
 	}
 }
