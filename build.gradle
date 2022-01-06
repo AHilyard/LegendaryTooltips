@@ -16,10 +16,6 @@ repositories {
 		name = "CurseMaven"
 		url "https://www.cursemaven.com"
 	}
-	maven {
-		name = "Cloth API"
-		url = "https://maven.shedaniel.me/"
-	}
 }
 
 sourceSets {
@@ -35,9 +31,12 @@ dependencies {
 	mappings loom.officialMojangMappings()
 	modImplementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricVersion}"
-	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.clothVersion}") { exclude(group: "net.fabricmc.fabric-api") }
 
-	modImplementation "curse.maven:iceberg-539382:3535221"
+	modImplementation 'curse.maven:forgeconfigapiport-547434:3562302'
+	implementation 'com.electronwill.night-config:core:3.6.3'
+	implementation 'com.electronwill.night-config:toml:3.6.3'
+
+	modImplementation "curse.maven:iceberg-539382:3595404"
 }
 
 loom {

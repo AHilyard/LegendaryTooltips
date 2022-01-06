@@ -1,40 +1,43 @@
 package com.anthonyhilyard.legendarytooltips.render;
 
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import com.mojang.math.Matrix4f;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.anthonyhilyard.iceberg.util.GuiHelper;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltips;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig;
 import com.anthonyhilyard.legendarytooltips.Loader;
+import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameDefinition;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Either;
 
 import org.lwjgl.opengl.GL11;
 
 public class TooltipDecor
 {
-	private static final ResourceLocation TEXTURE_TOOLTIP_BORDERS = new ResourceLocation(Loader.MODID, "textures/gui/tooltip_borders.png");
+	public static final ResourceLocation DEFAULT_BORDERS = new ResourceLocation(Loader.MODID, "textures/gui/tooltip_borders.png");
 	
 	private static int currentTooltipBorderStart = 0;
 	private static int currentTooltipBorderEnd = 0;
 
 	private static int shineTimer = 0;
 
-	private static List<FormattedText> cachedPreWrapLines = new ArrayList<>();
+	private static Map<Integer, List<Either<FormattedText, TooltipComponent>>> cachedPreWrapLines = new HashMap<>();
 
 	public static void setCurrentTooltipBorderStart(int color)
 	{
@@ -46,10 +49,9 @@ public class TooltipDecor
 		currentTooltipBorderEnd = color;
 	}
 
-	public static void setCachedLines(List<? extends FormattedText> lines)
+	public static void setCachedLines(List<Either<FormattedText, TooltipComponent>> lines, int index)
 	{
-		cachedPreWrapLines.clear();
-		cachedPreWrapLines.addAll(lines);
+		cachedPreWrapLines.put(index, lines);
 	}
 
 	public static void updateTimer()
@@ -90,7 +92,7 @@ public class TooltipDecor
 		poseStack.popPose();
 	}
 
-	public static void drawBorder(PoseStack poseStack, int x, int y, int width, int height, ItemStack item, List<? extends ClientTooltipComponent> lines, Font font, int frameLevel, boolean comparison)
+	public static void drawBorder(PoseStack poseStack, int x, int y, int width, int height, ItemStack item, Font font, FrameDefinition frameDefinition, boolean comparison, int index)
 	{
 		// If this is a comparison tooltip, we need to draw the actual border lines first.
 		if (comparison)
@@ -109,34 +111,46 @@ public class TooltipDecor
 		}
 
 		// If the separate name border is enabled, draw it now.
-		if (LegendaryTooltipsConfig.INSTANCE.nameSeparator && !cachedPreWrapLines.isEmpty())
+		if (LegendaryTooltipsConfig.INSTANCE.nameSeparator.get() && item != null && !item.isEmpty())
 		{
-			// Determine and store the number of "title lines".
-			FormattedText textLine = cachedPreWrapLines.get(0);
-			List<FormattedText> wrappedLine = font.getSplitter().splitLines(textLine, width, Style.EMPTY);
-			int titleLineCount = wrappedLine.size();
-
-			// Only do this if there's more lines below the title.
-			if (cachedPreWrapLines.size() > titleLineCount)
+			// Determine the number of "title lines".
+			FormattedText textLine = null;
+			if (cachedPreWrapLines.containsKey(index))
 			{
-				// If this is a comparison tooltip, we need to move this separator down to the proper position.
-				int offset = 0;
-				if (comparison)
-				{
-					offset = 11;
-				}
+				textLine = cachedPreWrapLines.get(index).get(0).left().get();
+			}
+			else if (cachedPreWrapLines.containsKey(0))
+			{
+				index = 0;
+				textLine = cachedPreWrapLines.get(0).get(0).left().get();
+			}
 
-				// Now draw the separator under the title.
-				drawSeparator(poseStack, x - 3 + 1, y - 3 + 1 + (titleLineCount * 10) + 1 + offset, width, currentTooltipBorderStart);
+			if (textLine != null)
+			{
+				List<FormattedCharSequence> wrappedLine = font.split(textLine, width);
+				int titleLineCount = wrappedLine.size();
+
+				// Only do this if there's more lines below the title.
+				if (cachedPreWrapLines.get(index).size() > titleLineCount)
+				{
+					// If this is a comparison tooltip, we need to move this separator down to the proper position.
+					int offset = 0;
+					if (comparison)
+					{
+						offset = 11;
+					}
+					// Now draw the separator under the title.
+					drawSeparator(poseStack, x - 3 + 1, y - 3 + 1 + (titleLineCount * 10) + 1 + offset, width, currentTooltipBorderStart);
+				}
 			}
 		}
 
-		if (frameLevel >= LegendaryTooltips.NUM_FRAMES || frameLevel < 0)
+		if (frameDefinition.index() == LegendaryTooltips.STANDARD)
 		{
 			return;
 		}
 
-		if (LegendaryTooltipsConfig.INSTANCE.shineEffect)
+		if (LegendaryTooltipsConfig.INSTANCE.shineEffect.get())
 		{
 			// Draw shiny effect here.
 			poseStack.pushPose();
@@ -170,41 +184,43 @@ public class TooltipDecor
 		}
 
 		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-		RenderSystem.setShaderTexture(0, TEXTURE_TOOLTIP_BORDERS);
+		RenderSystem.setShaderTexture(0, frameDefinition.resource());
 
 		// We have to bind the texture to be able to query it, so do that.
 		Minecraft mc = Minecraft.getInstance();
-		AbstractTexture borderTexture = mc.getTextureManager().getTexture(TEXTURE_TOOLTIP_BORDERS);
+		AbstractTexture borderTexture = mc.getTextureManager().getTexture(frameDefinition.resource());
 		borderTexture.bind();
 
 		// Grab the width and height of the texture.  This should be 128x128, but old resource packs could still be using 64x64.
 		int textureWidth = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
 		int textureHeight = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
 
+		final int frameIndex = frameDefinition.index();
+
 		// Here we will overlay a 6-patch border over the tooltip to make it look fancy.
 		poseStack.pushPose();
 		poseStack.translate(0, 0, 410.0);
 
 		// Render top-left corner.
-		GuiComponent.blit(poseStack, x - 6, y - 6, (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
+		GuiComponent.blit(poseStack, x - 6, y - 6, (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
 
 		// Render top-right corner.
-		GuiComponent.blit(poseStack, x + width - 8 + 6, y - 6, 56 + (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
+		GuiComponent.blit(poseStack, x + width - 8 + 6, y - 6, 56 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
 
 		// Render bottom-left corner.
-		GuiComponent.blit(poseStack, x - 6, y + height - 8 + 6, (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
+		GuiComponent.blit(poseStack, x - 6, y + height - 8 + 6, (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
 
 		// Render bottom-right corner.
-		GuiComponent.blit(poseStack, x + width - 8 + 6, y + height - 8 + 6, 56 + (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
+		GuiComponent.blit(poseStack, x + width - 8 + 6, y + height - 8 + 6, 56 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
 
 		// Only render central embellishments if the tooltip is 48 pixels wide or more.
 		if (width >= 48)
 		{
 			// Render top central embellishment.
-			GuiComponent.blit(poseStack, x + (width / 2) - 24, y - 9, 8 + (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight, 48, 8, textureWidth, textureHeight);
+			GuiComponent.blit(poseStack, x + (width / 2) - 24, y - 9, 8 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 48, 8, textureWidth, textureHeight);
 
 			// Render bottom central embellishment.
-			GuiComponent.blit(poseStack, x + (width / 2) - 24, y + height - 8 + 9, 8 + (frameLevel / 8) * 64, (frameLevel * 16) % textureHeight + 8, 48, 8, textureWidth, textureHeight);
+			GuiComponent.blit(poseStack, x + (width / 2) - 24, y + height - 8 + 9, 8 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 48, 8, textureWidth, textureHeight);
 		}
 
 		poseStack.popPose();

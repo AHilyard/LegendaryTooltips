@@ -24,17 +24,20 @@
 	},
 	
 	"accessWidener": "legendarytooltips.accesswidener",
+	"mixins": [
+		"legendarytooltips.mixins.json"
+	],
 
 	"depends": {
 		"fabricloader": ">=0.12.8",
 		"fabric": "*",
 		"minecraft": "1.18.x",
 		"java": ">=17",
-		"cloth-config2": ">=6.0",
-		"iceberg": ">=1.0.27"
+		"forgeconfigapiport": ">=3.1",
+		"iceberg": ">=1.0.35"
 	},
 	"suggests": {
-		"equipmentcompare": ">=1.2.7"
+		"equipmentcompare": ">=1.2.10"
 	},
 	"custom": {
 		"modupdater": {

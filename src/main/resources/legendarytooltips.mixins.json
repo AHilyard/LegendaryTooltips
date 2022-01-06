@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"package": "com.anthonyhilyard.legendarytooltips.mixin",
+	"compatibilityLevel": "JAVA_16",
+	"client": [
+		"ScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"minVersion": "0.8.4",
+	"target": "@env(DEFAULT)"
+}
