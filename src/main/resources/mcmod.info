@@ -1,0 +1,14 @@
+[
+{
+  "modid": "legendarytooltips",
+  "name": "Legendary Tooltips",
+  "description": "Gives rare items a fancy tooltip and adds additional tooltip configuration options.",
+  "version": "${version}",
+  "mcversion": "1.12.2",
+  "url": "https://anthonyhilyard.com/",
+  "updateUrl": "https://mc-curse-update-checker.herokuapp.com/532127",
+  "authorList": ["Grend"],
+  "logoFile": "icon.png",
+  "dependencies": []
+}
+]

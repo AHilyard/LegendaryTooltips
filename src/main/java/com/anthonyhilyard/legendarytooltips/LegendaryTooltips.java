@@ -1,35 +1,39 @@
 package com.anthonyhilyard.legendarytooltips;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderTooltipEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import com.anthonyhilyard.iceberg.events.RenderTooltipExtEvent;
-import com.anthonyhilyard.iceberg.util.ItemColor;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
+import com.anthonyhilyard.legendarytooltips.util.ItemColor;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-@Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.FORGE, value = Dist.CLIENT)
+@Mod(modid=Loader.MODID, name=Loader.MODNAME, version=Loader.MODVERSION, acceptedMinecraftVersions = "[1.12.2]")
+@EventBusSubscriber(modid = Loader.MODID)
 public class LegendaryTooltips
 {
-	@SuppressWarnings("unused")
-	public static final Logger LOGGER = LogManager.getLogger();
+	@Instance(Loader.MODID)
+	public LegendaryTooltips instance;
 
 	public static final int STANDARD = -1;
 	public static final int NUM_FRAMES = 16;
 
 	private static ItemStack lastTooltipItem = null;
+
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent event)
+	{
+		LegendaryTooltipsConfig.loadConfig(event.getSuggestedConfigurationFile());
+	}
 
 	private static Pair<Integer, Integer> itemFrameColors(ItemStack item, Pair<Integer, Integer> defaults)
 	{
@@ -50,12 +54,12 @@ public class LegendaryTooltips
 			}
 			return Pair.of(startColor, endColor);
 		}
-		else if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
+		else if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity)
 		{
-			Color rarityColor = ItemColor.getColorForItem(item, Color.fromLegacyFormat(TextFormatting.WHITE));
+			int rarityColor = ItemColor.getColorForItem(item, 0xFFFFFF);
 
 			float[] hsbVals = new float[3];
-			java.awt.Color.RGBtoHSB((rarityColor.getValue() >> 16) & 0xFF, (rarityColor.getValue() >> 8) & 0xFF, (rarityColor.getValue() >> 0) & 0xFF, hsbVals);
+			java.awt.Color.RGBtoHSB((rarityColor >> 16) & 0xFF, (rarityColor >> 8) & 0xFF, (rarityColor >> 0) & 0xFF, hsbVals);
 			boolean addHue = false;
 			if (hsbVals[0] * 360 < 62)
 			{
@@ -66,10 +70,10 @@ public class LegendaryTooltips
 				addHue = true;
 			}
 			
-			Color startColor = Color.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f, hsbVals[1], hsbVals[2]).getRGB());
-			Color endColor = Color.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f, hsbVals[1], hsbVals[2]).getRGB());
+			int startColor = java.awt.Color.getHSBColor(addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f, hsbVals[1], hsbVals[2]).getRGB();
+			int endColor =java.awt.Color.getHSBColor(addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f, hsbVals[1], hsbVals[2]).getRGB();
 
-			return Pair.of(startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF));
+			return Pair.of(startColor & 0xAAFFFFFF, endColor & 0x44FFFFFF);
 		}
 
 		return defaults;
@@ -81,18 +85,18 @@ public class LegendaryTooltips
 	{
 		TooltipDecor.updateTimer();
 
-		Minecraft mc = Minecraft.getInstance();
-		if (mc.screen != null)
+		Minecraft mc = Minecraft.getMinecraft();
+		if (mc.currentScreen != null)
 		{
-			if (mc.screen instanceof ContainerScreen)
+			if (mc.currentScreen instanceof GuiContainer)
 			{
-				if (((ContainerScreen<?>)mc.screen).getSlotUnderMouse() != null && 
-					((ContainerScreen<?>)mc.screen).getSlotUnderMouse().hasItem())
+				if (((GuiContainer)mc.currentScreen).getSlotUnderMouse() != null && 
+					((GuiContainer)mc.currentScreen).getSlotUnderMouse().getHasStack())
 				{
-					if (lastTooltipItem != ((ContainerScreen<?>)mc.screen).getSlotUnderMouse().getItem())
+					if (lastTooltipItem != ((GuiContainer)mc.currentScreen).getSlotUnderMouse().getStack())
 					{
 						TooltipDecor.resetTimer();
-						lastTooltipItem = ((ContainerScreen<?>)mc.screen).getSlotUnderMouse().getItem();
+						lastTooltipItem = ((GuiContainer)mc.currentScreen).getSlotUnderMouse().getStack();
 					}
 				}
 			}
@@ -114,48 +118,20 @@ public class LegendaryTooltips
 		TooltipDecor.setCurrentTooltipBorderStart(borderColors.getLeft());
 		TooltipDecor.setCurrentTooltipBorderEnd(borderColors.getRight());
 
-		// If this is a comparison tooltip, we will make the border transparent here so that we can redraw it later.
-		boolean comparison = false;
-		if (event instanceof RenderTooltipExtEvent.Color)
-		{
-			comparison = ((RenderTooltipExtEvent.Color)event).isComparison();
-		}
-
-		if (comparison)
-		{
-			event.setBorderStart(0);
-			event.setBorderEnd(0);
-		}
-		else
-		{
-			event.setBorderStart(borderColors.getLeft());
-			event.setBorderEnd(borderColors.getRight());
-		}
+		event.setBorderStart(borderColors.getLeft());
+		event.setBorderEnd(borderColors.getRight());
 	}
 
 	@SubscribeEvent
 	public static void onPostTooltipEvent(RenderTooltipEvent.PostText event)
 	{
 		// If tooltip shadows are enabled, draw one now.
-		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow.get())
+		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow)
 		{
-			TooltipDecor.drawShadow(event.getMatrixStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight());
-		}
-
-		boolean comparison = false;
-		if (event instanceof RenderTooltipExtEvent.PostText)
-		{
-			comparison = ((RenderTooltipExtEvent.PostText)event).isComparison();
+			TooltipDecor.drawShadow(event.getX(), event.getY(), event.getWidth(), event.getHeight());
 		}
 
 		// If this is a rare item, draw special border.
-		if (comparison)
-		{
-			TooltipDecor.drawBorder(event.getMatrixStack(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11, event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()), comparison);
-		}
-		else
-		{
-			TooltipDecor.drawBorder(event.getMatrixStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()), comparison);
-		}
+		TooltipDecor.drawBorder(event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()));
 	}
 }
