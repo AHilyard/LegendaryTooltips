@@ -79,6 +79,14 @@ public class TooltipDecor
 		GuiHelper.drawGradientRectHorizontal(402, x + width / 2, y, x + width, y + 1, color, color & 0xFFFFFF);
 	}
 
+	/**
+	 * Linearly-interpolates between a and b by interval t (0, 1).
+	 */
+	private static double lerp(double t, double a, double b)
+	{
+		return a + t * (b - a);
+	}
+
 	public static void drawBorder(int x, int y, int width, int height, ItemStack item, List<String> lines, FontRenderer font, int frameLevel)
 	{
 		// If the separate name border is enabled, draw it now.
@@ -119,7 +127,7 @@ public class TooltipDecor
 
 				int horizontalMin = x - 3;
 				int horizontalMax = x + width + 3;
-				int horizontalInterval = (int)MathHelper.clampedLerp(interval * interval, horizontalMax, horizontalMin);
+				int horizontalInterval = (int)lerp(interval * interval, horizontalMax, horizontalMin);
 				GuiHelper.drawGradientRectHorizontal(402, Math.max(horizontalInterval - 36, horizontalMin), y - 3, Math.min(horizontalInterval, horizontalMax), y - 3 + 1, 0x00FFFFFF, 0x00FFFFFF | alpha);
 				GuiHelper.drawGradientRectHorizontal(402, Math.max(horizontalInterval, horizontalMin), y - 3, Math.min(horizontalInterval + 36, horizontalMax), y - 3 + 1, 0x00FFFFFF | alpha, 0x00FFFFFF);
 			}
@@ -131,7 +139,7 @@ public class TooltipDecor
 
 				int verticalMin = y - 3 + 1;
 				int verticalMax = y + height + 3 - 1;
-				int verticalInterval = (int)MathHelper.clampedLerp(interval * interval, verticalMax, verticalMin);
+				int verticalInterval = (int)lerp(interval * interval, verticalMax, verticalMin);
 				GuiUtils.drawGradientRect(402, x - 3, Math.max(verticalInterval - 12, verticalMin), x - 3 + 1, Math.min(verticalInterval, verticalMax), 0x00FFFFFF, 0x00FFFFFF | alpha);
 				GuiUtils.drawGradientRect(402, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
 			}
