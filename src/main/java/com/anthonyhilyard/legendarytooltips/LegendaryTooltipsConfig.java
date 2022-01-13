@@ -1,24 +1,9 @@
 package com.anthonyhilyard.legendarytooltips;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-
 import com.anthonyhilyard.iceberg.util.Selectors;
 import com.anthonyhilyard.iceberg.util.Selectors.SelectorDocumentation;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
 import com.electronwill.nightconfig.core.Config;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -26,11 +11,21 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import org.apache.commons.lang3.tuple.Pair;
 
-@Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.MOD)
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class LegendaryTooltipsConfig
 {
 	public static final ForgeConfigSpec SPEC;

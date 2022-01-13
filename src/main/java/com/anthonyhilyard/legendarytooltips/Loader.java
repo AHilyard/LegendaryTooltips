@@ -1,5 +1,6 @@
 package com.anthonyhilyard.legendarytooltips;
 
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,6 +26,7 @@ public class Loader
 		{
 			new LegendaryTooltips();
 			MinecraftForge.EVENT_BUS.register(LegendaryTooltips.class);
+			FMLJavaModLoadingContext.get().getModEventBus().register(LegendaryTooltipsConfig.class);
 			ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LegendaryTooltipsConfig.SPEC);
 
 			if (Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager resourceManager)
