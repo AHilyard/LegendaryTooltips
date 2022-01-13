@@ -1,29 +1,23 @@
 package com.anthonyhilyard.legendarytooltips;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.ChatFormatting;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderTooltipEvent;
-import net.minecraftforge.client.event.RenderTooltipEvent.GatherComponents;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-
 import com.anthonyhilyard.iceberg.events.GatherComponentsExtEvent;
 import com.anthonyhilyard.iceberg.events.RenderTooltipExtEvent;
 import com.anthonyhilyard.iceberg.util.ItemColor;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameDefinition;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameSource;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.client.event.RenderTooltipEvent.GatherComponents;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.FORGE, value = Dist.CLIENT)
 public class LegendaryTooltips
 {
 	public static final Logger LOGGER = LogManager.getLogger();
