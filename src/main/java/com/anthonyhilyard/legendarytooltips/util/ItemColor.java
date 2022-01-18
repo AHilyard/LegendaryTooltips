@@ -87,9 +87,6 @@ public abstract class ItemColor
 			result = defaultColor;
 		}
 
-		Loader.LOGGER.info("item: {}", item.getDisplayName());
-		Loader.LOGGER.info("color: {}", result);
-
 		return result;
 	}
 }
