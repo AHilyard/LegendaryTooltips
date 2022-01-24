@@ -71,7 +71,8 @@ public class LegendaryTooltipsConfig extends Configuration
 			categories.put("colors", getCategory("colors"));
 
 			categoriesField.set(this, categories);
-		} catch (Exception e)
+		}
+		catch (Exception e)
 		{
 			Loader.LOGGER.error(e);
 		}
