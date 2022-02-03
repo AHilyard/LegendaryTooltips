@@ -33,6 +33,7 @@ import net.minecraftforge.fml.config.ModConfig;
 public class LegendaryTooltips implements ClientModInitializer
 {
 	public static final int STANDARD = -1;
+	public static final int NO_BORDER = -2;
 	public static final int NUM_FRAMES = 16;
 
 	private static ItemStack lastTooltipItem = null;
@@ -59,41 +60,50 @@ public class LegendaryTooltips implements ClientModInitializer
 	{
 		FrameDefinition result = LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(item);
 
-		// If the "match rarity" option is turned on, calculate some good-looking colors.
-		if (result.index() == STANDARD && LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
+		switch (result.index())
 		{
-			// First grab the item's name color.
-			TextColor rarityColor = ItemColor.getColorForItem(item, TextColor.fromLegacyFormat(ChatFormatting.WHITE));
+			case NO_BORDER:
+				result = new FrameDefinition(result.resource(), result.index(), defaultStartBorder, defaultEndBorder, defaultBackground, FrameSource.NONE, 0);
+				break;
 
-			// Convert the color from RGB to HSB for easier manipulation.
-			float[] hsbVals = new float[3];
-			java.awt.Color.RGBtoHSB((rarityColor.getValue() >> 16) & 0xFF, (rarityColor.getValue() >> 8) & 0xFF, (rarityColor.getValue() >> 0) & 0xFF, hsbVals);
-			boolean addHue = false;
+			case STANDARD:
+				// If the "match rarity" option is turned on, calculate some good-looking colors.
+				if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
+				{
+					// First grab the item's name color.
+					TextColor rarityColor = ItemColor.getColorForItem(item, TextColor.fromLegacyFormat(ChatFormatting.WHITE));
 
-			// These hue ranges are arbitrarily decided.  I just think they look the best.
-			if (hsbVals[0] * 360 < 62)
-			{
-				addHue = false;
-			}
-			else if (hsbVals[0] * 360 <= 240)
-			{
-				addHue = true;
-			}
+					// Convert the color from RGB to HSB for easier manipulation.
+					float[] hsbVals = new float[3];
+					java.awt.Color.RGBtoHSB((rarityColor.getValue() >> 16) & 0xFF, (rarityColor.getValue() >> 8) & 0xFF, (rarityColor.getValue() >> 0) & 0xFF, hsbVals);
+					boolean addHue = false;
 
-			// The start color will hue-shift by 0.6%, and the end will hue-shift the opposite direction by 4%.
-			// This gives a very nice looking gradient, while still matching the name color quite well.
-			float startHue = addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f;
-			float endHue = addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f;
+					// These hue ranges are arbitrarily decided.  I just think they look the best.
+					if (hsbVals[0] * 360 < 62)
+					{
+						addHue = false;
+					}
+					else if (hsbVals[0] * 360 <= 240)
+					{
+						addHue = true;
+					}
 
-			// Ensure values stay between 0 and 1.
-			startHue = (startHue + 1.0f) % 1.0f;
-			endHue = (endHue + 1.0f) % 1.0f;
+					// The start color will hue-shift by 0.6%, and the end will hue-shift the opposite direction by 4%.
+					// This gives a very nice looking gradient, while still matching the name color quite well.
+					float startHue = addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f;
+					float endHue = addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f;
 
-			TextColor startColor = TextColor.fromRgb(java.awt.Color.getHSBColor(startHue, hsbVals[1], hsbVals[2]).getRGB());
-			TextColor endColor = TextColor.fromRgb(java.awt.Color.getHSBColor(endHue, hsbVals[1], hsbVals[2]).getRGB());
-			TextColor backgroundColor = TextColor.fromRgb(java.awt.Color.getHSBColor(hsbVals[0], hsbVals[1] * 0.9f, 0.06f).getRGB());
+					// Ensure values stay between 0 and 1.
+					startHue = (startHue + 1.0f) % 1.0f;
+					endHue = (endHue + 1.0f) % 1.0f;
 
-			result = new FrameDefinition(result.resource(), result.index(), startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF), backgroundColor.getValue() & (0xF0FFFFFF), FrameSource.NONE, 0);
+					TextColor startColor = TextColor.fromRgb(java.awt.Color.getHSBColor(startHue, hsbVals[1], hsbVals[2]).getRGB());
+					TextColor endColor = TextColor.fromRgb(java.awt.Color.getHSBColor(endHue, hsbVals[1], hsbVals[2]).getRGB());
+					TextColor backgroundColor = TextColor.fromRgb(java.awt.Color.getHSBColor(hsbVals[0], hsbVals[1] * 0.9f, 0.06f).getRGB());
+
+					result = new FrameDefinition(result.resource(), result.index(), startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF), backgroundColor.getValue() & (0xF0FFFFFF), FrameSource.NONE, 0);
+				}
+				break;
 		}
 
 		if (result.startBorder() == null)
@@ -108,7 +118,6 @@ public class LegendaryTooltips implements ClientModInitializer
 		{
 			result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), result.endBorder(), defaultBackground, FrameSource.NONE, 0);
 		}
-
 		return result;
 	}
 
@@ -136,7 +145,10 @@ public class LegendaryTooltips implements ClientModInitializer
 
 	public static GatherResult onGatherComponentsEvent(ItemStack itemStack, int screenWidth, int screenHeight, List<Either<FormattedText, TooltipComponent>> tooltipElements, int maxWidth, int index)
 	{
-		TooltipDecor.setCachedLines(tooltipElements, index);
+		if (LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(itemStack).index() != NO_BORDER)
+		{
+			TooltipDecor.setCachedLines(tooltipElements, index);
+		}
 		return new GatherResult(InteractionResult.PASS, maxWidth, tooltipElements);
 	}
 
@@ -163,8 +175,13 @@ public class LegendaryTooltips implements ClientModInitializer
 		return result;
 	}
 
-	public static void onPostTooltipEvent(ItemStack stack, List<ClientTooltipComponent> components, PoseStack poseStack, int x, int y, Font font, int width, int height, boolean comparison, int index)
+	public static void onPostTooltipEvent(ItemStack itemStack, List<ClientTooltipComponent> components, PoseStack poseStack, int x, int y, Font font, int width, int height, boolean comparison, int index)
 	{
+		if (LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(itemStack).index() == NO_BORDER)
+		{
+			return;
+		}
+
 		// If tooltip shadows are enabled, draw one now.
 		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow.get())
 		{
@@ -181,11 +198,11 @@ public class LegendaryTooltips implements ClientModInitializer
 		// If this is a rare item, draw special border.
 		if (comparison)
 		{
-			TooltipDecor.drawBorder(poseStack, x, y - 11, width, height + 11, stack, font, LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(stack), comparison, index);
+			TooltipDecor.drawBorder(poseStack, x, y - 11, width, height + 11, itemStack, font, LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(itemStack), comparison, index);
 		}
 		else
 		{
-			TooltipDecor.drawBorder(poseStack, x, y, width, height, stack, font, LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(stack), comparison, index);
+			TooltipDecor.drawBorder(poseStack, x, y, width, height, itemStack, font, LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(itemStack), comparison, index);
 		}
 	}
 }

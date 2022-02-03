@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.2.3
+- Fixed a bug with non-square tooltip border textures.
+- Added blacklist configuration option.
+
 ### 1.2.2
 - Fixed a bug that prevented resource pack frame definitions files from beings loaded on Fabric.
 - Fixed a bug that prevented configuration file changes from being detected while in game on Fabric.
