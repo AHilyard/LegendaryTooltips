@@ -67,7 +67,6 @@ public class LegendaryTooltipsConfig
 	private static final List<ConfigValue<List<? extends String>>> itemSelectors = new ArrayList<ConfigValue<List<? extends String>>>(LegendaryTooltips.NUM_FRAMES);
 
 	private static final Map<FrameDefinition, Set<String>> customFrameDefinitions = new LinkedHashMap<>();
-	// private static final Map<FrameDefinition, Set<String>> dataFrameDefinitions = new LinkedHashMap<>();
 
 	private static final Map<ItemStack, FrameDefinition> frameDefinitionCache = new HashMap<>();
 

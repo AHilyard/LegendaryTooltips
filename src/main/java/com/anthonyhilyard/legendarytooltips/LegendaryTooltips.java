@@ -37,24 +37,8 @@ public class LegendaryTooltips
 	{
 		FrameDefinition result = LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(item);
 
-		// If we are displaying a custom border, use custom colors for borders and backgrounds, if available.
-		if (result.index() != STANDARD)
-		{
-			if (result.startBorder() == null)
-			{
-				result = new FrameDefinition(result.resource(), result.index(), defaultStartBorder, result.endBorder(), result.background(), FrameSource.NONE, 0);
-			}
-			if (result.endBorder() == null)
-			{
-				result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), defaultEndBorder, result.background(), FrameSource.NONE, 0);
-			}
-			if (result.endBorder() == null)
-			{
-				result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), result.endBorder(), defaultBackground, FrameSource.NONE, 0);
-			}
-		}
-		// Otherwise, if the "match rarity" option is turned on, calculate some good-looking colors.
-		else if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
+		// If the "match rarity" option is turned on, calculate some good-looking colors.
+		if (result.index() == STANDARD && LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
 		{
 			// First grab the item's name color.
 			TextColor rarityColor = ItemColor.getColorForItem(item, TextColor.fromLegacyFormat(ChatFormatting.WHITE));
@@ -88,6 +72,19 @@ public class LegendaryTooltips
 			TextColor backgroundColor = TextColor.fromRgb(java.awt.Color.getHSBColor(hsbVals[0], hsbVals[1] * 0.9f, 0.06f).getRGB());
 
 			result = new FrameDefinition(result.resource(), result.index(), startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF), backgroundColor.getValue() & (0xF0FFFFFF), FrameSource.NONE, 0);
+		}
+
+		if (result.startBorder() == null)
+		{
+			result = new FrameDefinition(result.resource(), result.index(), defaultStartBorder, result.endBorder(), result.background(), FrameSource.NONE, 0);
+		}
+		if (result.endBorder() == null)
+		{
+			result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), defaultEndBorder, result.background(), FrameSource.NONE, 0);
+		}
+		if (result.background() == null)
+		{
+			result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), result.endBorder(), defaultBackground, FrameSource.NONE, 0);
 		}
 
 		return result;

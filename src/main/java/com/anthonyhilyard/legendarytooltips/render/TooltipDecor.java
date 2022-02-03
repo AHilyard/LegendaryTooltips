@@ -189,8 +189,8 @@ public class TooltipDecor
 		RenderSystem.setShaderTexture(0, frameDefinition.resource());
 
 		// We have to bind the texture to be able to query it, so do that.
-		Minecraft mc = Minecraft.getInstance();
-		AbstractTexture borderTexture = mc.textureManager.getTexture(DEFAULT_BORDERS);
+		final Minecraft minecraft = Minecraft.getInstance();
+		AbstractTexture borderTexture = minecraft.getTextureManager().getTexture(frameDefinition.resource());
 		borderTexture.bind();
 
 		// Grab the width and height of the texture.  This should be 128x128, but old resource packs could still be using 64x64.
