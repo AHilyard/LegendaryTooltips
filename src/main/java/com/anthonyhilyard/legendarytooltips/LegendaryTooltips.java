@@ -31,41 +31,48 @@ public class LegendaryTooltips
 	{
 		// If we are displaying a custom "legendary" border, use a gold color for borders.
 		int frameLevel = LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(item);
-		if (frameLevel != STANDARD)
+		switch (frameLevel)
 		{
-			int startColor = LegendaryTooltipsConfig.INSTANCE.getCustomBorderStartColor(frameLevel);
-			int endColor = LegendaryTooltipsConfig.INSTANCE.getCustomBorderEndColor(frameLevel);
+			case NO_BORDER:
+				return defaults;
 
-			if (startColor == -1)
-			{
-				startColor = defaults.getLeft();
-			}
-			if (endColor == -1)
-			{
-				endColor = defaults.getRight();
-			}
-			return Pair.of(startColor, endColor);
-		}
-		else if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
-		{
-			Color rarityColor = ItemColor.getColorForItem(item, Color.fromLegacyFormat(TextFormatting.WHITE));
+			case STANDARD:
+				if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
+				{
+					Color rarityColor = ItemColor.getColorForItem(item, Color.fromLegacyFormat(TextFormatting.WHITE));
+		
+					float[] hsbVals = new float[3];
+					java.awt.Color.RGBtoHSB((rarityColor.getValue() >> 16) & 0xFF, (rarityColor.getValue() >> 8) & 0xFF, (rarityColor.getValue() >> 0) & 0xFF, hsbVals);
+					boolean addHue = false;
+					if (hsbVals[0] * 360 < 62)
+					{
+						addHue = false;
+					}
+					else if (hsbVals[0] * 360 <= 240)
+					{
+						addHue = true;
+					}
+					
+					Color startColor = Color.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f, hsbVals[1], hsbVals[2]).getRGB());
+					Color endColor = Color.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f, hsbVals[1], hsbVals[2]).getRGB());
+		
+					return Pair.of(startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF));
+				}
+				break;
 
-			float[] hsbVals = new float[3];
-			java.awt.Color.RGBtoHSB((rarityColor.getValue() >> 16) & 0xFF, (rarityColor.getValue() >> 8) & 0xFF, (rarityColor.getValue() >> 0) & 0xFF, hsbVals);
-			boolean addHue = false;
-			if (hsbVals[0] * 360 < 62)
-			{
-				addHue = false;
-			}
-			else if (hsbVals[0] * 360 <= 240)
-			{
-				addHue = true;
-			}
-			
-			Color startColor = Color.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f, hsbVals[1], hsbVals[2]).getRGB());
-			Color endColor = Color.fromRgb(java.awt.Color.getHSBColor(addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f, hsbVals[1], hsbVals[2]).getRGB());
+			default:
+				int startColor = LegendaryTooltipsConfig.INSTANCE.getCustomBorderStartColor(frameLevel);
+				int endColor = LegendaryTooltipsConfig.INSTANCE.getCustomBorderEndColor(frameLevel);
 
-			return Pair.of(startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF));
+				if (startColor == -1)
+				{
+					startColor = defaults.getLeft();
+				}
+				if (endColor == -1)
+				{
+					endColor = defaults.getRight();
+				}
+				return Pair.of(startColor, endColor);
 		}
 
 		return defaults;
@@ -98,7 +105,10 @@ public class LegendaryTooltips
 	@SubscribeEvent
 	public static void onPreTooltipEvent(RenderTooltipEvent.Pre event)
 	{
-		TooltipDecor.setCachedLines(event.getLines());
+		if (LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()) != NO_BORDER)
+		{
+			TooltipDecor.setCachedLines(event.getLines());
+		}
 	}
 
 	@SubscribeEvent
@@ -132,6 +142,11 @@ public class LegendaryTooltips
 	@SubscribeEvent
 	public static void onPostTooltipEvent(RenderTooltipEvent.PostText event)
 	{
+		if (LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()) == NO_BORDER)
+		{
+			return;
+		}
+
 		// If tooltip shadows are enabled, draw one now.
 		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow.get())
 		{
