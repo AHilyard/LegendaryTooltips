@@ -40,6 +40,7 @@ public class LegendaryTooltipsConfig
 	private final ConfigValue<List<? extends Integer>> framePriorities;
 
 	private final List<ConfigValue<List<? extends String>>> itemSelectors = new ArrayList<ConfigValue<List<? extends String>>>(LegendaryTooltips.NUM_FRAMES);
+	private final ConfigValue<List<? extends String>> blacklist;
 
 	private static final Map<ItemStack, Integer> frameLevelCache = new HashMap<ItemStack, Integer>();
 
@@ -92,6 +93,8 @@ public class LegendaryTooltipsConfig
 		{
 			itemSelectors.add(build.defineListAllowEmpty(Arrays.asList(String.format("level%d_entries", i)), () -> new ArrayList<String>(), e -> Selectors.validateSelector((String)e) ));
 		}
+
+		blacklist = build.comment(" Enter blacklist selectors here using the same format as above.  Any items that match these selectors will NOT show a border.").defineListAllowEmpty(Arrays.asList("blacklist"), () -> Arrays.asList(), e -> Selectors.validateSelector((String)e));
 		
 		build.pop().pop().pop();
 	}
@@ -101,6 +104,17 @@ public class LegendaryTooltipsConfig
 		if (frameLevelCache.containsKey(item))
 		{
 			return frameLevelCache.get(item);
+		}
+
+		// First check the blacklist.
+		for (String entry : blacklist.get())
+		{
+			if (Selectors.itemMatches(item, entry))
+			{
+				// Add to cache.
+				frameLevelCache.put(item, LegendaryTooltips.NO_BORDER);
+				return LegendaryTooltips.NO_BORDER;
+			}
 		}
 
 		// Check each level from 0 to 3 for matches for this item, from most specific to least.

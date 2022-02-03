@@ -138,8 +138,8 @@ public class TooltipDecor
 		mc.getTextureManager().bind(TEXTURE_TOOLTIP_BORDERS);
 
 		// Grab the width and height of the texture.  This should be 128x128, but old resource packs could still be using 64x64.
-		int textureWidth = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
-		int textureHeight = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+		int textureWidth  = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+		int textureHeight = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
 
 		if (LegendaryTooltipsConfig.INSTANCE.shineEffect.get())
 		{
@@ -201,6 +201,5 @@ public class TooltipDecor
 		}
 
 		matrixStack.popPose();
-
 	}
 }

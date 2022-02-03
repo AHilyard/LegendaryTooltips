@@ -17,16 +17,12 @@ import com.anthonyhilyard.iceberg.util.ItemColor;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.FORGE, value = Dist.CLIENT)
 public class LegendaryTooltips
 {
-	@SuppressWarnings("unused")
-	public static final Logger LOGGER = LogManager.getLogger();
-
 	public static final int STANDARD = -1;
+	public static final int NO_BORDER = -2;
 	public static final int NUM_FRAMES = 16;
 
 	private static ItemStack lastTooltipItem = null;
