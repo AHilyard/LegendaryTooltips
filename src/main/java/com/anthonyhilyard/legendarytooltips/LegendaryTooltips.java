@@ -9,8 +9,9 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.server.packs.resources.SimpleReloadableResourceManager;
+import net.minecraft.server.packs.PackType;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.ChatFormatting;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
 import net.minecraftforge.api.ModLoadingContext;
+import net.minecraftforge.api.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.config.ModConfig;
 
 public class LegendaryTooltips implements ClientModInitializer
@@ -38,9 +40,6 @@ public class LegendaryTooltips implements ClientModInitializer
 	@Override
 	public void onInitializeClient()
 	{
-		// TODO: Load old .json5 config if found, parse and convert to toml, then rename to .json5.old.
-		// LegendaryTooltipsConfig.init();
-
 		ModLoadingContext.registerConfig(Loader.MODID, ModConfig.Type.COMMON, LegendaryTooltipsConfig.SPEC);
 
 		// Check for legacy config files to convert now.
@@ -51,11 +50,9 @@ public class LegendaryTooltips implements ClientModInitializer
 		RenderTooltipEvents.POSTEXT.register(LegendaryTooltips::onPostTooltipEvent);
 		RenderTickEvents.START.register(LegendaryTooltips::onRenderTick);
 
-		if (Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager resourceManager)
-		{
-			resourceManager.registerReloadListener(FrameResourceParser.INSTANCE);
-		}
-		
+		ModConfigEvent.RELOADING.register(LegendaryTooltipsConfig::onLoad);
+
+		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(FrameResourceParser.INSTANCE);
 	}
 
 	private static FrameDefinition getDefinitionColors(ItemStack item, int defaultStartBorder, int defaultEndBorder, int defaultBackground)

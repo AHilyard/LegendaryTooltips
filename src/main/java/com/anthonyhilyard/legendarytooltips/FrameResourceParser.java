@@ -16,14 +16,14 @@ import com.google.gson.JsonObject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.GsonHelper;
 
-public final class FrameResourceParser implements ResourceManagerReloadListener
+public final class FrameResourceParser implements SimpleSynchronousResourceReloadListener
 {
 	public static final FrameResourceParser INSTANCE = new FrameResourceParser();
 	private FrameResourceParser() { }
@@ -50,6 +50,8 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 		// 		}
 		// 	]
 		// }
+
+		LegendaryTooltipsConfig.reset();
 		
 		try
 		{
@@ -130,5 +132,7 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 		}
 		
 	}
-	
+
+	@Override
+	public ResourceLocation getFabricId() { return new ResourceLocation(Loader.MODID, "frame_definitions"); }
 }
