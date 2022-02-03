@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.2.2
+- Fixed a bug with non-square tooltip border textures.
+- Added blacklist configuration option.
+
 ### 1.2.1
 - Fixed a crash bug that could occur when then "borders match rarity" option was disabled.
 - Fixed a graphical glitch that could occur when custom borders are specified with a non-default texture size.

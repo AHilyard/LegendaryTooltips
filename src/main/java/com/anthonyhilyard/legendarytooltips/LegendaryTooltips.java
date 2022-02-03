@@ -20,15 +20,11 @@ import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameDefinit
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameSource;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 @Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.FORGE, value = Dist.CLIENT)
 public class LegendaryTooltips
 {
-	public static final Logger LOGGER = LogManager.getLogger();
-
 	public static final int STANDARD = -1;
+	public static final int NO_BORDER = -2;
 	public static final int NUM_FRAMES = 16;
 
 	private static ItemStack lastTooltipItem = null;
@@ -37,41 +33,50 @@ public class LegendaryTooltips
 	{
 		FrameDefinition result = LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(item);
 
-		// If the "match rarity" option is turned on, calculate some good-looking colors.
-		if (result.index() == STANDARD && LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
+		switch (result.index())
 		{
-			// First grab the item's name color.
-			TextColor rarityColor = ItemColor.getColorForItem(item, TextColor.fromLegacyFormat(ChatFormatting.WHITE));
+			case NO_BORDER:
+				result = new FrameDefinition(result.resource(), result.index(), defaultStartBorder, defaultEndBorder, defaultBackground, FrameSource.NONE, 0);
+				break;
 
-			// Convert the color from RGB to HSB for easier manipulation.
-			float[] hsbVals = new float[3];
-			java.awt.Color.RGBtoHSB((rarityColor.getValue() >> 16) & 0xFF, (rarityColor.getValue() >> 8) & 0xFF, (rarityColor.getValue() >> 0) & 0xFF, hsbVals);
-			boolean addHue = false;
-
-			// These hue ranges are arbitrarily decided.  I just think they look the best.
-			if (hsbVals[0] * 360 < 62)
-			{
-				addHue = false;
-			}
-			else if (hsbVals[0] * 360 <= 240)
-			{
-				addHue = true;
-			}
-			
-			// The start color will hue-shift by 0.6%, and the end will hue-shift the opposite direction by 4%.
-			// This gives a very nice looking gradient, while still matching the name color quite well.
-			float startHue = addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f;
-			float endHue = addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f;
-			
-			// Ensure values stay between 0 and 1.
-			startHue = (startHue + 1.0f) % 1.0f;
-			endHue = (endHue + 1.0f) % 1.0f;
-
-			TextColor startColor = TextColor.fromRgb(java.awt.Color.getHSBColor(startHue, hsbVals[1], hsbVals[2]).getRGB());
-			TextColor endColor = TextColor.fromRgb(java.awt.Color.getHSBColor(endHue, hsbVals[1], hsbVals[2]).getRGB());
-			TextColor backgroundColor = TextColor.fromRgb(java.awt.Color.getHSBColor(hsbVals[0], hsbVals[1] * 0.9f, 0.06f).getRGB());
-
-			result = new FrameDefinition(result.resource(), result.index(), startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF), backgroundColor.getValue() & (0xF0FFFFFF), FrameSource.NONE, 0);
+			case STANDARD:
+				// If the "match rarity" option is turned on, calculate some good-looking colors.
+				if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity.get())
+				{
+					// First grab the item's name color.
+					TextColor rarityColor = ItemColor.getColorForItem(item, TextColor.fromLegacyFormat(ChatFormatting.WHITE));
+		
+					// Convert the color from RGB to HSB for easier manipulation.
+					float[] hsbVals = new float[3];
+					java.awt.Color.RGBtoHSB((rarityColor.getValue() >> 16) & 0xFF, (rarityColor.getValue() >> 8) & 0xFF, (rarityColor.getValue() >> 0) & 0xFF, hsbVals);
+					boolean addHue = false;
+		
+					// These hue ranges are arbitrarily decided.  I just think they look the best.
+					if (hsbVals[0] * 360 < 62)
+					{
+						addHue = false;
+					}
+					else if (hsbVals[0] * 360 <= 240)
+					{
+						addHue = true;
+					}
+					
+					// The start color will hue-shift by 0.6%, and the end will hue-shift the opposite direction by 4%.
+					// This gives a very nice looking gradient, while still matching the name color quite well.
+					float startHue = addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f;
+					float endHue = addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f;
+					
+					// Ensure values stay between 0 and 1.
+					startHue = (startHue + 1.0f) % 1.0f;
+					endHue = (endHue + 1.0f) % 1.0f;
+		
+					TextColor startColor = TextColor.fromRgb(java.awt.Color.getHSBColor(startHue, hsbVals[1], hsbVals[2]).getRGB());
+					TextColor endColor = TextColor.fromRgb(java.awt.Color.getHSBColor(endHue, hsbVals[1], hsbVals[2]).getRGB());
+					TextColor backgroundColor = TextColor.fromRgb(java.awt.Color.getHSBColor(hsbVals[0], hsbVals[1] * 0.9f, 0.06f).getRGB());
+		
+					result = new FrameDefinition(result.resource(), result.index(), startColor.getValue() & (0xAAFFFFFF), endColor.getValue() & (0x44FFFFFF), backgroundColor.getValue() & (0xF0FFFFFF), FrameSource.NONE, 0);
+				}
+				break;
 		}
 
 		if (result.startBorder() == null)
@@ -117,12 +122,15 @@ public class LegendaryTooltips
 	@SubscribeEvent
 	public static void onGatherComponentsEvent(GatherComponents event)
 	{
-		int index = 0;
-		if (event instanceof GatherComponentsExtEvent)
+		if (LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(event.getItemStack()).index() != NO_BORDER)
 		{
-			index = ((GatherComponentsExtEvent)event).getIndex();
+			int index = 0;
+			if (event instanceof GatherComponentsExtEvent)
+			{
+				index = ((GatherComponentsExtEvent)event).getIndex();
+			}
+			TooltipDecor.setCachedLines(event.getTooltipElements(), index);
 		}
-		TooltipDecor.setCachedLines(event.getTooltipElements(), index);
 	}
 
 	@SubscribeEvent
@@ -159,6 +167,11 @@ public class LegendaryTooltips
 	@SubscribeEvent
 	public static void onPostTooltipEvent(RenderTooltipExtEvent.Post event)
 	{
+		if (LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(event.getItemStack()).index() == NO_BORDER)
+		{
+			return;
+		}
+
 		// If tooltip shadows are enabled, draw one now.
 		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow.get())
 		{

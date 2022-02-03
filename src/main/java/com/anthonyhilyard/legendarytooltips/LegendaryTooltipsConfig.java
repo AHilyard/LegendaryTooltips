@@ -45,7 +45,8 @@ public class LegendaryTooltipsConfig
 	}
 
 	public record FrameDefinition(ResourceLocation resource, int index, Integer startBorder, Integer endBorder, Integer background, FrameSource source, int priority) {};
-	private static final FrameDefinition NO_BORDER = new FrameDefinition(null, LegendaryTooltips.STANDARD, null, null, null, FrameSource.NONE, 0);
+	private static final FrameDefinition STANDARD_BORDER = new FrameDefinition(null, LegendaryTooltips.STANDARD, null, null, null, FrameSource.NONE, 0);
+	private static final FrameDefinition NO_BORDER = new FrameDefinition(null, LegendaryTooltips.NO_BORDER, null, null, null, FrameSource.NONE, 0);
 
 	public static final TextColor DEFAULT_START_COLOR = TextColor.fromRgb(0xFF996922);
 	public static final TextColor DEFAULT_END_COLOR = TextColor.fromRgb(0xFF5A3A1D);
@@ -65,6 +66,7 @@ public class LegendaryTooltipsConfig
 	private final ConfigValue<List<? extends Integer>> framePriorities;
 	
 	private static final List<ConfigValue<List<? extends String>>> itemSelectors = new ArrayList<ConfigValue<List<? extends String>>>(LegendaryTooltips.NUM_FRAMES);
+	private final ConfigValue<List<? extends String>> blacklist;
 
 	private static final Map<FrameDefinition, Set<String>> customFrameDefinitions = new LinkedHashMap<>();
 
@@ -146,6 +148,7 @@ public class LegendaryTooltipsConfig
 		{
 			itemSelectors.add(build.defineListAllowEmpty(Arrays.asList(String.format("level%d_entries", i)), () -> new ArrayList<String>(), e -> Selectors.validateSelector((String)e) ));
 		}
+		blacklist = build.comment(" Enter blacklist selectors here using the same format as above. Any items that match these selectors will NOT show a border.").defineListAllowEmpty(Arrays.asList("blacklist"), () -> Arrays.asList(), e -> Selectors.validateSelector((String)e));
 
 		build.pop().comment(" Set border priorities here.  This should be a list of numbers that correspond to border levels, with numbers coming first being higher priority.  Optionally, -1 can be inserted to indicate relative priority of data and api-defined borders.  If you don't know what that means, don't worry about it.").push("priorities");
 		framePriorities = build.defineList("priorities", () -> IntStream.rangeClosed(0, LegendaryTooltips.NUM_FRAMES - 1).boxed().collect(Collectors.toList()), e -> ((int)e >= -1 && (int)e < LegendaryTooltips.NUM_FRAMES));
@@ -260,14 +263,25 @@ public class LegendaryTooltipsConfig
 
 		if (item == null)
 		{
-			frameDefinitionCache.put(item, NO_BORDER);
-			return NO_BORDER;
+			frameDefinitionCache.put(item, STANDARD_BORDER);
+			return STANDARD_BORDER;
 		}
 
 		if (startColors[0] == null)
 		{
 			// Somehow colors haven't been resolved yet, so do it now.
 			resolveColors();
+		}
+
+		// First check the blacklist.
+		for (String entry : blacklist.get())
+		{
+			if (Selectors.itemMatches(item, entry))
+			{
+				// Add to cache.
+				frameDefinitionCache.put(item, NO_BORDER);
+				return NO_BORDER;
+			}
 		}
 
 		List<Integer> priorities = framePriorities.get().stream().map(i -> Integer.valueOf(i)).collect(Collectors.toCollection(ArrayList::new));
@@ -322,8 +336,8 @@ public class LegendaryTooltipsConfig
 		}
 		
 		// Add to cache.
-		frameDefinitionCache.put(item, NO_BORDER);
-		return NO_BORDER;
+		frameDefinitionCache.put(item, STANDARD_BORDER);
+		return STANDARD_BORDER;
 	}
 
 	@SubscribeEvent
