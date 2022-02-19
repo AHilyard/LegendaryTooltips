@@ -1,5 +1,8 @@
 # Changelog
 
+### 1.2.4
+- Fixed a bug that caused a file not found error on startup.
+
 ### 1.2.3
 - Fixed a bug with non-square tooltip border textures.
 - Added blacklist configuration option.
