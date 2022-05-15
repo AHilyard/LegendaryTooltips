@@ -33,6 +33,7 @@ public class LegendaryTooltipsConfig
 	public final BooleanValue bordersMatchRarity;
 	public final BooleanValue tooltipShadow;
 	public final BooleanValue shineEffect;
+	public final BooleanValue compatibilityMode;
 
 	public final LongValue[] startColors = new LongValue[LegendaryTooltips.NUM_FRAMES];
 	public final LongValue[] endColors = new LongValue[LegendaryTooltips.NUM_FRAMES];
@@ -60,6 +61,7 @@ public class LegendaryTooltipsConfig
 		bordersMatchRarity = build.comment(" If enabled, tooltip border colors will match item rarity colors (except for custom borders).").define("borders_match_rarity", true);
 		tooltipShadow = build.comment(" If enabled, tooltips will display a drop shadow.").define("tooltip_shadow", true);
 		shineEffect = build.comment(" If enabled, items showing a custom border will have a special shine effect when hovered over.").define("shine_effect", true);
+		compatibilityMode = build.comment(" If enabled, utilizes some workarounds to improve compatibility with mods that alter tooltips.").define("compatibility_mode", false);
 
 		build.pop().comment(String.format(" Custom borders are broken into %d \"levels\", with level 0 being intended for the \"best\" or \"rarest\" items. Only level 0 has a custom border built-in, but others can be added with resource packs.", LegendaryTooltips.NUM_FRAMES)).push("custom_borders");
 		build.comment(" The start and end border colors of each levels' borders. Note that they can be entered as a hex code in the format \"0xAARRGGBB\" or \"0xRRGGBB\" for convenience.").push("colors");

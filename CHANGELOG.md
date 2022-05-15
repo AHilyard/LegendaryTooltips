@@ -1,5 +1,8 @@
 # Changelog
 
+### 1.1.7
+- Added "compatibility mode" config option to turn on an experimental workaround to improve compatibility with mods that alter tooltips.
+
 ### 1.1.6
 - Fixed a bug with non-square tooltip border textures.
 - Added blacklist configuration option.

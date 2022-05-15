@@ -168,5 +168,10 @@ public class LegendaryTooltips
 		{
 			TooltipDecor.drawBorder(event.getMatrixStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()), comparison);
 		}
+
+		if (LegendaryTooltipsConfig.INSTANCE.compatibilityMode.get())
+		{
+			event.getMatrixStack().translate(0,0,500);
+		}
 	}
 }
