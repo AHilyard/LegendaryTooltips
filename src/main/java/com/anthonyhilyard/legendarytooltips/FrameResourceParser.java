@@ -53,9 +53,9 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 		
 		try
 		{
-			for (Resource resource : resourceManager.getResources(new ResourceLocation(Loader.MODID, "frame_definitions.json")))
+			for (Resource resource : resourceManager.getResourceStack(new ResourceLocation(Loader.MODID, "frame_definitions.json")))
 			{
-				try (InputStream inputStream = resource.getInputStream())
+				try (InputStream inputStream = resource.open())
 				{
 					JsonObject rootObject = GsonHelper.parse(new InputStreamReader(inputStream), true);
 
@@ -128,7 +128,5 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 		{
 			Loader.LOGGER.warn("An error occurred while parsing frame definitions data:\n {}", ExceptionUtils.getStackTrace(e));
 		}
-		
 	}
-	
 }

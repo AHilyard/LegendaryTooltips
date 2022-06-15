@@ -48,26 +48,18 @@ repositories {
 	}
 }
 
-sourceSets {
-	main {
-		resources {
-			srcDir 'src/generated/resources'
-		}
-	}
-}
-
 dependencies {
 	minecraft "net.minecraftforge:forge:${project.mcVersion}-${project.forgeVersion}"
 	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-	implementation fg.deobf("curse.maven:iceberg-520110:3586154")
+	implementation fg.deobf("curse.maven:iceberg-520110:3832980")
 }
 
 jar {
 	manifest {
 		attributes(["Specification-Title": project.name,
 					"Specification-Vendor": project.author,
-					"Specification-Version": "24.0",
+					"Specification-Version": project.version,
 					"Implementation-Title": project.name,
 					"Implementation-Version": project.version,
 					"Implementation-Vendor" : project.author,

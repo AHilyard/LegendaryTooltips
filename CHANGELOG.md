@@ -1,5 +1,9 @@
 # Changelog
 
+### 1.2.5
+- Fixed a bug that caused excessive configuration file backups.
+- First Forge 1.19 release.
+
 ### 1.2.4
 - Fixed a bug that caused a file not found error on startup on Fabric.
 - Fixed typo causing mod version string to be incorrect on Forge.
