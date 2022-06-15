@@ -1,8 +1,16 @@
 # Changelog
 
-### 1.2.2
+### 1.2.4
+- Fixed a bug that caused a file not found error on startup on Fabric.
+- Fixed typo causing mod version string to be incorrect on Forge.
+
+### 1.2.3
 - Fixed a bug with non-square tooltip border textures.
 - Added blacklist configuration option.
+
+### 1.2.2
+- Fixed a bug that prevented resource pack frame definitions files from beings loaded on Fabric.
+- Fixed a bug that prevented configuration file changes from being detected while in game on Fabric.
 
 ### 1.2.1
 - Fixed a crash bug that could occur when then "borders match rarity" option was disabled.

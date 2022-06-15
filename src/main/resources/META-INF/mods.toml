@@ -1,10 +1,10 @@
 modLoader="javafml"
-loaderVersion="[39,)"
+loaderVersion="[40,)"
 license="CC BY-NC-ND 4.0"
 
 [[mods]]
 modId="legendarytooltips"
-version="${file.jarVersion}}"
+version="${file.jarVersion}"
 displayName="Legendary Tooltips"
 displayURL="https://anthonyhilyard.com/"
 updateJSONURL="https://mc-curse-update-checker.herokuapp.com/532127"
@@ -15,21 +15,21 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="forge"
 	mandatory=true
-	versionRange="[39,)"
+	versionRange="[40.1,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="minecraft"
 	mandatory=true
-	versionRange="[1.18.1,1.19)"
+	versionRange="[1.18.2,1.19)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.0.33,)"
+	versionRange="[1.0.41,)"
 	ordering="NONE"
 	side="BOTH"
 

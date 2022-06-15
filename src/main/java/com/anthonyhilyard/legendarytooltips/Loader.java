@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.packs.resources.SimpleReloadableResourceManager;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.IExtensionPoint;
@@ -27,7 +27,7 @@ public class Loader
 			MinecraftForge.EVENT_BUS.register(LegendaryTooltips.class);
 			ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LegendaryTooltipsConfig.SPEC);
 
-			if (Minecraft.getInstance().getResourceManager() instanceof SimpleReloadableResourceManager resourceManager)
+			if (Minecraft.getInstance().getResourceManager() instanceof ReloadableResourceManager resourceManager)
 			{
 				resourceManager.registerReloadListener(FrameResourceParser.INSTANCE);
 			}
