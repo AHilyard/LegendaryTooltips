@@ -32,7 +32,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricVersion}"
 
-	modImplementation 'curse.maven:forgeconfigapiport-547434:3562302'
+	modImplementation 'curse.maven:forgeconfigapiport-547434:3671141'
 	implementation 'com.electronwill.night-config:core:3.6.3'
 	implementation 'com.electronwill.night-config:toml:3.6.3'
 
