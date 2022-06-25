@@ -16,11 +16,9 @@ import com.google.gson.JsonObject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
@@ -57,9 +55,9 @@ public final class FrameResourceParser implements SimpleSynchronousResourceReloa
 		
 		try
 		{
-			for (Resource resource : resourceManager.getResources(new ResourceLocation(Loader.MODID, "frame_definitions.json")))
+			for (Resource resource : resourceManager.getResourceStack(new ResourceLocation(Loader.MODID, "frame_definitions.json")))
 			{
-				try (InputStream inputStream = resource.getInputStream())
+				try (InputStream inputStream = resource.open())
 				{
 					JsonObject rootObject = GsonHelper.parse(new InputStreamReader(inputStream), true);
 

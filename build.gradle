@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.10-SNAPSHOT'
+	id 'fabric-loom' version '0.12-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -16,13 +16,10 @@ repositories {
 		name = "CurseMaven"
 		url "https://www.cursemaven.com"
 	}
-}
 
-sourceSets {
-	main {
-		resources {
-			srcDir 'src/generated/resources'
-		}
+	maven {
+		name = "Fuzs Mod Resources"
+		url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
 	}
 }
 
@@ -32,11 +29,8 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricVersion}"
 
-	modImplementation 'curse.maven:forgeconfigapiport-547434:3671141'
-	implementation 'com.electronwill.night-config:core:3.6.3'
-	implementation 'com.electronwill.night-config:toml:3.6.3'
-
-	modImplementation "curse.maven:iceberg-539382:3595404"
+	modImplementation "net.minecraftforge:forgeconfigapiport-fabric:4.0.0"
+	modImplementation "curse.maven:iceberg-539382:3832794"
 }
 
 loom {
@@ -62,12 +56,12 @@ java {
 
 jar {
 	manifest {
-		attributes(["Specification-Title": project.name,
-					"Specification-Vendor": project.author,
-					"Specification-Version": "24.0",
-					"Implementation-Title": project.name,
-					"Implementation-Version": project.version,
-					"Implementation-Vendor" : project.author,
+		attributes(["Specification-Title":		project.name,
+					"Specification-Vendor":		project.author,
+					"Specification-Version":	project.version,
+					"Implementation-Title":		project.name,
+					"Implementation-Version":	project.version,
+					"Implementation-Vendor" :	project.author,
 					"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
 	}
 }

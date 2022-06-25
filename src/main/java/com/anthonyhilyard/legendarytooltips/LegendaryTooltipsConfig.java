@@ -185,10 +185,10 @@ public class LegendaryTooltipsConfig
 	public static TextColor getColor(Object value)
 	{
 		TextColor color = null;
-		if (value instanceof String)
+		if (value instanceof String string)
 		{
 			// Parse string color.
-			String colorString = ((String)value).toLowerCase().replace("0x", "").replace("#", "");
+			String colorString = string.toLowerCase().replace("0x", "").replace("#", "");
 			color = TextColor.parseColor(colorString);
 			if (color == null)
 			{
@@ -198,11 +198,9 @@ public class LegendaryTooltipsConfig
 				}
 			}
 		}
-		else if (value instanceof Long)
+		else if (value instanceof Number number)
 		{
-			// Three casts in a row, I think that's a record.  Woo!
-			int colorValue = (int)((long)(Long)value & 0xFFFFFFFFL);
-			color = TextColor.fromRgb(colorValue);
+			color = TextColor.fromRgb(number.intValue());
 		}
 
 		// If alpha is 0 but the color isn't 0x00000000, assume alpha is intended to be 0xFF.
@@ -355,7 +353,7 @@ public class LegendaryTooltipsConfig
 		resolveColors();
 	}
 
-	public static void onLoad(ModConfig config)
+	public static void onReload(ModConfig config)
 	{
 		if (config.getModId().equals(Loader.MODID))
 		{

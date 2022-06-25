@@ -31,9 +31,9 @@
 	"depends": {
 		"fabricloader": ">=0.12.8",
 		"fabric": "*",
-		"minecraft": ">=1.18.2",
+		"minecraft": "~1.19",
 		"java": ">=17",
-		"forgeconfigapiport": ">=3.2",
+		"forgeconfigapiport": ">=4.0",
 		"iceberg": ">=1.0.38"
 	},
 	"suggests": {

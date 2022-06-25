@@ -51,7 +51,7 @@ public class LegendaryTooltips implements ClientModInitializer
 		RenderTooltipEvents.POSTEXT.register(LegendaryTooltips::onPostTooltipEvent);
 		RenderTickEvents.START.register(LegendaryTooltips::onRenderTick);
 
-		ModConfigEvent.RELOADING.register(LegendaryTooltipsConfig::onLoad);
+		ModConfigEvent.RELOADING.register(LegendaryTooltipsConfig::onReload);
 
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(FrameResourceParser.INSTANCE);
 	}
