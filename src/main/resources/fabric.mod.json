@@ -37,7 +37,8 @@
 		"iceberg": ">=1.0.38"
 	},
 	"suggests": {
-		"equipmentcompare": ">=1.2.10"
+		"equipmentcompare": ">=1.3.0",
+		"roughlyenoughitems": ">=9.0.493"
 	},
 	"custom": {
 		"modupdater": {

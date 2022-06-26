@@ -2,8 +2,10 @@
 	"required": true,
 	"package": "com.anthonyhilyard.legendarytooltips.mixin",
 	"compatibilityLevel": "JAVA_16",
+	"plugin": "com.anthonyhilyard.legendarytooltips.mixin.MixinConfig",
 	"client": [
-		"ScreenMixin"
+		"ScreenMixin",
+		"RoughlyEnoughItemsScreenOverlayImplImplMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -1,2 +1,3 @@
 accessWidener	v1 named
 accessible    field    net/minecraft/client/gui/screens/inventory/AbstractContainerScreen    hoveredSlot    Lnet/minecraft/world/inventory/Slot;
+accessible    field    net/minecraft/client/gui/screens/Screen    font    Lnet/minecraft/client/gui/Font;

@@ -1,5 +1,8 @@
 # Changelog
 
+### 1.2.6
+- Added support for REI.
+
 ### 1.2.5
 - Fixed a bug that caused excessive configuration file backups.
 - First Forge 1.19 release.

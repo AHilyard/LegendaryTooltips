@@ -31,6 +31,7 @@ dependencies {
 
 	modImplementation "net.minecraftforge:forgeconfigapiport-fabric:4.0.0"
 	modImplementation "curse.maven:iceberg-539382:3832794"
+	modImplementation "curse.maven:roughlyenoughitems-310111:3846514"
 }
 
 loom {
