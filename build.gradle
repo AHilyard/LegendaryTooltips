@@ -18,14 +18,6 @@ repositories {
 	}
 }
 
-sourceSets {
-	main {
-		resources {
-			srcDir 'src/generated/resources'
-		}
-	}
-}
-
 dependencies {
 	minecraft "com.mojang:minecraft:${project.mcVersion}"
 	mappings loom.officialMojangMappings()
@@ -62,12 +54,12 @@ java {
 
 jar {
 	manifest {
-		attributes(["Specification-Title": project.name,
-					"Specification-Vendor": project.author,
-					"Specification-Version": "24.0",
-					"Implementation-Title": project.name,
-					"Implementation-Version": project.version,
-					"Implementation-Vendor" : project.author,
+		attributes(["Specification-Title":		project.name,
+					"Specification-Vendor":		project.author,
+					"Specification-Version":	project.version,
+					"Implementation-Title":		project.name,
+					"Implementation-Version":	project.version,
+					"Implementation-Vendor" :	project.author,
 					"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
 	}
 }

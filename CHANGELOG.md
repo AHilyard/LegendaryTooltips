@@ -1,5 +1,8 @@
 # Changelog
 
+### 1.2.5
+- Fixed a bug that caused excessive configuration file backups.
+
 ### 1.2.4
 - Fixed a bug that caused a file not found error on startup.
 
