@@ -48,14 +48,6 @@ repositories {
 	}
 }
 
-sourceSets {
-	main {
-		resources {
-			srcDir 'src/generated/resources'
-		}
-	}
-}
-
 dependencies {
 	minecraft "net.minecraftforge:forge:${project.mcVersion}-${project.forgeVersion}"
 	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
@@ -65,12 +57,12 @@ dependencies {
 
 jar {
 	manifest {
-		attributes(["Specification-Title": project.name,
-					"Specification-Vendor": project.author,
-					"Specification-Version": "24.0",
-					"Implementation-Title": project.name,
-					"Implementation-Version": project.version,
-					"Implementation-Vendor" : project.author,
+		attributes(["Specification-Title":		project.name,
+					"Specification-Vendor":		project.author,
+					"Specification-Version":	project.version,
+					"Implementation-Title":		project.name,
+					"Implementation-Version":	project.version,
+					"Implementation-Vendor" :	project.author,
 					"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
 					"MixinConfigs": "${project.name.toLowerCase()}.mixins.json"],)
 	}
