@@ -11,7 +11,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import com.mojang.math.Matrix4f;
-import net.minecraftforge.client.gui.GuiUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -74,13 +73,13 @@ public class TooltipDecor
 		
 		poseStack.pushPose();
 		Matrix4f mat = poseStack.last().pose();
-		GuiUtils.drawGradientRect(mat, 390, x - 1,         y + height + 4, x + width + 4, y + height + 5, shadowColor, shadowColor);
-		GuiUtils.drawGradientRect(mat, 390, x + width + 4, y - 1,          x + width + 5, y + height + 5, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(mat, 390, x - 1,         y + height + 4, x + width + 4, y + height + 5, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(mat, 390, x + width + 4, y - 1,          x + width + 5, y + height + 5, shadowColor, shadowColor);
 
-		GuiUtils.drawGradientRect(mat, 390, x + width + 3, y + height + 3, x + width + 4, y + height + 4, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(mat, 390, x + width + 3, y + height + 3, x + width + 4, y + height + 4, shadowColor, shadowColor);
 
-		GuiUtils.drawGradientRect(mat, 390, x,             y + height + 5, x + width + 5, y + height + 6, shadowColor, shadowColor);
-		GuiUtils.drawGradientRect(mat, 390, x + width + 5, y,              x + width + 6, y + height + 5, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(mat, 390, x,             y + height + 5, x + width + 5, y + height + 6, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(mat, 390, x + width + 5, y,              x + width + 6, y + height + 5, shadowColor, shadowColor);
 		poseStack.popPose();
 	}
 
@@ -101,10 +100,10 @@ public class TooltipDecor
 			poseStack.pushPose();
 			Matrix4f mat = poseStack.last().pose();
 
-			GuiUtils.drawGradientRect(mat, 400, x - 3, y - 3 + 1, x - 3 + 1, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
-			GuiUtils.drawGradientRect(mat, 400, x + width + 2, y - 3 + 1, x + width + 3, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
-			GuiUtils.drawGradientRect(mat, 400, x - 3, y - 3, x + width + 3, y - 3 + 1, currentTooltipBorderStart, currentTooltipBorderStart);
-			GuiUtils.drawGradientRect(mat, 400, x - 3, y + height + 2, x + width + 3, y + height + 3, currentTooltipBorderEnd, currentTooltipBorderEnd);
+			GuiHelper.drawGradientRect(mat, 400, x - 3, y - 3 + 1, x - 3 + 1, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
+			GuiHelper.drawGradientRect(mat, 400, x + width + 2, y - 3 + 1, x + width + 3, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
+			GuiHelper.drawGradientRect(mat, 400, x - 3, y - 3, x + width + 3, y - 3 + 1, currentTooltipBorderStart, currentTooltipBorderStart);
+			GuiHelper.drawGradientRect(mat, 400, x - 3, y + height + 2, x + width + 3, y + height + 3, currentTooltipBorderEnd, currentTooltipBorderEnd);
 			poseStack.popPose();
 
 			// Now draw a separator under the "equipped" badge.
@@ -178,8 +177,8 @@ public class TooltipDecor
 				int verticalMin = y - 3 + 1;
 				int verticalMax = y + height + 3 - 1;
 				int verticalInterval = (int)Mth.lerp(interval * interval, verticalMax, verticalMin);
-				GuiUtils.drawGradientRect(mat, 402, x - 3, Math.max(verticalInterval - 12, verticalMin), x - 3 + 1, Math.min(verticalInterval, verticalMax), 0x00FFFFFF, 0x00FFFFFF | alpha);
-				GuiUtils.drawGradientRect(mat, 402, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
+				GuiHelper.drawGradientRect(mat, 402, x - 3, Math.max(verticalInterval - 12, verticalMin), x - 3 + 1, Math.min(verticalInterval, verticalMax), 0x00FFFFFF, 0x00FFFFFF | alpha);
+				GuiHelper.drawGradientRect(mat, 402, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
 			}
 			
 			poseStack.popPose();

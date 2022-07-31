@@ -44,7 +44,7 @@ minecraft {
 repositories {
 	maven {
 		name = "CurseMaven"
-		url "https://www.cursemaven.com"
+		url = "https://www.cursemaven.com"
 	}
 }
 
@@ -52,17 +52,18 @@ dependencies {
 	minecraft "net.minecraftforge:forge:${project.mcVersion}-${project.forgeVersion}"
 	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-	implementation fg.deobf("curse.maven:iceberg-520110:3832980")
+	implementation fg.deobf("curse.maven:iceberg-520110:3898603")
+	implementation fg.deobf("curse.maven:prism-638111:3910027")
 }
 
 jar {
 	manifest {
-		attributes(["Specification-Title": project.name,
-					"Specification-Vendor": project.author,
-					"Specification-Version": project.version,
-					"Implementation-Title": project.name,
-					"Implementation-Version": project.version,
-					"Implementation-Vendor" : project.author,
+		attributes(["Specification-Title":		project.name,
+					"Specification-Vendor":		project.author,
+					"Specification-Version":	project.version,
+					"Implementation-Title":		project.name,
+					"Implementation-Version":	project.version,
+					"Implementation-Vendor" :	project.author,
 					"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
 					"MixinConfigs": "${project.name.toLowerCase()}.mixins.json"],)
 	}

@@ -24,7 +24,12 @@
 		//	// The end color for this border.  Can be specified as a string or integer.  Optional, defaults to 0xFF5A3A1D.
 		//	"endColor": "red",
 		//	// The background color for this border.  Can be specified as a string or integer.  Optional, defaults to 0xF0160A00.
+		//	// Will be ignored if bgStartColor and bgEndColor are specified.
 		//	"bgColor": "#222233",
+		//	// The start background color for this border.  Can be specified as a string or integer.  Optional, defaults to 0xF0160A00.
+		//	"bgStartColor": "#222233",
+		//	// The end background color for this border.  Can be specified as a string or integer.  Optional, defaults to 0xF0160A00.
+		//	"bgEndColor": "#222233",
 		//	// The priority for this frame definition.  Any integer value is accepted, higher numbers are higher priority.  Optional, defaults to 0.
 		//	"priority": 0,
 		//	// A list of selectors for this border to match against.  Required.  See configuration file for details on available selectors.
