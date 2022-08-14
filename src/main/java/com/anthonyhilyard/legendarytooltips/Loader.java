@@ -25,6 +25,10 @@ public class Loader
 		{
 			new LegendaryTooltips();
 			MinecraftForge.EVENT_BUS.register(LegendaryTooltips.class);
+
+			// Check for legacy config files to convert now.
+			LegacyConfigConverter.convert();
+
 			ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LegendaryTooltipsConfig.SPEC);
 
 			if (Minecraft.getInstance().getResourceManager() instanceof ReloadableResourceManager resourceManager)

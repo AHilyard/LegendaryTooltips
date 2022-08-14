@@ -44,7 +44,7 @@ minecraft {
 repositories {
 	maven {
 		name = "CurseMaven"
-		url "https://www.cursemaven.com"
+		url = "https://www.cursemaven.com"
 	}
 }
 
@@ -53,6 +53,7 @@ dependencies {
 	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
 	implementation fg.deobf("curse.maven:iceberg-520110:3586154")
+	implementation fg.deobf("curse.maven:prism-638111:3933410")
 }
 
 jar {
