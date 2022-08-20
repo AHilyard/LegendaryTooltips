@@ -7,7 +7,7 @@ modId="legendarytooltips"
 version="${file.jarVersion}"
 displayName="Legendary Tooltips"
 displayURL="https://anthonyhilyard.com/"
-updateJSONURL="https://mc-curse-update-checker.herokuapp.com/532127"
+updateJSONURL="https://mc-update-check.anthonyhilyard.com/532127"
 logoFile="icon.png"
 authors="Grend"
 description='''Gives rare items a fancy tooltip and adds additional tooltip configuration options.'''
@@ -15,7 +15,7 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="forge"
 	mandatory=true
-	versionRange="[36,)"
+	versionRange="[36.2,)"
 	ordering="NONE"
 	side="BOTH"
 
@@ -29,13 +29,20 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.0.26,)"
+	versionRange="[1.0.45,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="equipmentcompare"
 	mandatory=false
-	versionRange="[1.2.3,)"
+	versionRange="[1.3.2,)"
+	ordering="NONE"
+	side="BOTH"
+
+[[dependencies.legendarytooltips]]
+	modId="prism"
+	mandatory=true
+	versionRange="[1.0.1,)"
 	ordering="NONE"
 	side="BOTH"

@@ -4,6 +4,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ExtensionPoint;
@@ -25,7 +27,17 @@ public class Loader
 		{
 			new LegendaryTooltips();
 			MinecraftForge.EVENT_BUS.register(LegendaryTooltips.class);
+
+			// Check for legacy config files to convert now.
+			LegacyConfigConverter.convert();
+
 			ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LegendaryTooltipsConfig.SPEC);
+
+			if (Minecraft.getInstance().getResourceManager() instanceof IReloadableResourceManager)
+			{
+				IReloadableResourceManager resourceManager = (IReloadableResourceManager)Minecraft.getInstance().getResourceManager();
+				resourceManager.registerReloadListener(FrameResourceParser.INSTANCE);
+			}
 		}
 
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));

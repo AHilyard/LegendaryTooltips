@@ -1,0 +1,39 @@
+{
+	// Example frame_definitions.json format.
+	// This format may be used to specify custom frame definitions in resource packs or mods without requiring Legendary Tooltips as a
+	// dependency.  Simply uncomment the lines within the definitions list, replace placeholders with desired values, and place the
+	// file at assets/legendarytooltips/frame_definitions.json.  It should be automatically loaded and handled by Legendary Tooltips.
+	
+	// Border priority
+	// The priority of data-defined and api-defined borders can be specified using the priority value in each border definition.  Higher
+	// values will be checked for matches first.
+	// For multiple potentially-overlapping border configurations with the same priority value, the order in which borders are configured
+	// will be used instead.  For multiple resource packs/mods that specify potentially-overlapping border configurations with the same
+	// priority value, resource pack and mod load order may come into play.  Resource pack order can be specified by the end-user, whereas
+	// mod load order can be controlled by mod authors.  Finally, note that end-users may configure the priority of ALL data/api-defined
+	// borders in relation to locally-configured borders.
+
+	"definitions": [
+		// {
+		//	// The resource location of the image used for this border.  Optional, defaults to standard border resource.
+		//	"image": "legendarytooltips:textures/gui/tooltip_borders.png",
+		//	// The index of this border within the above resource.  Optional, defaults to 0.
+		//	"index": 0,
+		//	// The start color for this border.  Can be specified as a string or integer.  Optional, defaults to 0xFF996922.
+		//	"startColor": 0xFF00FF,
+		//	// The end color for this border.  Can be specified as a string or integer.  Optional, defaults to 0xFF5A3A1D.
+		//	"endColor": "red",
+		//	// The background color for this border.  Can be specified as a string or integer.  Optional, defaults to 0xF0160A00.
+		//	// Will be ignored if bgStartColor and bgEndColor are specified.
+		//	"bgColor": "#222233",
+		//	// The start background color for this border.  Can be specified as a string or integer.  Optional, defaults to 0xF0160A00.
+		//	"bgStartColor": "#222233",
+		//	// The end background color for this border.  Can be specified as a string or integer.  Optional, defaults to 0xF0160A00.
+		//	"bgEndColor": "#222233",
+		//	// The priority for this frame definition.  Any integer value is accepted, higher numbers are higher priority.  Optional, defaults to 0.
+		//	"priority": 0,
+		//	// A list of selectors for this border to match against.  Required.  See configuration file for details on available selectors.
+		//	"selectors": [ "stick", "oak_planks" ]
+		// }
+	]
+}

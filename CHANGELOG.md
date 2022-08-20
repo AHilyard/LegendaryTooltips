@@ -1,5 +1,63 @@
 # Changelog
 
+### 1.3.1
+- Fixed a bug that caused data-defined custom frames to persist after frame definitions files were removed.
+- Fixed a bug that sometimes caused separator lines under item titles to not render.
+- Fixed a bug that caused legacy configuration conversion to fail.
+- Removed compatibility mode configuration option. (Compatibility is now built-in)
+
+### 1.3.0
+- All color handling is now handled by Prism library.
+  - Now supports web colors for easier color definitions.
+  - Now supports animated colors for both borders and backgrounds.
+  - Now supports automatic border colors, which is the new default.  This means any border images can have automatically determined border and background colors that match the image.
+- The color section in the configuration file is now in a more compact format.  Configuration files in the old format will be automatically converted.
+- Both start and end background colors can now be specified separately.
+
+### 1.2.5
+- Fixed a bug that caused excessive configuration file backups.
+- First Forge 1.19 release.
+
+### 1.2.4
+- Fixed a bug that caused a file not found error on startup on Fabric.
+- Fixed typo causing mod version string to be incorrect on Forge.
+
+### 1.2.3
+- Fixed a bug with non-square tooltip border textures.
+- Added blacklist configuration option.
+
+### 1.2.2
+- Fixed a bug that prevented resource pack frame definitions files from beings loaded on Fabric.
+- Fixed a bug that prevented configuration file changes from being detected while in game on Fabric.
+
+### 1.2.1
+- Fixed a crash bug that could occur when then "borders match rarity" option was disabled.
+- Fixed a graphical glitch that could occur when custom borders are specified with a non-default texture size.
+
+### 1.2.0
+#### Configuration Improvements
+
+- Added documentation block to top of config file.
+- Reordered config file to follow a more logical order.
+- Tooltip background colors can now be configured.
+- All color values can now be optionally specified as strings (color names or hex codes).
+
+#### New Features
+
+- Added tooltip title centering option, which is on by default.
+- Added minimum width enforcement option, which is off by default.
+- Added new custom frame definition functionality for mod-defined borders.
+  - Mod authors can use this code-based method to add any number of entirely custom borders to items.
+- Added new custom frame definition functionality that can be included in resource packs.
+  - Mod authors or resource pack authors can use this data-based method to add any number of entirely custom borders to items.
+
+#### Bug Fixes
+
+- Fixed a bug where tooltip shadows would not match the height of Equipment Compare comparison tooltips.
+- Fixed a crash bug caused by certain tooltip border colors.
+- Fixed a bug where creative inventory tab tooltips would render separators outside of the tooltip.
+- Fixed a bug where separators would sometimes draw in the wrong place when comparing items with Equipment Compare.
+
 ### 1.1.7
 - Added "compatibility mode" config option to turn on an experimental workaround to improve compatibility with mods that alter tooltips.
 

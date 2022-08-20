@@ -1,16 +1,24 @@
 buildscript {
 	repositories {
 		maven { url = 'https://files.minecraftforge.net/maven' }
+		maven { url = 'https://repo.spongepowered.org/maven' }
 	}
 	dependencies {
-		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+		classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
 	}
 }
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'eclipse'
 
 archivesBaseName = project.name + '-' + project.mcVersion
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+
+mixin {
+	add sourceSets.main, "${project.name.toLowerCase()}.refmap.json"
+}
 
 minecraft {
 	mappings channel: 'official', version: project.mcVersion
@@ -39,28 +47,23 @@ repositories {
 	}
 }
 
-sourceSets {
-	main {
-		resources {
-			srcDir 'src/generated/resources'
-		}
-	}
-}
-
 dependencies {
-	minecraft 'net.minecraftforge:forge:' + project.properties.mcVersion + '-' + forgeVersion
+	minecraft 'net.minecraftforge:forge:' + project.mcVersion + '-' + project.forgeVersion
+	annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
 
-	compile 'curse.maven:iceberg-520110:3537263'
+	implementation fg.deobf("curse.maven:iceberg-520110:3943132")
+	implementation fg.deobf("curse.maven:prism-638111:3933561")
 }
 
 jar {
 	manifest {
-		attributes(["Specification-Title": project.name,
-					"Specification-Vendor": project.author,
-					"Specification-Version": "24.0",
-					"Implementation-Title": project.name,
-					"Implementation-Version": project.version,
-					"Implementation-Vendor" : project.author,
-					"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
+		attributes(["Specification-Title":		project.name,
+					"Specification-Vendor":		project.author,
+					"Specification-Version":	project.version,
+					"Implementation-Title":		project.name,
+					"Implementation-Version":	project.version,
+					"Implementation-Vendor" :	project.author,
+					"Implementation-Timestamp":	new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+					"MixinConfigs":				"${project.name.toLowerCase()}.mixins.json"],)
 	}
 }
