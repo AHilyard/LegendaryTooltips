@@ -1,5 +1,10 @@
 # Changelog
 
+### 1.3.1
+- Fixed a bug that caused data-defined custom frames to persist after frame definitions files were removed.
+- Fixed a bug that sometimes caused separator lines under item titles to not render.
+- Fixed a bug that caused legacy configuration conversion to fail.
+
 ### 1.3.0
 - All color handling is now handled by Prism library.
   - Now supports web colors for easier color definitions.
