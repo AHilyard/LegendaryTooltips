@@ -29,7 +29,7 @@
 	],
 
 	"depends": {
-		"fabricloader": ">=0.12.8",
+		"fabricloader": ">=0.14.0",
 		"fabric": "*",
 		"minecraft": ">=1.18.2",
 		"java": ">=17",
@@ -37,7 +37,7 @@
 		"iceberg": ">=1.0.38"
 	},
 	"suggests": {
-		"equipmentcompare": ">=1.2.10"
+		"equipmentcompare": ">=1.2.12"
 	},
 	"custom": {
 		"modupdater": {

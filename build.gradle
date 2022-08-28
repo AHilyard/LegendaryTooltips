@@ -14,7 +14,7 @@ sourceSets.main.resources.srcDirs += 'resources'
 repositories {
 	maven {
 		name = "CurseMaven"
-		url "https://www.cursemaven.com"
+		url = "https://www.cursemaven.com"
 	}
 }
 
@@ -29,6 +29,7 @@ dependencies {
 	implementation 'com.electronwill.night-config:toml:3.6.3'
 
 	modImplementation "curse.maven:iceberg-539382:3595404"
+	modImplementation "curse.maven:prism-665526:3956347"
 }
 
 loom {
@@ -46,10 +47,6 @@ processResources {
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
 	it.options.release = 17
-}
-
-java {
-	withSourcesJar()
 }
 
 jar {

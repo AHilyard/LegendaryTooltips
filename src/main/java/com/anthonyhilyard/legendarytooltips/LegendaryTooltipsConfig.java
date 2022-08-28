@@ -15,10 +15,16 @@ import java.util.LinkedHashSet;
 import com.anthonyhilyard.iceberg.util.Selectors;
 import com.anthonyhilyard.iceberg.util.Selectors.SelectorDocumentation;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
+import com.anthonyhilyard.prism.text.DynamicColor;
+import com.anthonyhilyard.prism.util.ConfigHelper;
+import com.anthonyhilyard.prism.util.IColor;
+import com.anthonyhilyard.prism.util.ImageAnalysis;
+import com.anthonyhilyard.prism.util.ConfigHelper.ColorFormatDocumentation;
 import com.electronwill.nightconfig.core.Config;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -40,13 +46,24 @@ public class LegendaryTooltipsConfig
 		DATA
 	}
 
-	public record FrameDefinition(ResourceLocation resource, int index, Integer startBorder, Integer endBorder, Integer background, FrameSource source, int priority) {};
-	private static final FrameDefinition STANDARD_BORDER = new FrameDefinition(null, LegendaryTooltips.STANDARD, null, null, null, FrameSource.NONE, 0);
-	private static final FrameDefinition NO_BORDER = new FrameDefinition(null, LegendaryTooltips.NO_BORDER, null, null, null, FrameSource.NONE, 0);
+	public enum ColorType
+	{
+		BORDER_START,
+		BORDER_END,
+		BG_START,
+		BG_END
+	}
 
-	public static final TextColor DEFAULT_START_COLOR = TextColor.fromRgb(0xFF996922);
-	public static final TextColor DEFAULT_END_COLOR = TextColor.fromRgb(0xFF5A3A1D);
-	public static final TextColor DEFAULT_BG_COLOR = TextColor.fromRgb(0xF0160A00);
+	public record FrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, FrameSource source, int priority) {};
+	private static final FrameDefinition STANDARD_BORDER = new FrameDefinition(null, LegendaryTooltips.STANDARD, null, null, null, null, FrameSource.NONE, 0);
+	private static final FrameDefinition NO_BORDER = new FrameDefinition(null, LegendaryTooltips.NO_BORDER, null, null, null, null, FrameSource.NONE, 0);
+
+	public static final Map<ColorType, TextColor> defaultColors = Map.of(
+		ColorType.BORDER_START, TextColor.fromRgb(0xFF996922),
+		ColorType.BORDER_END, TextColor.fromRgb(0xFF5A3A1D),
+		ColorType.BG_START, TextColor.fromRgb(0xF0160A00),
+		ColorType.BG_END, TextColor.fromRgb(0xE8160A00)
+	);
 
 	public final BooleanValue nameSeparator;
 	public final BooleanValue bordersMatchRarity;
@@ -55,9 +72,10 @@ public class LegendaryTooltipsConfig
 	public final BooleanValue centeredTitle;
 	public final BooleanValue enforceMinimumWidth;
 
-	private final TextColor[] startColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
-	private final TextColor[] endColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
-	private final TextColor[] bgColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
+	final TextColor[] startColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
+	final TextColor[] endColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
+	private final TextColor[] startBGColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
+	private final TextColor[] endBGColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
 
 	final ConfigValue<List<? extends Integer>> framePriorities;
 	
@@ -68,12 +86,7 @@ public class LegendaryTooltipsConfig
 
 	private static final Map<ItemStack, FrameDefinition> frameDefinitionCache = new HashMap<>();
 
-	static final List<ConfigValue<Object>> startColorConfigs = new ArrayList<>();
-	static final List<ConfigValue<Object>> endColorConfigs = new ArrayList<>();
-
-	private static final List<Supplier<ConfigValue<?>>> startColorSuppliers = new ArrayList<>();
-	private static final List<Supplier<ConfigValue<?>>> endColorSuppliers = new ArrayList<>();
-	private static final List<Supplier<ConfigValue<?>>> bgColorSuppliers = new ArrayList<>();
+	private static final List<Supplier<ConfigValue<?>>> colorSuppliers = new ArrayList<>();
 
 	static
 	{
@@ -89,8 +102,8 @@ public class LegendaryTooltipsConfig
 
 					  " *** READ THIS FIRST ***\n\n" +
 
-					  " By default, this mod does not apply special borders to most items.  It was designed to work well with mod packs\n" +
-					  " where the available selection of items can vary widely, so it is up to the user or mod pack designer to customize as needed.\n" +
+					  " By default, this mod does not apply special borders to most items.  It was designed to work well with mod packs where\n" +
+					  " the available selection of items can vary widely, so it is up to the user or mod pack designer to customize as needed.\n" +
 					  " There are many options available for setting up which custom borders (also called frames) apply to which items.  Follow these steps:\n" +
 					  "   1. Decide which items you want to have custom borders, and which borders.  Note that each custom border has a number associated with it (starting at 0).\n" +
 					  "   2. For each custom border you want to use, fill out the associated list in the \"definitions\" section.  This will be filled out with a list of \"selectors\",\n" +
@@ -149,34 +162,49 @@ public class LegendaryTooltipsConfig
 		}
 		blacklist = build.comment(" Enter blacklist selectors here using the same format as above. Any items that match these selectors will NOT show a border.").defineListAllowEmpty(Arrays.asList("blacklist"), () -> Arrays.asList(), e -> Selectors.validateSelector((String)e));
 
-		build.pop().comment(" Set border priorities here.  This should be a list of numbers that correspond to border levels, with numbers coming first being higher priority.  Optionally, -1 can be inserted to indicate relative priority of data and api-defined borders.  If you don't know what that means, don't worry about it.").push("priorities");
+		build.pop().comment(" Set border priorities here.  This should be a list of numbers that correspond to border levels, with numbers coming first being higher priority.\n" +
+							" Optionally, -1 can be inserted to indicate relative priority of data and api-defined borders.  If you don't know what that means, you don't need to worry about it.").push("priorities");
 		framePriorities = build.defineList("priorities", () -> IntStream.rangeClosed(0, LegendaryTooltips.NUM_FRAMES - 1).boxed().collect(Collectors.toList()), e -> ((int)e >= -1 && (int)e < LegendaryTooltips.NUM_FRAMES));
 
-		build.pop().comment(" The start and end border colors and background colors of each level.\n" +
-							" Note that they can be entered as any one of: a decimal or hex color code in the format 0xAARRGGBB or 0xRRGGBB, OR a string color name or color code.\n" +
-							" Examples: 0xFFFF00, 0xFF73D984, 4290445567, \"red\", \"#FFCC00\" are all valid.").push("colors");
+		// Build the comment for manual borders.
+		StringBuilder colorFormatsComment = new StringBuilder(" VALID COLOR FORMATS\n");
+		for (ColorFormatDocumentation doc : ConfigHelper.colorFormatDocumentation())
+		{
+			colorFormatsComment.append("   ").append(doc.name()).append(" - ").append(doc.description().replace("\n", "\n         "));
 
-		startColorSuppliers.clear();
-		endColorSuppliers.clear();
-		bgColorSuppliers.clear();
-		startColorConfigs.clear();
-		endColorConfigs.clear();
+			if (!doc.examples().isEmpty())
+			{
+				colorFormatsComment.append("\n     Examples: ");
+				for (int i = 0; i < doc.examples().size(); i++)
+				{
+					if (i > 0)
+					{
+						colorFormatsComment.append(", ");
+					}
+					colorFormatsComment.append(doc.examples().get(i));
+				}
+			}
+			colorFormatsComment.append("\n\n");
+		}
+
+		// Remove the final newline.
+		colorFormatsComment.setLength(colorFormatsComment.length() - 2);
+
+		build.pop().comment(" The colors used for each tooltip, in this order: top border color, bottom border color, top background color, bottom background color.\n" +
+							" None of these colors are required, though any colors not specified will be replaced with the default tooltip colors.\n\n" +
+							colorFormatsComment.toString()).push("colors");
+
+		colorSuppliers.clear();
 		for (int i = 0; i < LegendaryTooltips.NUM_FRAMES; i++)
 		{
-			final int index = i;
-
 			// We need to define the configuration paths here.
-			ConfigValue<Object> startColorValue = build.define(String.format("level%d_start_color", i), (long)(DEFAULT_START_COLOR.getValue()) & 0xFFFFFFFFL, v -> validateColor(v));
-			ConfigValue<Object> endColorValue = build.define(String.format("level%d_end_color", i), (long)(DEFAULT_END_COLOR.getValue()) & 0xFFFFFFFFL, v -> validateColor(v));
-			ConfigValue<?> bgColorValue = build.define(String.format("level%d_bg_color", i), (long)(DEFAULT_BG_COLOR.getValue()) & 0xFFFFFFFFL, v -> validateColor(v));
+			ConfigValue<?> colorsValue = build.defineList(String.format("level%d_colors", i),
+				i == 0 ?
+				List.<Object>of(defaultColors.get(ColorType.BORDER_START).getValue(), defaultColors.get(ColorType.BORDER_END).getValue(), defaultColors.get(ColorType.BG_START).getValue(), defaultColors.get(ColorType.BG_END).getValue()) :
+				List.<Object>of("auto", "auto", "auto", "auto"), v -> validateColor(v));
 			
-			startColorConfigs.add(startColorValue);
-			endColorConfigs.add(endColorValue);
-
-			// But store them as suppliers for resolution after the spec is finished being built.
-			startColorSuppliers.add(() -> startColorConfigs.get(index));
-			endColorSuppliers.add(() -> endColorConfigs.get(index));
-			bgColorSuppliers.add(() -> bgColorValue);
+			// Store them as suppliers for resolution after the spec is finished being built.
+			colorSuppliers.add(() -> colorsValue);
 		}
 
 		build.pop().pop();
@@ -184,51 +212,117 @@ public class LegendaryTooltipsConfig
 
 	public static TextColor getColor(Object value)
 	{
-		TextColor color = null;
-		if (value instanceof String string)
+		return getColor(value, null, null, 0, null);
+	}
+
+	public static TextColor getColor(Object value, TextColor defaultColor, ResourceLocation borderImage, int index, ColorType colorType)
+	{
+		TextColor color = (TextColor)(Object)ConfigHelper.parseColor(value);
+		if (color == null)
 		{
-			// Parse string color.
-			String colorString = string.toLowerCase().replace("0x", "").replace("#", "");
-			color = TextColor.parseColor(colorString);
-			if (color == null)
+			// If the specified color is automatic, try to get the right color for this border.
+			if (value instanceof String string && string.contentEquals("auto") && borderImage != null)
 			{
-				if (colorString.length() == 6 || colorString.length() == 8)
+				Rect2i region = new Rect2i((index / 8) * 64, (index * 16) % 128, 64, 16);
+
+				switch (colorType)
 				{
-					color = TextColor.parseColor("#" + colorString);
+					case BORDER_START:
+						region.setHeight(8);
+						break;
+					case BORDER_END:
+						region.setHeight(8);
+						region.setY(region.getY() + 8);
+						break;
+					default:
+				}
+
+				color = ImageAnalysis.getDominantColor(borderImage, region);
+
+				// Color can be null if the image was entirely transparent, white, or black for example.
+				// Don't return the default color for automatic spec.
+				if (color == null)
+				{
+					return defaultColor;
+				}
+
+				switch (colorType)
+				{
+					case BORDER_START:
+						if (DynamicColor.fromColor((IColor)(Object)color).value() > 80)
+						{
+							color = ConfigHelper.applyModifiers(List.of("-v10", "+s10"), color);
+							if (DynamicColor.fromColor((IColor)(Object)color).value() > 200)
+							{
+								color = ConfigHelper.applyModifiers(List.of("-v10"), color);
+							}
+						}
+						if (DynamicColor.fromColor((IColor)(Object)color).saturation() > 40)
+						{
+							color = ConfigHelper.applyModifiers(List.of("+s10"), color);
+						}
+						break;
+					case BORDER_END:
+						if (DynamicColor.fromColor((IColor)(Object)color).value() > 80)
+						{
+							color = ConfigHelper.applyModifiers(List.of("-v30"), color);
+							if (DynamicColor.fromColor((IColor)(Object)color).value() > 170 &&
+								DynamicColor.fromColor((IColor)(Object)color).value() < 220)
+							{
+								color = ConfigHelper.applyModifiers(List.of("-v30"), color);
+							}
+						}
+						if (DynamicColor.fromColor((IColor)(Object)color).saturation() > 40)
+						{
+							color = ConfigHelper.applyModifiers(List.of("+s50"), color);
+						}
+						break;
+					case BG_START:
+						color = ConfigHelper.applyModifiers(List.of("=v8", "+s50", "=a245"), color);
+						break;
+					case BG_END:
+						color = ConfigHelper.applyModifiers(List.of("=v20", "+s75", "=a230"), color);
+						break;
+				}
+				
+				if (color != null)
+				{
+					return color;
 				}
 			}
+			return defaultColor;
 		}
-		else if (value instanceof Number number)
+		else
 		{
-			color = TextColor.fromRgb(number.intValue());
+			return color;
 		}
-
-		// If alpha is 0 but the color isn't 0x00000000, assume alpha is intended to be 0xFF.
-		// Only downside is if users want black borders they'd have to specify "0xFF000000".
-		if (color != null && color.getValue() > 0 && color.getValue() <= 0xFFFFFF)
-		{
-			color = TextColor.fromRgb(color.getValue() | (0xFF << 24));
-		}
-		
-		return color;
 	}
 
 	private static boolean validateColor(Object value)
 	{
-		return getColor(value) != null;
+		return (getColor(value) != null || (value instanceof String string && string.contentEquals("auto")));
 	}
 
 	private static void resolveColors()
 	{
 		for (int i = 0; i < LegendaryTooltips.NUM_FRAMES; i++)
 		{
-			Supplier<ConfigValue<?>> startColorSupplier = startColorSuppliers.get(i);
-			Supplier<ConfigValue<?>> endColorSupplier = endColorSuppliers.get(i);
-			Supplier<ConfigValue<?>> bgColorSupplier = bgColorSuppliers.get(i);
+			Object colors = colorSuppliers.get(i).get().get();
 
-			INSTANCE.startColors[i] = getColor(startColorSupplier.get().get());
-			INSTANCE.endColors[i] = getColor(endColorSupplier.get().get());
-			INSTANCE.bgColors[i] = getColor(bgColorSupplier.get().get());
+			if (colors instanceof List<?> colorsList)
+			{
+				INSTANCE.startColors[i] =	getColor(colorsList.size() > 0 ? colorsList.get(0) : null, defaultColors.get(ColorType.BORDER_START), TooltipDecor.DEFAULT_BORDERS, i, ColorType.BORDER_START);
+				INSTANCE.endColors[i] =		getColor(colorsList.size() > 1 ? colorsList.get(1) : null, defaultColors.get(ColorType.BORDER_END), TooltipDecor.DEFAULT_BORDERS, i, ColorType.BORDER_END);
+				INSTANCE.startBGColors[i] =	getColor(colorsList.size() > 2 ? colorsList.get(2) : null, defaultColors.get(ColorType.BG_START), TooltipDecor.DEFAULT_BORDERS, i, ColorType.BG_START);
+				INSTANCE.endBGColors[i] =	getColor(colorsList.size() > 3 ? colorsList.get(3) : null, defaultColors.get(ColorType.BG_END), TooltipDecor.DEFAULT_BORDERS, i, ColorType.BG_END);
+			}
+			else
+			{
+				INSTANCE.startColors[i] =	defaultColors.get(ColorType.BORDER_START);
+				INSTANCE.endColors[i] =		defaultColors.get(ColorType.BORDER_END);
+				INSTANCE.startBGColors[i] =	defaultColors.get(ColorType.BG_START);
+				INSTANCE.endBGColors[i] =	defaultColors.get(ColorType.BG_END);
+			}
 		}
 	}
 
@@ -236,9 +330,18 @@ public class LegendaryTooltipsConfig
 	 * Adds a new custom frame definition.  If the same frame definition already exists, 
 	 * the provided selectors are added after the already-configured selectors.
 	 */
-	public void addFrameDefinition(ResourceLocation resource, int index, Integer startBorder, Integer endBorder, Integer background, int priority, List<String> selectors)
+	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> background, int priority, List<String> selectors)
 	{
-		FrameDefinition definition = new FrameDefinition(resource, index, startBorder, endBorder, background, FrameSource.API, priority);
+		addFrameDefinition(resource, index, startBorder, endBorder, background, background, priority, selectors);
+	}
+
+	/**
+	 * Adds a new custom frame definition.  If the same frame definition already exists, 
+	 * the provided selectors are added after the already-configured selectors.
+	 */
+	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, int priority, List<String> selectors)
+	{
+		FrameDefinition definition = new FrameDefinition(resource, index, startBorder, endBorder, startBackground, endBackground, FrameSource.API, priority);
 		addFrameDefinition(definition, selectors);
 	}
 
@@ -256,6 +359,17 @@ public class LegendaryTooltipsConfig
 		}
 		selectorSet.addAll(selectors);
 		customFrameDefinitions.put(definition, selectorSet);
+	}
+
+	void clearDataFrames()
+	{
+		for (FrameDefinition frameDefinition : customFrameDefinitions.keySet())
+		{
+			if (frameDefinition.source == FrameSource.DATA)
+			{
+				customFrameDefinitions.remove(frameDefinition);
+			}
+		}
 	}
 
 	public FrameDefinition getFrameDefinition(ItemStack item)
@@ -302,16 +416,17 @@ public class LegendaryTooltipsConfig
 			// Standard config-based frame.
 			if (frameIndex != -1 && frameIndex < LegendaryTooltips.NUM_FRAMES)
 			{
-				TextColor startColor = startColors[frameIndex] == null ? DEFAULT_START_COLOR : startColors[frameIndex];
-				TextColor endColor = endColors[frameIndex] == null ? DEFAULT_END_COLOR : endColors[frameIndex];
-				TextColor bgColor = bgColors[frameIndex] == null ? DEFAULT_BG_COLOR : bgColors[frameIndex];
+				TextColor startColor =		startColors[frameIndex] == null ? defaultColors.get(ColorType.BORDER_START) : startColors[frameIndex];
+				TextColor endColor =		endColors[frameIndex] == null ? defaultColors.get(ColorType.BORDER_END) : endColors[frameIndex];
+				TextColor startBGColor =	startBGColors[frameIndex] == null ? defaultColors.get(ColorType.BG_START) : startBGColors[frameIndex];
+				TextColor endBGColor =		endBGColors[frameIndex] == null ? defaultColors.get(ColorType.BG_END) : endBGColors[frameIndex];
 
 				for (String entry : itemSelectors.get(frameIndex).get())
 				{
 					if (Selectors.itemMatches(item, entry))
 					{
 						// Add to cache.
-						FrameDefinition frameDefinition = new FrameDefinition(TooltipDecor.DEFAULT_BORDERS, frameIndex, startColor.getValue(), endColor.getValue(), bgColor.getValue(), FrameSource.CONFIG, i);
+						FrameDefinition frameDefinition = new FrameDefinition(TooltipDecor.DEFAULT_BORDERS, frameIndex, () -> startColor.getValue(), () -> endColor.getValue(), () -> startBGColor.getValue(), () -> endBGColor.getValue(), FrameSource.CONFIG, i);
 						frameDefinitionCache.put(item, frameDefinition);
 						return frameDefinition;
 					}

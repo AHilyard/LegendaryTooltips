@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.ColorType;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameDefinition;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameSource;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
@@ -41,7 +42,10 @@ public final class FrameResourceParser implements SimpleSynchronousResourceReloa
 		// 			"index": 0,														// optional, defaults to 0
 		// 			"startColor": "",												// optional, defaults to #FF996922 also accepts integer color
 		// 			"endColor": "",													// optional, defaults to #FF5A3A1D also accepts integer color
-		// 			"bgColor": "",													// optional, defaults to #F0160A00 also accepts integer color
+		// 			"bgColor": "",													// optional, mutually exclusive with bgStart/bgEnd colors
+		//																			// defaults to #F0160A00 also accepts integer color
+		// 			"bgStartColor": "",												// optional, defaults to #F0160A00 also accepts integer color
+		// 			"bgEndColor": "",												// optional, defaults to #F0160A00 also accepts integer color
 		// 			"priority": 0,													// optional, defaults to 0
 		// 			"selectors": []													// required
 		// 		},
@@ -52,6 +56,9 @@ public final class FrameResourceParser implements SimpleSynchronousResourceReloa
 		// }
 
 		LegendaryTooltipsConfig.reset();
+
+		// First clear the data frames in case a definitions file was removed.
+		LegendaryTooltipsConfig.INSTANCE.clearDataFrames();
 		
 		try
 		{
@@ -68,14 +75,16 @@ public final class FrameResourceParser implements SimpleSynchronousResourceReloa
 						for (int i = 0; i < definitions.size(); i++)
 						{
 							JsonObject definitionObject = GsonHelper.convertToJsonObject(definitions.get(i), String.format("definitions[%d]", i));
-							String image = TooltipDecor.DEFAULT_BORDERS.toString();
+							ResourceLocation image = TooltipDecor.DEFAULT_BORDERS;
 							int index = 0;
 							int priority = 0;
-							Map<String, TextColor> colors = new HashMap<>(Map.of(
-								"startColor", LegendaryTooltipsConfig.DEFAULT_START_COLOR,
-								"endColor", LegendaryTooltipsConfig.DEFAULT_END_COLOR,
-								"bgColor", LegendaryTooltipsConfig.DEFAULT_BG_COLOR
-							));
+							Map<String, TextColor> colors = new HashMap<String, TextColor>() {{
+								put("startColor", LegendaryTooltipsConfig.defaultColors.get(ColorType.BORDER_START));
+								put("endColor", LegendaryTooltipsConfig.defaultColors.get(ColorType.BORDER_END));
+								put("bgColor", LegendaryTooltipsConfig.defaultColors.get(ColorType.BG_START));
+								put("bgStartColor", null);
+								put("bgEndColor", null);
+							}};
 							List<String> selectors = new ArrayList<String>();
 
 							// Selectors are required, so do those first.
@@ -90,7 +99,7 @@ public final class FrameResourceParser implements SimpleSynchronousResourceReloa
 								String parsedImage = GsonHelper.getAsString(definitionObject, "image");
 								if (ResourceLocation.isValidResourceLocation(parsedImage))
 								{
-									image = parsedImage;
+									image = new ResourceLocation(parsedImage);
 								}
 							}
 							if (definitionObject.has("index")) { index = GsonHelper.getAsInt(definitionObject, "index"); }
@@ -101,14 +110,32 @@ public final class FrameResourceParser implements SimpleSynchronousResourceReloa
 							{
 								if (definitionObject.has(colorKey))
 								{
+									ColorType colorType;
+									switch (colorKey)
+									{
+										case "startColor":
+											colorType = ColorType.BORDER_START;
+											break;
+										case "endColor":
+											colorType = ColorType.BORDER_END;
+											break;
+										default:
+										case "bgColor":
+										case "bgStartColor":
+											colorType = ColorType.BG_START;
+											break;
+										case "bgEndColor":
+											colorType = ColorType.BG_END;
+											break;
+									}
 									TextColor parsedColor = null;
 									if (GsonHelper.isStringValue(definitionObject, colorKey))
 									{
-										parsedColor = LegendaryTooltipsConfig.getColor(GsonHelper.getAsString(definitionObject, colorKey));
+										parsedColor = LegendaryTooltipsConfig.getColor(GsonHelper.getAsString(definitionObject, colorKey), null, image, index, colorType);
 									}
 									else if (GsonHelper.isNumberValue(definitionObject, colorKey))
 									{
-										parsedColor = LegendaryTooltipsConfig.getColor((Long)GsonHelper.getAsLong(definitionObject, colorKey));
+										parsedColor = LegendaryTooltipsConfig.getColor((Long)GsonHelper.getAsLong(definitionObject, colorKey), null, image, index, colorType);
 									}
 									if (parsedColor != null)
 									{
@@ -118,7 +145,12 @@ public final class FrameResourceParser implements SimpleSynchronousResourceReloa
 							}
 							
 							// Finally, add the fully-parsed definition.
-							FrameDefinition definition = new FrameDefinition(new ResourceLocation(image), index, colors.get("startColor").getValue(), colors.get("endColor").getValue(), colors.get("bgColor").getValue(), FrameSource.DATA, priority);
+							FrameDefinition definition = new FrameDefinition(image, index,
+								() -> colors.get("startColor").getValue(),
+								() -> colors.get("endColor").getValue(),
+								() -> colors.get("bgStartColor") != null ? colors.get("bgStartColor").getValue() : colors.get("bgColor").getValue(),
+								() -> colors.get("bgEndColor") != null ? colors.get("bgEndColor").getValue() : colors.get("bgColor").getValue(),
+								FrameSource.DATA, priority);
 							LegendaryTooltipsConfig.INSTANCE.addFrameDefinition(definition, selectors);
 						}
 					}
@@ -130,7 +162,6 @@ public final class FrameResourceParser implements SimpleSynchronousResourceReloa
 		{
 			Loader.LOGGER.warn("An error occurred while parsing frame definitions data:\n {}", ExceptionUtils.getStackTrace(e));
 		}
-		
 	}
 
 	@Override
