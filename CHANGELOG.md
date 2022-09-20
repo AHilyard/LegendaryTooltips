@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.3.3
+- Added missing Prism dependency (Fabric only).
+
+### 1.3.2
+- Fixed a bug that could prevent resources from reloading properly.
+
 ### 1.3.1
 - Fixed a bug that caused data-defined custom frames to persist after frame definitions files were removed.
 - Fixed a bug that sometimes caused separator lines under item titles to not render.

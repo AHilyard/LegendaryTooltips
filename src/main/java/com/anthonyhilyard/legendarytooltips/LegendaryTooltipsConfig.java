@@ -363,13 +363,7 @@ public class LegendaryTooltipsConfig
 
 	void clearDataFrames()
 	{
-		for (FrameDefinition frameDefinition : customFrameDefinitions.keySet())
-		{
-			if (frameDefinition.source == FrameSource.DATA)
-			{
-				customFrameDefinitions.remove(frameDefinition);
-			}
-		}
+		customFrameDefinitions.entrySet().removeIf(entry -> entry.getKey().source == FrameSource.DATA);
 	}
 
 	public FrameDefinition getFrameDefinition(ItemStack item)
