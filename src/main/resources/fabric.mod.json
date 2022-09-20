@@ -29,12 +29,13 @@
 	],
 
 	"depends": {
-		"fabricloader": ">=0.12.8",
+		"fabricloader": ">=0.14.0",
 		"fabric": "*",
 		"minecraft": "~1.19",
 		"java": ">=17",
 		"forgeconfigapiport": ">=4.0",
-		"iceberg": ">=1.0.38"
+		"iceberg": ">=1.0.38",
+		"prism": "*"
 	},
 	"suggests": {
 		"equipmentcompare": ">=1.3.0",

@@ -1,5 +1,24 @@
 # Changelog
 
+### 1.3.3
+- Added missing Prism dependency (Fabric only).
+
+### 1.3.2
+- Fixed a bug that could prevent resources from reloading properly.
+
+### 1.3.1
+- Fixed a bug that caused data-defined custom frames to persist after frame definitions files were removed.
+- Fixed a bug that sometimes caused separator lines under item titles to not render.
+- Fixed a bug that caused legacy configuration conversion to fail.
+
+### 1.3.0
+- All color handling is now handled by Prism library.
+  - Now supports web colors for easier color definitions.
+  - Now supports animated colors for both borders and backgrounds.
+  - Now supports automatic border colors, which is the new default.  This means any border images can have automatically determined border and background colors that match the image.
+- The color section in the configuration file is now in a more compact format.  Configuration files in the old format will be automatically converted.
+- Both start and end background colors can now be specified separately.
+
 ### 1.2.6
 - Added support for REI.
 

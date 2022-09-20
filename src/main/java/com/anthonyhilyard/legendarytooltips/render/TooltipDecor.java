@@ -7,7 +7,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import com.mojang.math.Matrix4f;
 import net.minecraft.network.chat.FormattedText;
@@ -127,11 +126,10 @@ public class TooltipDecor
 
 			if (textLine != null)
 			{
-				List<FormattedCharSequence> wrappedLine = font.split(textLine, width);
-				int titleLineCount = wrappedLine.size();
+				int titleLineCount = font.split(textLine, width).size();
 
 				// Only do this if there's more lines below the title.
-				if (cachedPreWrapLines.get(index).size() > titleLineCount)
+				if (cachedPreWrapLines.get(index).size() > 1)
 				{
 					// If this is a comparison tooltip, we need to move this separator down to the proper position.
 					int offset = 0;
@@ -158,7 +156,7 @@ public class TooltipDecor
 
 			if (shineTimer >= 10 && shineTimer <= 40)
 			{
-				float interval = Mth.clamp((float)(shineTimer - 10) / 20.0f, 0.0f, 1.0f);
+				float interval = Mth.clamp((float)(shineTimer - 10) / 30.0f, 0.0f, 1.0f);
 				int alpha = (int)(0x99 * interval) << 24;
 
 				int horizontalMin = x - 3;
