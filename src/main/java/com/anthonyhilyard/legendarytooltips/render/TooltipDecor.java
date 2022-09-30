@@ -9,8 +9,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.client.config.GuiUtils;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltips;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig;
@@ -29,7 +30,7 @@ public class TooltipDecor
 
 	private static int shineTimer = 0;
 
-	private static List<String> cachedPreWrapLines = new ArrayList<>();
+	private static Map<Integer, List<String>> cachedPreWrapLines = new HashMap<Integer, List<String>>();
 
 	public static void setCurrentTooltipBorderStart(int color)
 	{
@@ -41,10 +42,9 @@ public class TooltipDecor
 		currentTooltipBorderEnd = color;
 	}
 
-	public static void setCachedLines(List<String> lines)
+	public static void setCachedLines(List<String> lines, int index)
 	{
-		cachedPreWrapLines.clear();
-		cachedPreWrapLines.addAll(lines);
+		cachedPreWrapLines.put(index, lines);
 	}
 
 	public static void updateTimer()
@@ -87,21 +87,53 @@ public class TooltipDecor
 		return a + t * (b - a);
 	}
 
-	public static void drawBorder(int x, int y, int width, int height, ItemStack item, List<String> lines, FontRenderer font, int frameLevel)
+	public static void drawBorder(int x, int y, int width, int height, ItemStack item, List<String> lines, FontRenderer font, int frameLevel, boolean comparison, int index)
 	{
-		// If the separate name border is enabled, draw it now.
-		if (LegendaryTooltipsConfig.INSTANCE.nameSeparator && !cachedPreWrapLines.isEmpty())
+		// If this is a comparison tooltip, we need to draw the actual border lines first.
+		if (comparison)
 		{
-			// Determine and store the number of "title lines".
-			String textLine = cachedPreWrapLines.get(0);
-			List<String> wrappedLine = font.listFormattedStringToWidth(textLine, width);
-			int titleLineCount = wrappedLine.size();
+			GuiUtils.drawGradientRect(400, x - 3, y - 3 + 1, x - 3 + 1, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
+			GuiUtils.drawGradientRect(400, x + width + 2, y - 3 + 1, x + width + 3, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
+			GuiUtils.drawGradientRect(400, x - 3, y - 3, x + width + 3, y - 3 + 1, currentTooltipBorderStart, currentTooltipBorderStart);
+			GuiUtils.drawGradientRect(400, x - 3, y + height + 2, x + width + 3, y + height + 3, currentTooltipBorderEnd, currentTooltipBorderEnd);
 
-			// Only do this if there's more lines below the title.
-			if (cachedPreWrapLines.size() > titleLineCount)
+			// Now draw a separator under the "equipped" badge.
+			drawSeparator(x - 3 + 1, y - 3 + 1 + 10, width, currentTooltipBorderStart);
+		}
+
+		// If the separate name border is enabled, draw it now.
+		if (LegendaryTooltipsConfig.INSTANCE.nameSeparator && item != null && !item.isEmpty())
+		{
+			// Determine the number of "title lines".
+			String textLine = null;
+			if (cachedPreWrapLines.containsKey(index))
 			{
-				// Now draw the separator under the title.
-				drawSeparator(x - 3 + 1, y - 3 + 1 + (titleLineCount * 10) + 1, width, currentTooltipBorderStart);
+				textLine = cachedPreWrapLines.get(index).get(0);
+			}
+			else if (cachedPreWrapLines.containsKey(0))
+			{
+				index = 0;
+				textLine = cachedPreWrapLines.get(0).get(0);
+			}
+
+			if (textLine != null)
+			{
+				List<String> wrappedLine = font.listFormattedStringToWidth(textLine, width);
+				int titleLineCount = wrappedLine.size();
+
+				// Only do this if there's more lines below the title.
+				if (cachedPreWrapLines.get(index).size() > titleLineCount)
+				{
+					// If this is a comparison tooltip, we need to move this separator down to the proper position.
+					int offset = 0;
+					if (comparison)
+					{
+						offset = 11;
+					}
+
+					// Now draw the separator under the title.
+					drawSeparator(x - 3 + 1, y - 3 + 1 + (titleLineCount * 10) + 1 + offset, width, currentTooltipBorderStart);
+				}
 			}
 		}
 

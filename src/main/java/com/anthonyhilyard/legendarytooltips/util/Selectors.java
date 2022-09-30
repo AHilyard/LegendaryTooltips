@@ -17,6 +17,7 @@ import net.minecraft.item.EnumRarity;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 
+@SuppressWarnings("null")
 public class Selectors
 {
 	private static final int TAG_COMPOUND = 10;
@@ -83,8 +84,21 @@ public class Selectors
 	{
 		String itemResourceLocation = ForgeRegistries.ITEMS.getKey(item.getItem()).toString();
 
-		// Item ID
-		if (selector.equals(itemResourceLocation) || selector.equals(itemResourceLocation.replace("minecraft:", "")))
+		int metadata = -1;
+		String[] chunks = selector.split(":");
+		if (chunks.length > 1)
+		{
+			try
+			{
+				metadata = Integer.parseInt(chunks[chunks.length - 1]);
+				selector = selector.substring(0, selector.length() - chunks[chunks.length - 1].length() - 1);
+			}
+			catch (NumberFormatException e) {}
+
+		}
+
+		// Item ID / metadata
+		if ((selector.equals(itemResourceLocation) || selector.equals(itemResourceLocation.replace("minecraft:", ""))) && (metadata == -1 || metadata == item.getMetadata()))
 		{
 			return true;
 		}

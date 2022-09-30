@@ -5,10 +5,9 @@ import net.minecraft.client.util.ITooltipFlag;
 
 import java.util.List;
 
-import com.anthonyhilyard.legendarytooltips.Loader;
-
 import net.minecraft.client.Minecraft;
 
+@SuppressWarnings("null")
 public abstract class ItemColor
 {
 	public static Integer findFirstColorCode(String rawTitle)

@@ -31,6 +31,7 @@ public class LegendaryTooltipsConfig extends Configuration
 
 	public static final String DEFAULT_START_COLOR = "#FF996922";
 	public static final String DEFAULT_END_COLOR = "#FF5A3A1D";
+	public static final String DEFAULT_BG_COLOR = "#F0160A00";
 
 	public boolean nameSeparator;
 	public boolean bordersMatchRarity;
@@ -43,6 +44,7 @@ public class LegendaryTooltipsConfig extends Configuration
 
 	private String[] startColors = new String[LegendaryTooltips.NUM_FRAMES];
 	private String[] endColors = new String[LegendaryTooltips.NUM_FRAMES];
+	private String[] bgColors = new String[LegendaryTooltips.NUM_FRAMES];
 
 	private transient final Map<ItemStack, Integer> frameLevelCache = new HashMap<ItemStack, Integer>();
 
@@ -52,7 +54,7 @@ public class LegendaryTooltipsConfig extends Configuration
 		INSTANCE = new LegendaryTooltipsConfig(file);
 	}
 
-		private LegendaryTooltipsConfig(File file)
+	private LegendaryTooltipsConfig(File file)
 	{
 		super(file);
 		load();
@@ -96,6 +98,7 @@ public class LegendaryTooltipsConfig extends Configuration
 		getCategory("definitions").setPropertyOrder(IntStream.rangeClosed(0, 15).boxed().map(x -> String.format("level%d_entries", x)).collect(Collectors.toList()))
 			.setComment(" Entry types:\n" + 
 			"   Item name - Use item name for vanilla items or include mod name for modded items.  Examples: minecraft:stick, iron_ore\n" +
+			"   Item Metadata - After an item name, you may include a colon and then a number to indicate metadata.  Examples: minecraft:wool:5, minecraft:sponge:1\n" +
 			"   Tag - $ followed by ore dictionary tag name.  Examples: $plankWood or $ingotIron\n" +
 			"   Mod name - @ followed by mod identifier.  Examples: @spoiledeggs\n" +
 			"   Rarity - ! followed by item's rarity.  Examples: !uncommon, !rare !epic\n" +
@@ -132,10 +135,12 @@ public class LegendaryTooltipsConfig extends Configuration
 
 		startColors[0] = getString("level0_start_color", "colors", DEFAULT_START_COLOR, "");
 		endColors[0] = getString("level0_end_color", "colors", DEFAULT_END_COLOR, "");
+		bgColors[0] = getString("level0_bg_color", "colors", DEFAULT_BG_COLOR, "");
 		for (int i = 1; i < LegendaryTooltips.NUM_FRAMES; i++)
 		{
 			startColors[i] = getString(String.format("level%d_start_color", i), "colors", DEFAULT_START_COLOR, "");
 			endColors[i] = getString(String.format("level%d_end_color", i), "colors", DEFAULT_END_COLOR, "");
+			bgColors[i] = getString(String.format("level%d_bg_color", i), "colors", DEFAULT_BG_COLOR, "");
 		}
 
 		save();
@@ -230,6 +235,23 @@ public class LegendaryTooltipsConfig extends Configuration
 				return endColor | (0xFF << 24);
 			}
 			return endColor;
+		}
+		return null;
+	}
+
+	public Integer getCustomBackgroundColor(int level)
+	{
+		if (level >= 0 && level <= 15 && bgColors[level] != null)
+		{
+			Integer bgColor = getColor(bgColors[level]);
+
+			// If alpha is 0 but the color isn't 0x00000000, assume alpha is intended to be 0xFF.
+			// Only downside is if users want black borders they'd have to specify "0xFF000000".
+			if (bgColor > 0 && bgColor <= 0xFFFFFF)
+			{
+				return bgColor | (0xFF << 24);
+			}
+			return bgColor;
 		}
 		return null;
 	}

@@ -10,12 +10,13 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
 import com.anthonyhilyard.legendarytooltips.util.ItemColor;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 @Mod(modid=Loader.MODID, name=Loader.MODNAME, version=Loader.MODVERSION, acceptedMinecraftVersions = "[1.12.2]")
 @EventBusSubscriber(modid = Loader.MODID)
@@ -35,7 +36,7 @@ public class LegendaryTooltips
 		LegendaryTooltipsConfig.loadConfig(event.getSuggestedConfigurationFile());
 	}
 
-	private static Pair<Integer, Integer> itemFrameColors(ItemStack item, Pair<Integer, Integer> defaults)
+	private static Integer[] itemFrameColors(ItemStack item, Integer[] defaults)
 	{
 		// If we are displaying a custom "legendary" border, use a gold color for borders.
 		int frameLevel = LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(item);
@@ -43,16 +44,21 @@ public class LegendaryTooltips
 		{
 			int startColor = LegendaryTooltipsConfig.INSTANCE.getCustomBorderStartColor(frameLevel);
 			int endColor = LegendaryTooltipsConfig.INSTANCE.getCustomBorderEndColor(frameLevel);
+			int bgColor = LegendaryTooltipsConfig.INSTANCE.getCustomBackgroundColor(frameLevel);
 
 			if (startColor == -1)
 			{
-				startColor = defaults.getLeft();
+				startColor = defaults[0];
 			}
 			if (endColor == -1)
 			{
-				endColor = defaults.getRight();
+				endColor = defaults[1];
 			}
-			return Pair.of(startColor, endColor);
+			if (bgColor == -1)
+			{
+				bgColor = defaults[2];
+			}
+			return new Integer[] { startColor, endColor, bgColor };
 		}
 		else if (LegendaryTooltipsConfig.INSTANCE.bordersMatchRarity)
 		{
@@ -72,15 +78,16 @@ public class LegendaryTooltips
 			
 			int startColor = java.awt.Color.getHSBColor(addHue ? hsbVals[0] - 0.006f : hsbVals[0] + 0.006f, hsbVals[1], hsbVals[2]).getRGB();
 			int endColor =java.awt.Color.getHSBColor(addHue ? hsbVals[0] + 0.04f : hsbVals[0] - 0.04f, hsbVals[1], hsbVals[2]).getRGB();
+			int bgColor = java.awt.Color.getHSBColor(addHue ? hsbVals[0] - 0.0045f : hsbVals[0] + 0.0045f, hsbVals[1] * 0.85f, 16.0f / 255.0f).getRGB();
 
-			return Pair.of(startColor & 0xAAFFFFFF, endColor & 0x44FFFFFF);
+			return new Integer[] { startColor & 0xDDFFFFFF, endColor & 0xAAFFFFFF, bgColor & 0xF0FFFFFF };
 		}
 
 		return defaults;
 	}
 
 	@SubscribeEvent
-	@SuppressWarnings("generic")
+	@SuppressWarnings({"generic", "null"})
 	public static void onRenderTick(TickEvent.RenderTickEvent event)
 	{
 		TooltipDecor.updateTimer();
@@ -106,32 +113,98 @@ public class LegendaryTooltips
 	@SubscribeEvent
 	public static void onPreTooltipEvent(RenderTooltipEvent.Pre event)
 	{
-		TooltipDecor.setCachedLines(event.getLines());
+		int index = 0;
+		if (net.minecraftforge.fml.common.Loader.isModLoaded("equipmentcompare"))
+		{
+			try
+			{
+				index = (int)Class.forName("com.anthonyhilyard.legendarytooltips.compat.EquipmentCompareHandler").getMethod("getEventIndex", Event.class).invoke(null, event);
+			}
+			catch (Exception e)
+			{
+				Loader.LOGGER.error(ExceptionUtils.getStackTrace(e));
+			}
+		}
+
+		TooltipDecor.setCachedLines(event.getLines(), index);
 	}
 
 	@SubscribeEvent
 	public static void onTooltipColorEvent(RenderTooltipEvent.Color event)
 	{
-		Pair<Integer, Integer> borderColors = itemFrameColors(event.getStack(), Pair.of(event.getBorderStart(), event.getBorderEnd()));
+		Integer[] borderColors = itemFrameColors(event.getStack(), new Integer[] { event.getBorderStart(), event.getBorderEnd(), event.getBackground() });
 
 		// Every tooltip will send a color event before a posttext event, so we can store the color here.
-		TooltipDecor.setCurrentTooltipBorderStart(borderColors.getLeft());
-		TooltipDecor.setCurrentTooltipBorderEnd(borderColors.getRight());
+		TooltipDecor.setCurrentTooltipBorderStart(borderColors[0]);
+		TooltipDecor.setCurrentTooltipBorderEnd(borderColors[1]);
 
-		event.setBorderStart(borderColors.getLeft());
-		event.setBorderEnd(borderColors.getRight());
+		boolean comparison = false;
+
+		if (net.minecraftforge.fml.common.Loader.isModLoaded("equipmentcompare"))
+		{
+			try
+			{
+				comparison = (boolean)Class.forName("com.anthonyhilyard.legendarytooltips.compat.EquipmentCompareHandler").getMethod("isComparisonEvent", Event.class).invoke(null, event);
+			}
+			catch (Exception e)
+			{
+				Loader.LOGGER.error(ExceptionUtils.getStackTrace(e));
+			}
+		}
+
+		if (comparison)
+		{
+			event.setBorderStart(0);
+			event.setBorderEnd(0);
+		}
+		else
+		{
+			event.setBorderStart(borderColors[0]);
+			event.setBorderEnd(borderColors[1]);
+		}
+		event.setBackground(borderColors[2]);
 	}
 
 	@SubscribeEvent
 	public static void onPostTooltipEvent(RenderTooltipEvent.PostText event)
 	{
+		boolean comparison = false;
+		int index = 0;
+
+		if (net.minecraftforge.fml.common.Loader.isModLoaded("equipmentcompare"))
+		{
+			try
+			{
+				comparison = (boolean)Class.forName("com.anthonyhilyard.legendarytooltips.compat.EquipmentCompareHandler").getMethod("isComparisonEvent", Event.class).invoke(null, event);
+				index = (int)Class.forName("com.anthonyhilyard.legendarytooltips.compat.EquipmentCompareHandler").getMethod("getEventIndex", Event.class).invoke(null, event);
+			}
+			catch (Exception e)
+			{
+				Loader.LOGGER.error(ExceptionUtils.getStackTrace(e));
+			}
+		}
+
 		// If tooltip shadows are enabled, draw one now.
 		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow)
 		{
-			TooltipDecor.drawShadow(event.getX(), event.getY(), event.getWidth(), event.getHeight());
+			if (comparison)
+			{
+				TooltipDecor.drawShadow(event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11);
+			}
+			else
+			{
+				TooltipDecor.drawShadow(event.getX(), event.getY(), event.getWidth(), event.getHeight());
+			}
 		}
 
 		// If this is a rare item, draw special border.
-		TooltipDecor.drawBorder(event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()));
+		if (comparison)
+		{
+			TooltipDecor.drawBorder(event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11, event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()), comparison, index);
+		}
+		else
+		{
+			TooltipDecor.drawBorder(event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getStack(), event.getLines(), event.getFontRenderer(), LegendaryTooltipsConfig.INSTANCE.getFrameLevelForItem(event.getStack()), comparison, index);
+		}
 	}
 }
