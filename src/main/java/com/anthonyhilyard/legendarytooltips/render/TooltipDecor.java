@@ -1,6 +1,7 @@
 package com.anthonyhilyard.legendarytooltips.render;
 
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.client.Minecraft;
@@ -116,14 +117,33 @@ public class TooltipDecor
 		{
 			// Determine the number of "title lines".
 			FormattedText textLine = null;
+			int titleIndex = 0;
 			if (cachedPreWrapLines.containsKey(index))
 			{
-				textLine = cachedPreWrapLines.get(index).get(0).left().get();
+				// Get the first text line from the cached lines.
+				for (Either<FormattedText, TooltipComponent> line : cachedPreWrapLines.get(index))
+				{
+					if (line.left().isPresent())
+					{
+						textLine = line.left().get();
+						break;
+					}
+					titleIndex++;
+				}
 			}
 			else if (cachedPreWrapLines.containsKey(0))
 			{
 				index = 0;
-				textLine = cachedPreWrapLines.get(0).get(0).left().get();
+				// Get the first text line from the cached lines.
+				for (Either<FormattedText, TooltipComponent> line : cachedPreWrapLines.get(0))
+				{
+					if (line.left().isPresent())
+					{
+						textLine = line.left().get();
+						break;
+					}
+					titleIndex++;
+				}
 			}
 
 			if (textLine != null)
@@ -134,8 +154,22 @@ public class TooltipDecor
 				// Only do this if there's more lines below the title.
 				if (cachedPreWrapLines.get(index).size() > titleLineCount)
 				{
-					// If this is a comparison tooltip, we need to move this separator down to the proper position.
 					int offset = 0;
+					// Calculate the offset, which is the height of all components before the title.
+					for (int i = 0; i < titleIndex; i++)
+					{
+						Either<FormattedText, TooltipComponent> line = cachedPreWrapLines.get(index).get(i);
+						if (line.left().isPresent())
+						{
+							offset += font.lineHeight;
+						}
+						else if (line.right().isPresent())
+						{
+							offset += ClientTooltipComponent.create(line.right().get()).getHeight() + 2;
+						}
+					}
+
+					// If this is a comparison tooltip, we need to move the separator down further to the proper position.
 					if (comparison)
 					{
 						offset = 11;

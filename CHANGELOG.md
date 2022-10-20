@@ -1,5 +1,8 @@
 # Changelog
 
+### 1.3.1
+- Fixed a crash that could occur when trying to display some modded tooltip components.
+
 ### 1.3.0
 - All color handling is now handled by Prism library.
   - Now supports web colors for easier color definitions.

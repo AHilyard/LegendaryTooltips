@@ -53,17 +53,16 @@ public class ScreenMixin
 	{
 		if (!components.isEmpty() && LegendaryTooltipsConfig.INSTANCE.centeredTitle.get())
 		{
-			// Calculate tooltip width first.
 			int tooltipWidth = 0;
 			if (LegendaryTooltipsConfig.INSTANCE.enforceMinimumWidth.get())
 			{
 				tooltipWidth = 48;
 			}
 
-			// Replace the first component with the newly-centered version.
-			// TODO: For multi-line titles, this will need to change.
+			// Replace the components with the newly-centered versions.
 			List<ClientTooltipComponent> centeredComponents = Tooltips.centerTitle(components, preEvent.getFont(), tooltipWidth);
-			components.set(0, centeredComponents.get(0));
+			components.clear();
+			components.addAll(centeredComponents);
 		}
 	}
 }

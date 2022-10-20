@@ -21,6 +21,7 @@ import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
 import com.anthonyhilyard.prism.item.ItemColors;
 import com.anthonyhilyard.prism.text.DynamicColor;
 
+@SuppressWarnings("null")
 @Mod.EventBusSubscriber(modid = Loader.MODID, bus = Bus.FORGE, value = Dist.CLIENT)
 public class LegendaryTooltips
 {
