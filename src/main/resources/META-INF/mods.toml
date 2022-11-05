@@ -36,7 +36,7 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="prism"
 	mandatory=true
-	versionRange="[1.0.0,)"
+	versionRange="[1.0.1,)"
 	ordering="NONE"
 	side="BOTH"
 

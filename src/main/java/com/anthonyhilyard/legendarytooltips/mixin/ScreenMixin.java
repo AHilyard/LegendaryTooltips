@@ -61,9 +61,9 @@ public class ScreenMixin
 			}
 
 			// Replace the first component with the newly-centered version.
-			// TODO: For multi-line titles, this will need to change.
 			List<ClientTooltipComponent> centeredComponents = Tooltips.centerTitle(components, preEvent.getFont(), tooltipWidth);
-			components.set(0, centeredComponents.get(0));
+			components.clear();
+			components.addAll(centeredComponents);
 		}
 	}
 }
