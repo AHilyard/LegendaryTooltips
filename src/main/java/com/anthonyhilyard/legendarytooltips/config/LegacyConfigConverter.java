@@ -1,4 +1,4 @@
-package com.anthonyhilyard.legendarytooltips;
+package com.anthonyhilyard.legendarytooltips.config;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.anthonyhilyard.legendarytooltips.Loader;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.io.ParsingMode;
 import com.electronwill.nightconfig.toml.TomlFormat;

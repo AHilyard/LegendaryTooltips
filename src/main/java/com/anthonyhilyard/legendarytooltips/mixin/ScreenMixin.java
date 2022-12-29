@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.anthonyhilyard.iceberg.util.Tooltips;
-import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig;
+import com.anthonyhilyard.iceberg.util.Tooltips.TooltipInfo;
+import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 
 @Mixin(Screen.class)
@@ -39,17 +41,17 @@ public class ScreenMixin
 	{
 		if (LegendaryTooltipsConfig.INSTANCE.enforceMinimumWidth.get())
 		{
-			return 48;
+			return Math.max(width, 48);
 		}
 		else
 		{
-			return 0;
+			return width;
 		}
 	}
 
 	@Inject(method = "renderTooltipInternal", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I", ordinal = 0),
 		locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-	private void centerTitle(PoseStack poseStack, List<ClientTooltipComponent> components, int x, int y, CallbackInfo info, RenderTooltipEvent.Pre preEvent)
+	private void centerTitle(PoseStack poseStack, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, CallbackInfo info, RenderTooltipEvent.Pre preEvent)
 	{
 		if (!components.isEmpty() && LegendaryTooltipsConfig.INSTANCE.centeredTitle.get())
 		{
@@ -60,8 +62,10 @@ public class ScreenMixin
 				tooltipWidth = 48;
 			}
 
+			tooltipWidth = new TooltipInfo(components, preEvent.getFont(), 1).getMaxLineWidth(tooltipWidth);
+
 			// Replace the first component with the newly-centered version.
-			List<ClientTooltipComponent> centeredComponents = Tooltips.centerTitle(components, preEvent.getFont(), tooltipWidth);
+			List<ClientTooltipComponent> centeredComponents = Tooltips.centerTitle(components, preEvent.getFont(), tooltipWidth, Tooltips.calculateTitleLines(components));
 			components.clear();
 			components.addAll(centeredComponents);
 		}

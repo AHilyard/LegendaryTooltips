@@ -3,6 +3,12 @@ package com.anthonyhilyard.legendarytooltips;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.anthonyhilyard.legendarytooltips.config.FrameResourceParser;
+import com.anthonyhilyard.legendarytooltips.config.LegacyConfigConverter;
+import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;
+import com.anthonyhilyard.legendarytooltips.tooltip.ItemModelComponent;
+import com.anthonyhilyard.legendarytooltips.tooltip.PaddingComponent;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,6 +29,9 @@ public class Loader
 	{
 		if (FMLEnvironment.dist == Dist.CLIENT)
 		{
+			ItemModelComponent.registerFactory();
+			PaddingComponent.registerFactory();
+
 			new LegendaryTooltips();
 			MinecraftForge.EVENT_BUS.register(LegendaryTooltips.class);
 
