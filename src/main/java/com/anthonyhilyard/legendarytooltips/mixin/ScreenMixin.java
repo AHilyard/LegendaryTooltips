@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 
 @Mixin(Screen.class)
@@ -51,7 +50,7 @@ public class ScreenMixin
 
 	@Inject(method = "renderTooltipInternal", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I", ordinal = 0),
 		locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-	private void centerTitle(PoseStack poseStack, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, CallbackInfo info, RenderTooltipEvent.Pre preEvent)
+	private void centerTitle(PoseStack poseStack, List<ClientTooltipComponent> components, int x, int y, CallbackInfo info, RenderTooltipEvent.Pre preEvent)
 	{
 		if (!components.isEmpty() && LegendaryTooltipsConfig.INSTANCE.centeredTitle.get())
 		{

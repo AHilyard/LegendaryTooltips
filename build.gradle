@@ -52,7 +52,7 @@ dependencies {
 	minecraft "net.minecraftforge:forge:${project.mcVersion}-${project.forgeVersion}"
 	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-	implementation fg.deobf("curse.maven:iceberg-520110:4238751")
+	implementation fg.deobf("curse.maven:iceberg-520110:4278508")
 	implementation fg.deobf("curse.maven:prism-638111:4238759")
 }
 

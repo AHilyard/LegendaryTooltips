@@ -10,7 +10,7 @@ import com.anthonyhilyard.prism.util.ColorUtil;
 import com.anthonyhilyard.prism.util.ConfigHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -92,7 +92,7 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 		modelViewStack.scale(1.25f, 1.25f, 1.0f);
 		RenderSystem.applyModelViewMatrix();
 
-		customItemRenderer.renderDetailModelIntoGUI(itemStack, 0, 0, Axis.YP.rotationDegrees(Mth.lerp(rotationTimer / 12.0f, 0, 360.0f)));
+		customItemRenderer.renderDetailModelIntoGUI(itemStack, 0, 0, Vector3f.YP.rotationDegrees(Mth.lerp(rotationTimer / 12.0f, 0, 360.0f)));
 
 		modelViewStack.popPose();
 		RenderSystem.applyModelViewMatrix();

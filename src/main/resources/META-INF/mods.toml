@@ -22,14 +22,14 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="minecraft"
 	mandatory=true
-	versionRange="[1.19,)"
+	versionRange="[1.19,1.19.2]"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.0.46,)"
+	versionRange="[1.1.2,)"
 	ordering="NONE"
 	side="BOTH"
 
