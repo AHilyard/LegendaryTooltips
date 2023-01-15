@@ -1,4 +1,4 @@
-package com.anthonyhilyard.legendarytooltips;
+package com.anthonyhilyard.legendarytooltips.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +14,9 @@ import java.util.LinkedHashSet;
 
 import com.anthonyhilyard.iceberg.util.Selectors;
 import com.anthonyhilyard.iceberg.util.Selectors.SelectorDocumentation;
-import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
+import com.anthonyhilyard.legendarytooltips.LegendaryTooltips;
+import com.anthonyhilyard.legendarytooltips.Loader;
+import com.anthonyhilyard.legendarytooltips.tooltip.TooltipDecor;
 import com.anthonyhilyard.prism.text.DynamicColor;
 import com.anthonyhilyard.prism.util.ConfigHelper;
 import com.anthonyhilyard.prism.util.IColor;
@@ -65,12 +67,21 @@ public class LegendaryTooltipsConfig
 		ColorType.BG_END, TextColor.fromRgb(0xE8160A00)
 	);
 
+	public enum ModelRenderType
+	{
+		NONE,
+		EQUIPMENT,
+		ALL
+	}
+
 	public final BooleanValue nameSeparator;
 	public final BooleanValue bordersMatchRarity;
 	public final BooleanValue tooltipShadow;
 	public final BooleanValue shineEffect;
 	public final BooleanValue centeredTitle;
 	public final BooleanValue enforceMinimumWidth;
+	public final BooleanValue compactTooltips;
+	public final ConfigValue<ModelRenderType> renderItemModel;
 
 	final TextColor[] startColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
 	final TextColor[] endColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
@@ -120,6 +131,8 @@ public class LegendaryTooltipsConfig
 		shineEffect = build.comment(" If enabled, items showing a custom border will have a special shine effect when hovered over.").define("shine_effect", true);
 		centeredTitle = build.comment(" If enabled, tooltip titles will be drawn centered.").define("centered_title", true);
 		enforceMinimumWidth = build.comment(" If enabled, tooltips with custom borders will always be at least wide enough to display all border decorations.").define("enforce_minimum_width", false);
+		compactTooltips = build.comment(" If enabled, some unnecessary text and spacing will be removed from equipment tooltips.").define("compact_tooltips", true);
+		renderItemModel = build.comment(" Which items should have a 3D model rendered in the tooltip.  If set to \"equipment\", the model will only be rendered for items with durability.").defineEnum("render_item_model", ModelRenderType.EQUIPMENT);
 
 		build.pop().comment(String.format(" Custom borders are broken into %d \"levels\", with level 0 being intended for the \"best\" or \"rarest\" items. Only level 0 has a custom border built-in, but others can be added with resource packs.", LegendaryTooltips.NUM_FRAMES)).push("custom_borders");
 
@@ -208,6 +221,20 @@ public class LegendaryTooltipsConfig
 		}
 
 		build.pop().pop();
+	}
+
+	public static boolean showModelForItem(ItemStack itemStack)
+	{
+		switch (INSTANCE.renderItemModel.get())
+		{
+			case NONE:
+			default:
+				return false;
+			case ALL:
+				return !itemStack.isEmpty();
+			case EQUIPMENT:
+				return !itemStack.isEmpty() && itemStack.getItem().canBeDepleted();
+		}
 	}
 
 	public static TextColor getColor(Object value)

@@ -6,11 +6,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.locale.Language;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.ChatFormatting;
 
@@ -28,9 +34,16 @@ import com.anthonyhilyard.iceberg.events.RenderTickEvents;
 import com.anthonyhilyard.iceberg.events.RenderTooltipEvents;
 import com.anthonyhilyard.iceberg.events.RenderTooltipEvents.ColorExtResult;
 import com.anthonyhilyard.iceberg.events.RenderTooltipEvents.GatherResult;
-import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameDefinition;
-import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameSource;
-import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
+import com.anthonyhilyard.legendarytooltips.config.FrameResourceParser;
+import com.anthonyhilyard.legendarytooltips.config.LegacyConfigConverter;
+import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;
+import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameDefinition;
+import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameSource;
+import com.anthonyhilyard.legendarytooltips.tooltip.TooltipDecor;
+import com.anthonyhilyard.iceberg.util.StringRecomposer;
+import com.anthonyhilyard.iceberg.util.Tooltips.TitleBreakComponent;
+import com.anthonyhilyard.legendarytooltips.tooltip.ItemModelComponent;
+import com.anthonyhilyard.legendarytooltips.tooltip.PaddingComponent;
 import com.anthonyhilyard.prism.item.ItemColors;
 import com.anthonyhilyard.prism.text.DynamicColor;
 
@@ -46,10 +59,13 @@ public class LegendaryTooltips implements ClientModInitializer
 	@Override
 	public void onInitializeClient()
 	{
-		ModLoadingContext.registerConfig(Loader.MODID, ModConfig.Type.COMMON, LegendaryTooltipsConfig.SPEC);
-
 		// Check for legacy config files to convert now.
 		LegacyConfigConverter.convert();
+
+		ModLoadingContext.registerConfig(Loader.MODID, ModConfig.Type.COMMON, LegendaryTooltipsConfig.SPEC);
+
+		ItemModelComponent.registerFactory();
+		PaddingComponent.registerFactory();
 
 		RenderTooltipEvents.GATHER.register(LegendaryTooltips::onGatherComponentsEvent);
 		RenderTooltipEvents.COLOREXT.register(LegendaryTooltips::onTooltipColorEvent);
@@ -61,14 +77,14 @@ public class LegendaryTooltips implements ClientModInitializer
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(FrameResourceParser.INSTANCE);
 	}
 
-	private static FrameDefinition getDefinitionColors(ItemStack item, int defaultStartBorder, int defaultEndBorder, int defaultStartBackground, int defaultEndBackground)
+	public static FrameDefinition getDefinitionColors(ItemStack item, int defaultStartBorder, int defaultEndBorder, int defaultStartBackground, int defaultEndBackground)
 	{
 		FrameDefinition result = LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(item);
 
 		switch (result.index())
 		{
 			case NO_BORDER:
-			result = new FrameDefinition(result.resource(), result.index(), () -> defaultStartBorder, () -> defaultEndBorder, () -> defaultStartBackground, () -> defaultEndBackground, FrameSource.NONE, 0);
+				result = new FrameDefinition(result.resource(), result.index(), () -> defaultStartBorder, () -> defaultEndBorder, () -> defaultStartBackground, () -> defaultEndBackground, FrameSource.NONE, 0);
 				break;
 
 			case STANDARD:
@@ -129,19 +145,85 @@ public class LegendaryTooltips implements ClientModInitializer
 		return result;
 	}
 
+	public static GatherResult onGatherComponentsEvent(ItemStack itemStack, int screenWidth, int screenHeight, List<Either<FormattedText, TooltipComponent>> tooltipElements, int maxWidth, int index)
+	{
+		// If compact tooltips are turned on, remove a few unneeded lines from the tooltip.
+		if (LegendaryTooltipsConfig.INSTANCE.compactTooltips.get())
+		{
+			// Search for any translatable components with translation keys that start with "item.modifiers." for removal.
+			for (int i = 0; i < tooltipElements.size(); i++)
+			{
+				if (tooltipElements.get(i).left().isPresent())
+				{
+					FormattedText text = tooltipElements.get(i).left().get();
+					if (text instanceof MutableComponent component && component.getContents() instanceof TranslatableContents contents)
+					{
+						// If we find a translatable component with a translation key that starts with "item.modifiers.", remove it and the blank line before it.
+						if (contents.getKey().startsWith("item.modifiers."))
+						{
+							tooltipElements.remove(i);
+
+							if (tooltipElements.size() > i - 1 && i > 0 &&
+								(tooltipElements.get(i - 1).right().isPresent() && tooltipElements.get(i - 1).right().get() == CommonComponents.EMPTY) ||
+								(tooltipElements.get(i - 1).left().isPresent()  && tooltipElements.get(i - 1).left().get().getString().isEmpty()))
+							{
+								tooltipElements.remove(i - 1);
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (LegendaryTooltipsConfig.showModelForItem(itemStack))
+		{
+			// Alter the title by adding enough space to the beginning to make room for the item model.
+			if (!tooltipElements.isEmpty() && tooltipElements.get(0).left().isPresent())
+			{
+				FormattedText title = tooltipElements.get(0).left().get();
+				FormattedCharSequence paddedTitle = FormattedCharSequence.fromList(List.of(FormattedCharSequence.forward("      ", Style.EMPTY), Language.getInstance().getVisualOrder(title), FormattedCharSequence.forward(" ", Style.EMPTY)));
+				List<FormattedText> recomposedTitle = StringRecomposer.recompose(List.of(ClientTooltipComponent.create(paddedTitle)));
+				if (!recomposedTitle.isEmpty())
+				{
+					tooltipElements.set(0, Either.<FormattedText, TooltipComponent>left(recomposedTitle.get(0)));
+
+					// Insert an item model component before the title, and an empty line after it.
+					tooltipElements.add(0, Either.<FormattedText, TooltipComponent>right(new ItemModelComponent(itemStack)));
+
+					// If the only components at this point are the model and the title, we only need to add half a line of spacing.
+					if (tooltipElements.stream().filter(x -> !(x.right().isPresent() && x.right().get() instanceof TitleBreakComponent)).count() == 2)
+					{
+						tooltipElements.add(2, Either.<FormattedText, TooltipComponent>right(new PaddingComponent(6)));
+					}
+					// Otherwise, we'll add a full line.
+					else
+					{
+						tooltipElements.add(2, Either.<FormattedText, TooltipComponent>left(FormattedText.of(" ")));
+					}
+				}
+			}
+		}
+
+		return new GatherResult(InteractionResult.PASS, maxWidth, tooltipElements);
+	}
+
 	public static void onRenderTick(float partialTick)
 	{
-		Minecraft client = Minecraft.getInstance();
-		TooltipDecor.updateTimer();
+		Minecraft mc = Minecraft.getInstance();
 
-		if (client.screen != null)
+		float deltaTime = mc.getDeltaFrameTime() / 50.0f;
+		TooltipDecor.updateTimer(deltaTime);
+		ItemModelComponent.updateTimer(deltaTime);
+
+		if (mc.screen != null)
 		{
-			if (client.screen instanceof AbstractContainerScreen)
+			if (mc.screen instanceof AbstractContainerScreen<?> containerScreen)
 			{
-				if (((AbstractContainerScreen<?>)client.screen).hoveredSlot != null &&
-					((AbstractContainerScreen<?>)client.screen).hoveredSlot.hasItem())
+				if (containerScreen.hoveredSlot != null &&
+					containerScreen.hoveredSlot.hasItem())
 				{
-					ItemStack item = ((AbstractContainerScreen<?>)client.screen).hoveredSlot.getItem();
+					ItemStack item = containerScreen.hoveredSlot.getItem();
 					if (lastTooltipItem != item)
 					{
 						TooltipDecor.resetTimer();
@@ -152,15 +234,6 @@ public class LegendaryTooltips implements ClientModInitializer
 		}
 	}
 
-	public static GatherResult onGatherComponentsEvent(ItemStack itemStack, int screenWidth, int screenHeight, List<Either<FormattedText, TooltipComponent>> tooltipElements, int maxWidth, int index)
-	{
-		if (LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(itemStack).index() != NO_BORDER)
-		{
-			TooltipDecor.setCachedLines(tooltipElements, index);
-		}
-		return new GatherResult(InteractionResult.PASS, maxWidth, tooltipElements);
-	}
-
 	public static ColorExtResult onTooltipColorEvent(ItemStack stack, List<ClientTooltipComponent> components, PoseStack poseStack, int x, int y, Font font, int backgroundStart, int backgroundEnd, int borderStart, int borderEnd, boolean comparison, int index)
 	{
 		ColorExtResult result;
@@ -169,6 +242,8 @@ public class LegendaryTooltips implements ClientModInitializer
 		// Every tooltip will send a color event before a posttext event, so we can store the color here.
 		TooltipDecor.setCurrentTooltipBorderStart(frameDefinition.startBorder().get());
 		TooltipDecor.setCurrentTooltipBorderEnd(frameDefinition.endBorder().get());
+		TooltipDecor.setCurrentTooltipBackgroundStart(frameDefinition.startBackground().get());
+		TooltipDecor.setCurrentTooltipBackgroundEnd(frameDefinition.endBackground().get());
 
 		// If this is a comparison tooltip, we will make the border transparent here so that we can redraw it later.
 		if (comparison)
@@ -206,11 +281,12 @@ public class LegendaryTooltips implements ClientModInitializer
 		// If this is a rare item, draw special border.
 		if (comparison)
 		{
-			TooltipDecor.drawBorder(poseStack, x, y - 11, width, height + 11, itemStack, font, LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(itemStack), comparison, index);
+			// (PoseStack poseStack, int x, int y, int width, int height, ItemStack item, List<ClientTooltipComponent> components, Font font, FrameDefinition frameDefinition, boolean comparison, int index)
+			TooltipDecor.drawBorder(poseStack, x, y - 11, width, height + 11, itemStack, components, font, LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(itemStack), comparison, index);
 		}
 		else
 		{
-			TooltipDecor.drawBorder(poseStack, x, y, width, height, itemStack, font, LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(itemStack), comparison, index);
+			TooltipDecor.drawBorder(poseStack, x, y, width, height, itemStack, components, font, LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(itemStack), comparison, index);
 		}
 	}
 }

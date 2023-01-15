@@ -1,5 +1,14 @@
 # Changelog
 
+### 1.4.1
+- Fixed a bug that could cause non-item tooltips to try to show an item model when item previews were set to ALL.
+
+### 1.4.0
+- Fixed a bug that caused tooltip shine animation to play at different speeds under some circumstances.
+- Added support for Minecraft 1.19.3.
+- Added an option to show a 3D preview of items in tooltips.
+- Added an option to condense tooltips by removing some unneeded lines of text.
+
 ### 1.3.3
 - Added missing Prism dependency (Fabric only).
 

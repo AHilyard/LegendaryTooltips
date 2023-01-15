@@ -1,4 +1,4 @@
-package com.anthonyhilyard.legendarytooltips;
+package com.anthonyhilyard.legendarytooltips.config;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -7,10 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.ColorType;
-import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameDefinition;
-import com.anthonyhilyard.legendarytooltips.LegendaryTooltipsConfig.FrameSource;
-import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
+import com.anthonyhilyard.legendarytooltips.Loader;
+import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.ColorType;
+import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameDefinition;
+import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameSource;
+import com.anthonyhilyard.legendarytooltips.tooltip.TooltipDecor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
