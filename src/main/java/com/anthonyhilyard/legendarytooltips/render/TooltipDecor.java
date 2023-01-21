@@ -57,7 +57,7 @@ public class TooltipDecor
 
 	public static void resetTimer()
 	{
-		shineTimer = 50;
+		shineTimer = LegendaryTooltipsConfig.INSTANCE.shineTicks;
 	}
 	
 	public static void drawShadow(int x, int y, int width, int height)
@@ -151,11 +151,14 @@ public class TooltipDecor
 
 		if (LegendaryTooltipsConfig.INSTANCE.shineEffect)
 		{
+			//Use config-defined value, replace hardcoded values with percents to match original at 50
+			int maxTick = LegendaryTooltipsConfig.INSTANCE.shineTicks;
 			// Draw shiny effect here.
-			if (shineTimer >= 10 && shineTimer <= 40)
+			if (shineTimer >= (maxTick * 0.2F) && shineTimer <= (maxTick * 0.8F))
 			{
-				float interval = MathHelper.clamp((float)(shineTimer - 10) / 20.0f, 0.0f, 1.0f);
+				float interval = MathHelper.clamp(((float)shineTimer - ((float)maxTick * 0.2F)) / ((float)maxTick * 0.6F), 0.0f, 1.0f);
 				int alpha = (int)(0x99 * interval) << 24;
+
 
 				int horizontalMin = x - 3;
 				int horizontalMax = x + width + 3;
@@ -164,17 +167,37 @@ public class TooltipDecor
 				GuiHelper.drawGradientRectHorizontal(402, Math.max(horizontalInterval, horizontalMin), y - 3, Math.min(horizontalInterval + 36, horizontalMax), y - 3 + 1, 0x00FFFFFF | alpha, 0x00FFFFFF);
 			}
 
-			if (shineTimer <= 20)
-			{
-				float interval = MathHelper.clamp((float)shineTimer / 20.0f, 0.0f, 1.0f);
-				int alpha = (int)(0x55 * interval) << 24;
+			if(LegendaryTooltipsConfig.INSTANCE.shineSync) {
+				//Sync vertical interval to horizontal
+				if (shineTimer >= (maxTick * 0.2F) && shineTimer <= (maxTick * 0.8F))
+				{
+					float interval = MathHelper.clamp(((float)shineTimer - ((float)maxTick * 0.2F)) / ((float)maxTick * 0.6F), 0.0f, 1.0f);
+					int alpha = (int)(0x55 * interval) << 24;
 
-				int verticalMin = y - 3 + 1;
-				int verticalMax = y + height + 3 - 1;
-				int verticalInterval = (int)lerp(interval * interval, verticalMax, verticalMin);
-				GuiUtils.drawGradientRect(402, x - 3, Math.max(verticalInterval - 12, verticalMin), x - 3 + 1, Math.min(verticalInterval, verticalMax), 0x00FFFFFF, 0x00FFFFFF | alpha);
-				GuiUtils.drawGradientRect(402, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
+					int verticalMin = y - 3 + 1;
+					int verticalMax = y + height + 3 - 1;
+					int verticalInterval = (int)lerp(interval * interval, verticalMax, verticalMin);
+					GuiUtils.drawGradientRect(402, x - 3, Math.max(verticalInterval - 12, verticalMin), x - 3 + 1, Math.min(verticalInterval, verticalMax), 0x00FFFFFF, 0x00FFFFFF | alpha);
+					GuiUtils.drawGradientRect(402, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
+				}
 			}
+			else {
+				//Don't sync vertical and horizontal, play later as original
+				if (shineTimer <= (maxTick * 0.4F))
+				{
+					float interval = MathHelper.clamp((float)shineTimer / ((float)maxTick * 0.4F), 0.0f, 1.0f);
+					int alpha = (int)(0x55 * interval) << 24;
+
+					int verticalMin = y - 3 + 1;
+					int verticalMax = y + height + 3 - 1;
+					int verticalInterval = (int)lerp(interval * interval, verticalMax, verticalMin);
+					GuiUtils.drawGradientRect(402, x - 3, Math.max(verticalInterval - 12, verticalMin), x - 3 + 1, Math.min(verticalInterval, verticalMax), 0x00FFFFFF, 0x00FFFFFF | alpha);
+					GuiUtils.drawGradientRect(402, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
+				}
+			}
+
+			//Reset timer to repeat shine after it is done playing if config option is enabled
+			if(shineTimer <= 0 && LegendaryTooltipsConfig.INSTANCE.shineRepeat) TooltipDecor.resetTimer();
 		}
 
 		// Here we will overlay a 6-patch border over the tooltip to make it look fancy.

@@ -16,10 +16,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import com.anthonyhilyard.legendarytooltips.render.TooltipDecor;
 import com.anthonyhilyard.legendarytooltips.util.ItemColor;
 
+import net.minecraftforge.fml.relauncher.Side;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-@Mod(modid=Loader.MODID, name=Loader.MODNAME, version=Loader.MODVERSION, acceptedMinecraftVersions = "[1.12.2]")
-@EventBusSubscriber(modid = Loader.MODID)
+@Mod(modid=Loader.MODID, name=Loader.MODNAME, version=Loader.MODVERSION, acceptedMinecraftVersions = "[1.12.2]", clientSideOnly = true)
+@EventBusSubscriber(modid = Loader.MODID, value = Side.CLIENT)
 public class LegendaryTooltips
 {
 	@Instance(Loader.MODID)
@@ -90,7 +91,8 @@ public class LegendaryTooltips
 	@SuppressWarnings({"generic", "null"})
 	public static void onRenderTick(TickEvent.RenderTickEvent event)
 	{
-		TooltipDecor.updateTimer();
+		//Only tick timer once per tick, 2 phases
+		if(event.phase == TickEvent.Phase.END) TooltipDecor.updateTimer();
 
 		Minecraft mc = Minecraft.getMinecraft();
 		if (mc.currentScreen != null)
@@ -106,6 +108,7 @@ public class LegendaryTooltips
 						lastTooltipItem = ((GuiContainer)mc.currentScreen).getSlotUnderMouse().getStack();
 					}
 				}
+				else TooltipDecor.resetTimer();//Required, otherwise mousing over an empty slot or no slot then back does not reset the timer
 			}
 		}
 	}

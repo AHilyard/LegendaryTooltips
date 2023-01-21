@@ -7,7 +7,7 @@ public class Loader
 {
 	public static final String MODID = "legendarytooltips";
 	public static final String MODNAME = "Legendary Tooltips";
-	public static final String MODVERSION = "1.1.8";
+	public static final String MODVERSION = "1.1.9";
 	public static final Logger LOGGER = LogManager.getLogger(MODID);
 
 	public Loader()

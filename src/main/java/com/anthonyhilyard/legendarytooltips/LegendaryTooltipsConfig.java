@@ -23,8 +23,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import com.anthonyhilyard.legendarytooltips.util.Selectors;
 import com.anthonyhilyard.legendarytooltips.util.TextColor;
+import net.minecraftforge.fml.relauncher.Side;
 
-@EventBusSubscriber(modid = Loader.MODID)
+@EventBusSubscriber(modid = Loader.MODID, value = Side.CLIENT)
 public class LegendaryTooltipsConfig extends Configuration
 {
 	public static LegendaryTooltipsConfig INSTANCE;
@@ -37,6 +38,10 @@ public class LegendaryTooltipsConfig extends Configuration
 	public boolean bordersMatchRarity;
 	public boolean tooltipShadow;
 	public boolean shineEffect;
+
+	public boolean shineRepeat;
+	public boolean shineSync;
+	public int shineTicks;
 
 	private final List<List<String>> itemSelectors = new ArrayList<List<String>>(LegendaryTooltips.NUM_FRAMES);
 
@@ -120,6 +125,10 @@ public class LegendaryTooltipsConfig extends Configuration
 		bordersMatchRarity = getBoolean("borders_match_rarity", "visual_options", true, "If enabled, tooltip border colors will match item rarity colors (except for custom borders).");
 		tooltipShadow = getBoolean("tooltip_shadow", "visual_options", true, "If enabled, tooltips will display a drop shadow.");
 		shineEffect = getBoolean("shine_effect", "visual_options", true, "If enabled, items showing a custom border will have a special shine effect when hovered over.");
+		shineRepeat = getBoolean("shine_repeat", "visual_options", false, "Whether or not to repeat the shine effect, or to only play it once.");
+		shineSync = getBoolean("shine_sync", "visual_options", false, "Whether or not to sync horizontal and vertical shine, or delay vertical shine.");
+		shineTicks = getInt("shine_ticks", "visual_options", 50, 50, 800, "The speed at which to player the shine effect, higher value is slower.");
+
 
 		// Level 0 by default applies to epic and rare items.
 		itemSelectors.add(Arrays.asList(getStringList("level0_entries", "definitions", new String[]{"!epic", "!rare"}, "")));
