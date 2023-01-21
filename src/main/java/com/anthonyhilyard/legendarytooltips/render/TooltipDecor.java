@@ -28,7 +28,7 @@ public class TooltipDecor
 	@SuppressWarnings("unused")
 	private static int currentTooltipBorderEnd = 0;
 
-	private static int shineTimer = 0;
+	private static Map<Integer, Integer> shineTimers = new HashMap<Integer, Integer>() {{ put(0, 0); }};
 
 	private static Map<Integer, List<String>> cachedPreWrapLines = new HashMap<Integer, List<String>>();
 
@@ -47,19 +47,27 @@ public class TooltipDecor
 		cachedPreWrapLines.put(index, lines);
 	}
 
-	public static void updateTimer()
+	public static void updateTimers()
 	{
-		if (shineTimer > 0)
+		for (Integer index : shineTimers.keySet())
 		{
-			shineTimer--;
+			shineTimers.put(index, shineTimers.get(index) - 1);
 		}
 	}
 
-	public static void resetTimer()
+	public static void resetTimer(int index)
 	{
-		shineTimer = LegendaryTooltipsConfig.INSTANCE.shineTicks;
+		shineTimers.put(index, LegendaryTooltipsConfig.INSTANCE.shineTicks);
 	}
-	
+
+	public static void resetTimers()
+	{
+		for (Integer index : shineTimers.keySet())
+		{
+			resetTimer(index);
+		}
+	}
+
 	public static void drawShadow(int x, int y, int width, int height)
 	{
 		int shadowColor = 0x44000000;
@@ -151,14 +159,19 @@ public class TooltipDecor
 
 		if (LegendaryTooltipsConfig.INSTANCE.shineEffect)
 		{
-			//Use config-defined value, replace hardcoded values with percents to match original at 50
-			int maxTick = LegendaryTooltipsConfig.INSTANCE.shineTicks;
-			// Draw shiny effect here.
-			if (shineTimer >= (maxTick * 0.2F) && shineTimer <= (maxTick * 0.8F))
+			if (!shineTimers.containsKey(index))
 			{
-				float interval = MathHelper.clamp(((float)shineTimer - ((float)maxTick * 0.2F)) / ((float)maxTick * 0.6F), 0.0f, 1.0f);
-				int alpha = (int)(0x99 * interval) << 24;
+				shineTimers.put(index, LegendaryTooltipsConfig.INSTANCE.shineTicks);
+			}
 
+			// Use config-defined value, replace hardcoded values with percents to match original at 50.
+			int maxTick = LegendaryTooltipsConfig.INSTANCE.shineTicks;
+
+			// Draw shiny effect here.
+			if (shineTimers.get(index) >= (maxTick * 0.2f) && shineTimers.get(index) <= (maxTick * 0.8f))
+			{
+				float interval = MathHelper.clamp(((float)shineTimers.get(index) - ((float)maxTick * 0.2f)) / ((float)maxTick * 0.6f), 0.0f, 1.0f);
+				int alpha = (int)(0x99 * interval) << 24;
 
 				int horizontalMin = x - 3;
 				int horizontalMax = x + width + 3;
@@ -167,11 +180,12 @@ public class TooltipDecor
 				GuiHelper.drawGradientRectHorizontal(402, Math.max(horizontalInterval, horizontalMin), y - 3, Math.min(horizontalInterval + 36, horizontalMax), y - 3 + 1, 0x00FFFFFF | alpha, 0x00FFFFFF);
 			}
 
-			if(LegendaryTooltipsConfig.INSTANCE.shineSync) {
-				//Sync vertical interval to horizontal
-				if (shineTimer >= (maxTick * 0.2F) && shineTimer <= (maxTick * 0.8F))
+			if (LegendaryTooltipsConfig.INSTANCE.shineSync)
+			{
+				// Sync vertical interval to horizontal.
+				if (shineTimers.get(index) >= (maxTick * 0.2f) && shineTimers.get(index) <= (maxTick * 0.8f))
 				{
-					float interval = MathHelper.clamp(((float)shineTimer - ((float)maxTick * 0.2F)) / ((float)maxTick * 0.6F), 0.0f, 1.0f);
+					float interval = MathHelper.clamp(((float)shineTimers.get(index) - ((float)maxTick * 0.2f)) / ((float)maxTick * 0.6f), 0.0f, 1.0f);
 					int alpha = (int)(0x55 * interval) << 24;
 
 					int verticalMin = y - 3 + 1;
@@ -181,11 +195,12 @@ public class TooltipDecor
 					GuiUtils.drawGradientRect(402, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
 				}
 			}
-			else {
-				//Don't sync vertical and horizontal, play later as original
-				if (shineTimer <= (maxTick * 0.4F))
+			else
+			{
+				// Play vertical effect at a delay.
+				if (shineTimers.get(index) <= (maxTick * 0.4f))
 				{
-					float interval = MathHelper.clamp((float)shineTimer / ((float)maxTick * 0.4F), 0.0f, 1.0f);
+					float interval = MathHelper.clamp((float)shineTimers.get(index) / ((float)maxTick * 0.4f), 0.0f, 1.0f);
 					int alpha = (int)(0x55 * interval) << 24;
 
 					int verticalMin = y - 3 + 1;
@@ -196,8 +211,11 @@ public class TooltipDecor
 				}
 			}
 
-			//Reset timer to repeat shine after it is done playing if config option is enabled
-			if(shineTimer <= 0 && LegendaryTooltipsConfig.INSTANCE.shineRepeat) TooltipDecor.resetTimer();
+			// Reset timer to repeat shine after it is done playing if config option is enabled.
+			if (shineTimers.get(index) <= 0 && LegendaryTooltipsConfig.INSTANCE.shineRepeat)
+			{
+				TooltipDecor.resetTimers();
+			}
 		}
 
 		// Here we will overlay a 6-patch border over the tooltip to make it look fancy.

@@ -127,8 +127,7 @@ public class LegendaryTooltipsConfig extends Configuration
 		shineEffect = getBoolean("shine_effect", "visual_options", true, "If enabled, items showing a custom border will have a special shine effect when hovered over.");
 		shineRepeat = getBoolean("shine_repeat", "visual_options", false, "Whether or not to repeat the shine effect, or to only play it once.");
 		shineSync = getBoolean("shine_sync", "visual_options", false, "Whether or not to sync horizontal and vertical shine, or delay vertical shine.");
-		shineTicks = getInt("shine_ticks", "visual_options", 50, 50, 800, "The speed at which to player the shine effect, higher value is slower.");
-
+		shineTicks = getInt("shine_ticks", "visual_options", 50, 20, 800, "The speed at which to play the shine effect, higher value is slower.");
 
 		// Level 0 by default applies to epic and rare items.
 		itemSelectors.add(Arrays.asList(getStringList("level0_entries", "definitions", new String[]{"!epic", "!rare"}, "")));

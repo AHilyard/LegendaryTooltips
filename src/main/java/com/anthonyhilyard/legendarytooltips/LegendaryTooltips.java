@@ -91,8 +91,11 @@ public class LegendaryTooltips
 	@SuppressWarnings({"generic", "null"})
 	public static void onRenderTick(TickEvent.RenderTickEvent event)
 	{
-		//Only tick timer once per tick, 2 phases
-		if(event.phase == TickEvent.Phase.END) TooltipDecor.updateTimer();
+		// Only tick timer once per tick, during the end-tick phase.
+		if (event.phase == TickEvent.Phase.END)
+		{
+			TooltipDecor.updateTimers();
+		}
 
 		Minecraft mc = Minecraft.getMinecraft();
 		if (mc.currentScreen != null)
@@ -104,11 +107,35 @@ public class LegendaryTooltips
 				{
 					if (lastTooltipItem != ((GuiContainer)mc.currentScreen).getSlotUnderMouse().getStack())
 					{
-						TooltipDecor.resetTimer();
+						TooltipDecor.resetTimers();
 						lastTooltipItem = ((GuiContainer)mc.currentScreen).getSlotUnderMouse().getStack();
 					}
 				}
-				else TooltipDecor.resetTimer();//Required, otherwise mousing over an empty slot or no slot then back does not reset the timer
+				else
+				{
+					// Required, otherwise mousing over an empty slot or no slot then back does not reset the timer.
+					TooltipDecor.resetTimers();
+				}
+			}
+		}
+
+		// If Equipment Compare is installed and we've just activated a comparison, reset the timers for all comparison tooltips since they've just appeared.
+		if (net.minecraftforge.fml.common.Loader.isModLoaded("equipmentcompare"))
+		{
+			try
+			{
+				if ((boolean)Class.forName("com.anthonyhilyard.legendarytooltips.compat.EquipmentCompareHandler").getMethod("comparisonsJustActivated").invoke(null))
+				{
+					// Reset timers for all indices except 0.
+					for (int i = 1; i < 10; i++)
+					{
+						TooltipDecor.resetTimer(i);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Loader.LOGGER.error(ExceptionUtils.getStackTrace(e));
 			}
 		}
 	}
