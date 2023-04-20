@@ -45,7 +45,7 @@ public abstract class ItemColor
 
 	public static Integer getColorForItem(ItemStack item, int defaultColor)
 	{
-		Integer result = null;
+		Integer result = null, rarityColor = null;
 
 		if (item == null)
 		{
@@ -57,7 +57,8 @@ public abstract class ItemColor
 			item.getTextComponent().getStyle() != null &&
 			item.getTextComponent().getStyle().getColor() != null)
 		{
-			result = TextColor.getColorFromFormatCode(item.getTextComponent().getStyle().getColor().toString());
+			rarityColor = TextColor.getColorFromFormatCode(item.getTextComponent().getStyle().getColor().toString());
+			result = rarityColor;
 		}
 
 		// Now check for NBT, which should override whatever color we have.
@@ -70,7 +71,7 @@ public abstract class ItemColor
 
 		// If we still haven't found a color or we're still using the rarity color, check the actual tooltip.
 		// This is slow, so it better get cached externally!
-		if (result == null)
+		if (result == null || result == rarityColor)
 		{
 			Minecraft mc = Minecraft.getMinecraft();
 			List<String> lines = item.getTooltip(mc.player, ITooltipFlag.TooltipFlags.ADVANCED);
