@@ -20,7 +20,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 
-@Mixin(Screen.class)
+@Mixin(value = Screen.class, priority = 1001)
 public class ScreenMixin
 {
 	@Shadow

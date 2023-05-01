@@ -1,5 +1,13 @@
 # Changelog
 
+### 1.4.3
+- Fixed an incompatibility with TooltipFix that could cause wrapped tooltips to have incorrectly centered titles.
+
+### 1.4.2
+- Added support for Minecraft 1.19.4.
+- Added configuration option to set rotation speed of 3D item previews.
+- Slightly increased default rotation speed.
+
 ### 1.4.1
 - Fixed a bug that could cause non-item tooltips to try to show an item model when item previews were set to ALL.
 

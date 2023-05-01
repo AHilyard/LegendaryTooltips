@@ -31,7 +31,7 @@ dependencies {
 
 	modImplementation "net.minecraftforge:forgeconfigapiport-fabric:4.0.0"
 	//modImplementation "curse.maven:iceberg-539382:3832794"
-	modImplementation files("libs/Iceberg-1.19.3-fabric-1.1.2.jar")
+	modImplementation files("libs/Iceberg-1.19.4-fabric-1.1.8.jar")
 	modImplementation "curse.maven:prism-665526:3997155"
 	modImplementation "curse.maven:roughlyenoughitems-310111:4167518"
 }

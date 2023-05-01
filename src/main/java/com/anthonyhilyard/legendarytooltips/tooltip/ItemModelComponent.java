@@ -5,6 +5,7 @@ import java.util.List;
 import com.anthonyhilyard.iceberg.renderer.CustomItemRenderer;
 import com.anthonyhilyard.iceberg.util.GuiHelper;
 import com.anthonyhilyard.iceberg.util.Tooltips.InlineComponent;
+import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;
 import com.anthonyhilyard.prism.text.DynamicColor;
 import com.anthonyhilyard.prism.util.ColorUtil;
 import com.anthonyhilyard.prism.util.ConfigHelper;
@@ -31,11 +32,20 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 
 	public static void updateTimer(float partialTick)
 	{
-		rotationTimer += partialTick;
-		if (rotationTimer > 12.0f)
+		double rotationInterval = LegendaryTooltipsConfig.INSTANCE.modelRotationSpeed.get();
+		if (rotationInterval > 0)
 		{
-			rotationTimer -= 12.0f;
+			rotationTimer += partialTick;
+			if (rotationTimer > rotationInterval)
+			{
+				rotationTimer -= rotationInterval;
+			}
 		}
+		else
+		{
+			rotationTimer = 0;
+		}
+
 	}
 
 	public ItemModelComponent(ItemStack itemStack)
@@ -59,10 +69,11 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 	public int getWidth(Font p_169952_) { return getRenderWidth(); }
 
 	@Override
-	public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int z)
+	public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer)
 	{
 		y--;
 		x--;
+		int z = 0;
 		final int margin = 2;
 
 		DynamicColor borderStartColor = DynamicColor.fromRgb(TooltipDecor.currentTooltipBorderStart);
@@ -87,11 +98,17 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 
 		final PoseStack modelViewStack = RenderSystem.getModelViewStack();
 		modelViewStack.pushPose();
-		modelViewStack.translate(x + margin - 1, y + margin - 1, 400.0f);
+		modelViewStack.mulPoseMatrix(poseStack.last().pose());
+		modelViewStack.translate(x + margin - 1, y + margin - 1, 0.0f);
 		modelViewStack.scale(1.25f, 1.25f, 1.0f);
 		RenderSystem.applyModelViewMatrix();
 
-		customItemRenderer.renderDetailModelIntoGUI(itemStack, 0, 0, Axis.YP.rotationDegrees(Mth.lerp(rotationTimer / 12.0f, 0, 360.0f)));
+		float rotationAngle = 0.0f;
+		if (LegendaryTooltipsConfig.INSTANCE.modelRotationSpeed.get() > 0)
+		{
+			rotationAngle = Mth.lerp(rotationTimer / LegendaryTooltipsConfig.INSTANCE.modelRotationSpeed.get().floatValue(), 0, 360.0f);
+		}
+		customItemRenderer.renderDetailModelIntoGUI(itemStack, 0, 0, Axis.YP.rotationDegrees(rotationAngle));
 
 		modelViewStack.popPose();
 		RenderSystem.applyModelViewMatrix();

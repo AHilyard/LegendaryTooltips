@@ -4,8 +4,10 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import com.anthonyhilyard.iceberg.util.Tooltips;
+import com.anthonyhilyard.legendarytooltips.Loader;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -41,7 +43,7 @@ public class RoughlyEnoughItemsScreenOverlayImplFabricMixin
 		}
 		catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e)
 		{
-			e.printStackTrace();
+			Loader.LOGGER.error(ExceptionUtils.getStackTrace(e));
 		}
 	}
 
