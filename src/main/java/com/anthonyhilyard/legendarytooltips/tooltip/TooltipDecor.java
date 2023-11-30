@@ -1,22 +1,17 @@
 package com.anthonyhilyard.legendarytooltips.tooltip;
 
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 import org.joml.Matrix4f;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.anthonyhilyard.iceberg.util.GuiHelper;
 import com.anthonyhilyard.iceberg.util.Tooltips;
@@ -27,7 +22,6 @@ import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.Frame
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.datafixers.util.Either;
 
 import org.lwjgl.opengl.GL11;
 
@@ -41,8 +35,6 @@ public class TooltipDecor
 	static int currentTooltipBackgroundEnd = 0;
 
 	private static float shineTimer = 2.5f;
-
-	private static Map<Integer, List<Either<FormattedText, TooltipComponent>>> cachedPreWrapLines = new HashMap<>();
 
 	public static void setCurrentTooltipBorderStart(int color)
 	{
@@ -62,11 +54,6 @@ public class TooltipDecor
 	public static void setCurrentTooltipBackgroundEnd(int color)
 	{
 		currentTooltipBackgroundEnd = color;
-	}
-
-	public static void setCachedLines(List<Either<FormattedText, TooltipComponent>> lines, int index)
-	{
-		cachedPreWrapLines.put(index, lines);
 	}
 
 	public static void updateTimer(float deltaTime)
@@ -246,25 +233,25 @@ public class TooltipDecor
 		poseStack.translate(0, 0, 410.0);
 
 		// Render top-left corner.
-		GuiComponent.blit(poseStack, x - 6, y - 6, (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
+		GuiHelper.blit(poseStack, x - 6, y - 6, 8, 8, (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
 
 		// Render top-right corner.
-		GuiComponent.blit(poseStack, x + width - 8 + 6, y - 6, 56 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
+		GuiHelper.blit(poseStack, x + width - 8 + 6, y - 6, 8, 8, 56 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
 
 		// Render bottom-left corner.
-		GuiComponent.blit(poseStack, x - 6, y + height - 8 + 6, (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
+		GuiHelper.blit(poseStack, x - 6, y + height - 8 + 6, 8, 8, (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
 
 		// Render bottom-right corner.
-		GuiComponent.blit(poseStack, x + width - 8 + 6, y + height - 8 + 6, 56 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
+		GuiHelper.blit(poseStack, x + width - 8 + 6, y + height - 8 + 6, 8, 8, 56 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
 
 		// Only render central embellishments if the tooltip is 48 pixels wide or more.
 		if (width >= 48)
 		{
 			// Render top central embellishment.
-			GuiComponent.blit(poseStack, x + (width / 2) - 24, y - 9, 8 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 48, 8, textureWidth, textureHeight);
+			GuiHelper.blit(poseStack, x + (width / 2) - 24, y - 9, 48, 8, 8 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 48, 8, textureWidth, textureHeight);
 
 			// Render bottom central embellishment.
-			GuiComponent.blit(poseStack, x + (width / 2) - 24, y + height - 8 + 9, 8 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 48, 8, textureWidth, textureHeight);
+			GuiHelper.blit(poseStack, x + (width / 2) - 24, y + height - 8 + 9, 48, 8, 8 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 48, 8, textureWidth, textureHeight);
 		}
 
 		poseStack.popPose();

@@ -43,7 +43,10 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 		// 			"index": 0,														// optional, defaults to 0
 		// 			"startColor": "",												// optional, defaults to #FF996922 also accepts integer color
 		// 			"endColor": "",													// optional, defaults to #FF5A3A1D also accepts integer color
-		// 			"bgColor": "",													// optional, defaults to #F0160A00 also accepts integer color
+		// 			"bgColor": "",													// optional, mutually exclusive with bgStart/bgEnd colors
+		//																			// defaults to #F0160A00 also accepts integer color
+		// 			"bgStartColor": "",												// optional, defaults to #F0160A00 also accepts integer color
+		// 			"bgEndColor": "",												// optional, defaults to #F0160A00 also accepts integer color
 		// 			"priority": 0,													// optional, defaults to 0
 		// 			"selectors": []													// required
 		// 		},
@@ -52,7 +55,12 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 		// 		}
 		// 	]
 		// }
-		
+
+		LegendaryTooltipsConfig.reset();
+
+		// First clear the data frames in case a definitions file was removed.
+		LegendaryTooltipsConfig.INSTANCE.clearDataFrames();
+
 		try
 		{
 			for (Resource resource : resourceManager.getResourceStack(new ResourceLocation(Loader.MODID, "frame_definitions.json")))
@@ -139,8 +147,12 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 							}
 							
 							// Finally, add the fully-parsed definition.
-							FrameDefinition definition = new FrameDefinition(image, index, () -> colors.get("startColor").getValue(), () -> colors.get("endColor").getValue(),
-								() -> colors.get("bgStartColor") != null ? colors.get("bgStartColor").getValue() : colors.get("bgColor").getValue(), () -> colors.get("bgEndColor") != null ? colors.get("bgEndColor").getValue() : colors.get("bgColor").getValue(), FrameSource.DATA, priority);
+							FrameDefinition definition = new FrameDefinition(image, index,
+								() -> colors.get("startColor").getValue(),
+								() -> colors.get("endColor").getValue(),
+								() -> colors.get("bgStartColor") != null ? colors.get("bgStartColor").getValue() : colors.get("bgColor").getValue(),
+								() -> colors.get("bgEndColor") != null ? colors.get("bgEndColor").getValue() : colors.get("bgColor").getValue(),
+								FrameSource.DATA, priority);
 							LegendaryTooltipsConfig.INSTANCE.addFrameDefinition(definition, selectors);
 						}
 					}

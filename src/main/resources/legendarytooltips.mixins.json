@@ -4,7 +4,7 @@
 	"compatibilityLevel": "JAVA_17",
 	"refmap": "legendarytooltips.refmap.json",
 	"client": [
-		"ScreenMixin"
+		"GuiGraphicsMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -254,22 +254,22 @@ public class LegendaryTooltips
 		{
 			if (event.isComparison())
 			{
-				TooltipDecor.drawShadow(event.getPoseStack(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11);
+				TooltipDecor.drawShadow(event.getGraphics().pose(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11);
 			}
 			else
 			{
-				TooltipDecor.drawShadow(event.getPoseStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight());
+				TooltipDecor.drawShadow(event.getGraphics().pose(), event.getX(), event.getY(), event.getWidth(), event.getHeight());
 			}
 		}
 
 		// If this is a rare item, draw special border.
 		if (event.isComparison())
 		{
-			TooltipDecor.drawBorder(event.getPoseStack(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11, event.getItemStack(), event.getComponents(), event.getFont(), LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(event.getItemStack()), event.isComparison(), event.getIndex());
+			TooltipDecor.drawBorder(event.getGraphics().pose(), event.getX(), event.getY() - 11, event.getWidth(), event.getHeight() + 11, event.getItemStack(), event.getComponents(), event.getFont(), LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(event.getItemStack()), event.isComparison(), event.getIndex());
 		}
 		else
 		{
-			TooltipDecor.drawBorder(event.getPoseStack(), event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getItemStack(), event.getComponents(), event.getFont(), LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(event.getItemStack()), event.isComparison(), event.getIndex());
+			TooltipDecor.drawBorder(event.getGraphics().pose(), event.getX(), event.getY(), event.getWidth(), event.getHeight(), event.getItemStack(), event.getComponents(), event.getFont(), LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(event.getItemStack()), event.isComparison(), event.getIndex());
 		}
 	}
 }

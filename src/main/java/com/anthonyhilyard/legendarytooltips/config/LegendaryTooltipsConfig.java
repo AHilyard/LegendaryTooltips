@@ -395,6 +395,11 @@ public class LegendaryTooltipsConfig
 		customFrameDefinitions.put(definition, selectorSet);
 	}
 
+	void clearDataFrames()
+	{
+		customFrameDefinitions.entrySet().removeIf(entry -> entry.getKey().source == FrameSource.DATA);
+	}
+
 	public FrameDefinition getFrameDefinition(ItemStack item)
 	{
 		if (frameDefinitionCache.containsKey(item))
@@ -482,16 +487,21 @@ public class LegendaryTooltipsConfig
 		return STANDARD_BORDER;
 	}
 
+	public static void reset()
+	{
+		// Clear the frame level cache in case anything has changed.
+		frameDefinitionCache.clear();
+
+		// Also resolve the colors again.
+		resolveColors();
+	}
+
 	@SubscribeEvent
 	public static void onReload(ModConfigEvent.Reloading e)
 	{
 		if (e.getConfig().getModId().equals(Loader.MODID))
 		{
-			// Clear the frame level cache in case anything has changed.
-			frameDefinitionCache.clear();
-
-			// Also resolve the colors again.
-			resolveColors();
+			reset();
 		}
 	}
 }
