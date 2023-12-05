@@ -135,7 +135,7 @@ public class LegendaryTooltipsConfig
 		enforceMinimumWidth = build.comment(" If enabled, tooltips with custom borders will always be at least wide enough to display all border decorations.").define("enforce_minimum_width", false);
 		compactTooltips = build.comment(" If enabled, some unnecessary text and spacing will be removed from equipment tooltips.").define("compact_tooltips", true);
 		renderItemModel = build.comment(" Which items should have a 3D model rendered in the tooltip.  If set to \"equipment\", the model will only be rendered for items with durability.").defineEnum("render_item_model", ModelRenderType.EQUIPMENT);
-		modelRotationSpeed = build.comment(" The speed at which 3D models in tooltips will rotate. Lower values rotate faster, set to 0 to disable rotation.").defineInRange("model_rotation_speed", 10.0, 0, 50.0);
+		modelRotationSpeed = build.comment(" The speed at which 3D models in tooltips will rotate.  Lower values rotate faster, set to 0 to disable rotation.").defineInRange("model_rotation_speed", 12.0, 0, 50.0);
 
 		build.pop().comment(String.format(" Custom borders are broken into %d \"levels\", with level 0 being intended for the \"best\" or \"rarest\" items. Only level 0 has a custom border built-in, but others can be added with resource packs.", LegendaryTooltips.NUM_FRAMES)).push("custom_borders");
 

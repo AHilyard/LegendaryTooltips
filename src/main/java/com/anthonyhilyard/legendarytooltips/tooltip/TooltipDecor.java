@@ -1,6 +1,5 @@
 package com.anthonyhilyard.legendarytooltips.tooltip;
 
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -219,8 +218,8 @@ public class TooltipDecor
 		RenderSystem.setShaderTexture(0, frameDefinition.resource());
 
 		// We have to bind the texture to be able to query it, so do that.
-		Minecraft mc = Minecraft.getInstance();
-		AbstractTexture borderTexture = mc.getTextureManager().getTexture(frameDefinition.resource());
+		final Minecraft minecraft = Minecraft.getInstance();
+		AbstractTexture borderTexture = minecraft.getTextureManager().getTexture(frameDefinition.resource());
 		borderTexture.bind();
 
 		// Grab the width and height of the texture.  This should be 128x128, but old resource packs could still be using 64x64.
@@ -234,25 +233,25 @@ public class TooltipDecor
 		poseStack.translate(0, 0, 410.0);
 
 		// Render top-left corner.
-		GuiComponent.blit(poseStack, x - 6, y - 6, (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
+		GuiHelper.blit(poseStack, x - 6, y - 6, 8, 8, (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
 
 		// Render top-right corner.
-		GuiComponent.blit(poseStack, x + width - 8 + 6, y - 6, 56 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
+		GuiHelper.blit(poseStack, x + width - 8 + 6, y - 6, 8, 8, 56 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 8, 8, textureWidth, textureHeight);
 
 		// Render bottom-left corner.
-		GuiComponent.blit(poseStack, x - 6, y + height - 8 + 6, (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
+		GuiHelper.blit(poseStack, x - 6, y + height - 8 + 6, 8, 8, (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
 
 		// Render bottom-right corner.
-		GuiComponent.blit(poseStack, x + width - 8 + 6, y + height - 8 + 6, 56 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
+		GuiHelper.blit(poseStack, x + width - 8 + 6, y + height - 8 + 6, 8, 8, 56 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 8, 8, textureWidth, textureHeight);
 
 		// Only render central embellishments if the tooltip is 48 pixels wide or more.
 		if (width >= 48)
 		{
 			// Render top central embellishment.
-			GuiComponent.blit(poseStack, x + (width / 2) - 24, y - 9, 8 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 48, 8, textureWidth, textureHeight);
+			GuiHelper.blit(poseStack, x + (width / 2) - 24, y - 9, 48, 8, 8 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight, 48, 8, textureWidth, textureHeight);
 
 			// Render bottom central embellishment.
-			GuiComponent.blit(poseStack, x + (width / 2) - 24, y + height - 8 + 9, 8 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 48, 8, textureWidth, textureHeight);
+			GuiHelper.blit(poseStack, x + (width / 2) - 24, y + height - 8 + 9, 48, 8, 8 + (frameIndex / 8) * 64, (frameIndex * 16) % textureHeight + 8, 48, 8, textureWidth, textureHeight);
 		}
 
 		poseStack.popPose();

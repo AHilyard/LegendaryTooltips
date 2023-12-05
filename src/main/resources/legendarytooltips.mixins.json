@@ -1,15 +1,15 @@
 {
 	"required": true,
 	"package": "com.anthonyhilyard.legendarytooltips.mixin",
-	"compatibilityLevel": "JAVA_16",
+	"compatibilityLevel": "JAVA_17",
 	"plugin": "com.anthonyhilyard.legendarytooltips.mixin.MixinConfig",
 	"client": [
-		"ScreenMixin",
+		"GuiGraphicsMixin",
 		"RoughlyEnoughItemsScreenOverlayImplFabricMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
 	},
-	"minVersion": "0.8.4",
+	"minVersion": "0.8.5",
 	"target": "@env(DEFAULT)"
 }

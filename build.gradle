@@ -29,11 +29,10 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricVersion}"
 
-	modImplementation "net.minecraftforge:forgeconfigapiport-fabric:4.0.0"
-	//modImplementation "curse.maven:iceberg-539382:3832794"
-	modImplementation files("libs/Iceberg-1.19.4-fabric-1.1.8.jar")
-	modImplementation "curse.maven:prism-665526:3997155"
-	modImplementation "curse.maven:roughlyenoughitems-310111:4167518"
+	modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:8.0.0"
+	modImplementation files("libs/Iceberg-1.20.1-fabric-1.1.10.jar")
+	modImplementation files("libs/Prism-1.20.1-fabric-1.0.4.jar")
+	modImplementation "curse.maven:roughlyenoughitems-310111:4622769"
 }
 
 loom {
@@ -51,10 +50,6 @@ processResources {
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
 	it.options.release = 17
-}
-
-java {
-	withSourcesJar()
 }
 
 jar {

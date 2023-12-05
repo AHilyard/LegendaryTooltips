@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.locale.Language;
@@ -26,8 +27,8 @@ import com.mojang.datafixers.util.Either;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 
-import net.minecraftforge.api.ModLoadingContext;
-import net.minecraftforge.api.fml.event.config.ModConfigEvent;
+import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
+import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
 import net.minecraftforge.fml.config.ModConfig;
 
 import com.anthonyhilyard.iceberg.events.RenderTickEvents;
@@ -62,7 +63,7 @@ public class LegendaryTooltips implements ClientModInitializer
 		// Check for legacy config files to convert now.
 		LegacyConfigConverter.convert();
 
-		ModLoadingContext.registerConfig(Loader.MODID, ModConfig.Type.COMMON, LegendaryTooltipsConfig.SPEC);
+		ForgeConfigRegistry.INSTANCE.register(Loader.MODID, ModConfig.Type.COMMON, LegendaryTooltipsConfig.SPEC);
 
 		ItemModelComponent.registerFactory();
 		PaddingComponent.registerFactory();
@@ -72,7 +73,7 @@ public class LegendaryTooltips implements ClientModInitializer
 		RenderTooltipEvents.POSTEXT.register(LegendaryTooltips::onPostTooltipEvent);
 		RenderTickEvents.START.register(LegendaryTooltips::onRenderTick);
 
-		ModConfigEvent.RELOADING.register(LegendaryTooltipsConfig::onReload);
+		ModConfigEvents.reloading(Loader.MODID).register(LegendaryTooltipsConfig::onReload);
 
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(FrameResourceParser.INSTANCE);
 	}
@@ -234,7 +235,7 @@ public class LegendaryTooltips implements ClientModInitializer
 		}
 	}
 
-	public static ColorExtResult onTooltipColorEvent(ItemStack stack, List<ClientTooltipComponent> components, PoseStack poseStack, int x, int y, Font font, int backgroundStart, int backgroundEnd, int borderStart, int borderEnd, boolean comparison, int index)
+	public static ColorExtResult onTooltipColorEvent(ItemStack stack, GuiGraphics graphics, int x, int y, Font font, int backgroundStart, int backgroundEnd, int borderStart, int borderEnd, List<ClientTooltipComponent> components, boolean comparison, int index)
 	{
 		ColorExtResult result;
 		FrameDefinition frameDefinition = getDefinitionColors(stack, borderStart, borderEnd, backgroundStart, backgroundEnd);
@@ -258,12 +259,14 @@ public class LegendaryTooltips implements ClientModInitializer
 		return result;
 	}
 
-	public static void onPostTooltipEvent(ItemStack itemStack, List<ClientTooltipComponent> components, PoseStack poseStack, int x, int y, Font font, int width, int height, boolean comparison, int index)
+	public static void onPostTooltipEvent(ItemStack itemStack, GuiGraphics graphics, int x, int y, Font font, int width, int height, List<ClientTooltipComponent> components, boolean comparison, int index)
 	{
 		if (LegendaryTooltipsConfig.INSTANCE.getFrameDefinition(itemStack).index() == NO_BORDER)
 		{
 			return;
 		}
+
+		PoseStack poseStack = graphics.pose();
 
 		// If tooltip shadows are enabled, draw one now.
 		if (LegendaryTooltipsConfig.INSTANCE.tooltipShadow.get())
