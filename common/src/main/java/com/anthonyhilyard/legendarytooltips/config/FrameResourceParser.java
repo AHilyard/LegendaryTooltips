@@ -43,7 +43,7 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 		// 			"image": "legendarytooltips:textures/gui/tooltip_borders.png",	// optional, defaults to standard or resource-pack defined frame texture
 		// 			"index": 0,														// optional, defaults to 0
 		//			"sizes": {														// optional
-		//				"borderSize": 64,											// optional, defaults to 64
+		//				"frameWidth": 64,											// optional, defaults to 64
 		//				"partSize": 8												// optional, defaults to 8
 		//			},
 		//			"offsets": {													// optional
@@ -88,7 +88,7 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 							ResourceLocation image = TooltipDecor.DEFAULT_BORDERS;
 							int index = 0;
 							int priority = 0;
-							int borderSize = LegendaryTooltipsConfig.DEFAULT_BORDER_SIZE;
+							int frameWidth = LegendaryTooltipsConfig.DEFAULT_FRAME_WIDTH;
 							int partSize = LegendaryTooltipsConfig.DEFAULT_PART_SIZE;
 							int partOffset = LegendaryTooltipsConfig.DEFAULT_PART_OFFSET;
 							int cornerOffset = LegendaryTooltipsConfig.DEFAULT_CORNER_OFFSET;
@@ -121,9 +121,9 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 							if (definitionObject.has("sizes"))
 							{
 								JsonObject sizes = GsonHelper.getAsJsonObject(definitionObject, "sizes");
-								if (sizes.has("borderSize"))
+								if (sizes.has("frameWidth"))
 								{
-									borderSize = sizes.get("borderSize").getAsInt();
+									frameWidth = sizes.get("frameWidth").getAsInt();
 								}
 								if (sizes.has("partSize"))
 								{
@@ -190,7 +190,7 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 								() -> colors.get("endColor").getValue(),
 								() -> colors.get("bgStartColor") != null ? colors.get("bgStartColor").getValue() : colors.get("bgColor").getValue(),
 								() -> colors.get("bgEndColor") != null ? colors.get("bgEndColor").getValue() : colors.get("bgColor").getValue(),
-								FrameSource.DATA, priority, borderSize, partSize, partOffset, cornerOffset);
+								FrameSource.DATA, priority, frameWidth, partSize, partOffset, cornerOffset);
 							LegendaryTooltipsConfig.getInstance().addFrameDefinition(definition, selectors);
 						}
 					}

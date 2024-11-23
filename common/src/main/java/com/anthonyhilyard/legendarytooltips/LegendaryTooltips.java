@@ -61,7 +61,7 @@ public class LegendaryTooltips
 		switch (result.index())
 		{
 			case NO_BORDER:
-				result = new FrameDefinition(result.resource(), result.index(), () -> defaultStartBorder, () -> defaultEndBorder, () -> defaultStartBackground, () -> defaultEndBackground, FrameSource.NONE, 0, result.borderSize(), result.partSize(), result.partOffset(), result.cornerOffset());
+				result = new FrameDefinition(result.resource(), result.index(), () -> defaultStartBorder, () -> defaultEndBorder, () -> defaultStartBackground, () -> defaultEndBackground, FrameSource.NONE, 0, result.frameWidth(), result.partSize(), result.partOffset(), result.cornerOffset());
 				break;
 
 			case STANDARD:
@@ -98,26 +98,26 @@ public class LegendaryTooltips
 					DynamicColor startBGColor = DynamicColor.fromAHSV(0xE4, startBGHue, (int)(rarityColor.saturation() * 0.9f), 14);
 					DynamicColor endBGColor = DynamicColor.fromAHSV(0xFD, endBGHue, (int)(rarityColor.saturation() * 0.8f), 18);
 
-					result = new FrameDefinition(result.resource(), result.index(), () -> startColor.getIntValue(), () -> endColor.getIntValue(), () -> startBGColor.getIntValue(), () -> endBGColor.getIntValue(), FrameSource.NONE, 0, result.borderSize(), result.partSize(), result.partOffset(), result.cornerOffset());
+					result = new FrameDefinition(result.resource(), result.index(), () -> startColor.getIntValue(), () -> endColor.getIntValue(), () -> startBGColor.getIntValue(), () -> endBGColor.getIntValue(), FrameSource.NONE, 0, result.frameWidth(), result.partSize(), result.partOffset(), result.cornerOffset());
 				}
 				break;
 		}
 
 		if (result.startBorder() == null)
 		{
-			result = new FrameDefinition(result.resource(), result.index(), () -> defaultStartBorder, result.endBorder(), result.startBackground(), result.endBackground(), FrameSource.NONE, 0, result.borderSize(), result.partSize(), result.partOffset(), result.cornerOffset());
+			result = new FrameDefinition(result.resource(), result.index(), () -> defaultStartBorder, result.endBorder(), result.startBackground(), result.endBackground(), FrameSource.NONE, 0, result.frameWidth(), result.partSize(), result.partOffset(), result.cornerOffset());
 		}
 		if (result.endBorder() == null)
 		{
-			result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), () -> defaultEndBorder, result.startBackground(), result.endBackground(), FrameSource.NONE, 0, result.borderSize(), result.partSize(), result.partOffset(), result.cornerOffset());
+			result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), () -> defaultEndBorder, result.startBackground(), result.endBackground(), FrameSource.NONE, 0, result.frameWidth(), result.partSize(), result.partOffset(), result.cornerOffset());
 		}
 		if (result.startBackground() == null)
 		{
-			result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), result.endBorder(), () -> defaultStartBackground, result.endBackground(), FrameSource.NONE, 0, result.borderSize(), result.partSize(), result.partOffset(), result.cornerOffset());
+			result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), result.endBorder(), () -> defaultStartBackground, result.endBackground(), FrameSource.NONE, 0, result.frameWidth(), result.partSize(), result.partOffset(), result.cornerOffset());
 		}
 		if (result.endBackground() == null)
 		{
-			result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), result.endBorder(), result.startBackground(), () -> defaultEndBackground, FrameSource.NONE, 0, result.borderSize(), result.partSize(), result.partOffset(), result.cornerOffset());
+			result = new FrameDefinition(result.resource(), result.index(), result.startBorder(), result.endBorder(), result.startBackground(), () -> defaultEndBackground, FrameSource.NONE, 0, result.frameWidth(), result.partSize(), result.partOffset(), result.cornerOffset());
 		}
 		return result;
 	}
