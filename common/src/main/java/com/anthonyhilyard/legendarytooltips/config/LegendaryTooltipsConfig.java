@@ -59,9 +59,9 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 		BG_END
 	}
 
-	public static final int DEFAULT_BORDER_SIZE = 64;
+	public static final int DEFAULT_FRAME_WIDTH = 64;
 	public static final int DEFAULT_PART_SIZE = 8;
-	public static final int DEFAULT_PART_OFFSET = 1;
+	public static final int DEFAULT_PART_OFFSET = -1;
 	public static final int DEFAULT_CORNER_OFFSET = 2;
 
 	public static final Map<ColorType, TextColor> defaultColors = Map.of(
@@ -71,8 +71,8 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 		ColorType.BG_END, TextColor.fromRgb(0xE8160A00)
 	);
 
-	public record FrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, FrameSource source, int priority, int borderSize, int partSize, int partOffset, int cornerOffset) {};
-	private static final FrameDefinition STANDARD_BORDER = new FrameDefinition(null, LegendaryTooltips.STANDARD, null, null, null, null, FrameSource.NONE, 0, DEFAULT_BORDER_SIZE, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
+	public record FrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, FrameSource source, int priority, int frameWidth, int partSize, int partOffset, int cornerOffset) {};
+	private static final FrameDefinition STANDARD_BORDER = new FrameDefinition(null, LegendaryTooltips.STANDARD, null, null, null, null, FrameSource.NONE, 0, DEFAULT_FRAME_WIDTH, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
 	private static final FrameDefinition NO_BORDER = new FrameDefinition(null, LegendaryTooltips.NO_BORDER, null, null, null, null, FrameSource.NONE, 0, 0, 0, 0, 0);
 
 	public enum ModelRenderType
@@ -410,22 +410,22 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 	 */
 	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> background, int priority, List<String> selectors)
 	{
-		addFrameDefinition(resource, index, startBorder, endBorder, background, background, priority, selectors, DEFAULT_BORDER_SIZE, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
+		addFrameDefinition(resource, index, startBorder, endBorder, background, background, priority, selectors, DEFAULT_FRAME_WIDTH, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
 	}
 
 	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, int priority, List<String> selectors)
 	{
-		addFrameDefinition(resource, index, startBorder, endBorder, startBackground, endBackground, priority, selectors, DEFAULT_BORDER_SIZE, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
+		addFrameDefinition(resource, index, startBorder, endBorder, startBackground, endBackground, priority, selectors, DEFAULT_FRAME_WIDTH, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
 	}
 
-	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> background, int priority, List<String> selectors, int borderSize, int partSize, int partOffset, int cornerOffset)
+	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> background, int priority, List<String> selectors, int frameWidth, int partSize, int partOffset, int cornerOffset)
 	{
-		addFrameDefinition(resource, index, startBorder, endBorder, background, background, priority, selectors, borderSize, partSize, partOffset, cornerOffset);
+		addFrameDefinition(resource, index, startBorder, endBorder, background, background, priority, selectors, frameWidth, partSize, partOffset, cornerOffset);
 	}
 
-	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, int priority, List<String> selectors, int borderSize, int partSize, int partOffset, int cornerOffset)
+	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, int priority, List<String> selectors, int frameWidth, int partSize, int partOffset, int cornerOffset)
 	{
-		FrameDefinition definition = new FrameDefinition(resource, index, startBorder, endBorder, startBackground, endBackground, FrameSource.API, priority, borderSize, partSize, partOffset, cornerOffset);
+		FrameDefinition definition = new FrameDefinition(resource, index, startBorder, endBorder, startBackground, endBackground, FrameSource.API, priority, frameWidth, partSize, partOffset, cornerOffset);
 		addFrameDefinition(definition, selectors);
 	}
 
@@ -504,7 +504,7 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 					if (Selectors.itemMatches(item, entry, provider))
 					{
 						// Add to cache.
-						FrameDefinition frameDefinition = new FrameDefinition(TooltipDecor.DEFAULT_BORDERS, frameIndex, () -> startColor.getValue(), () -> endColor.getValue(), () -> startBGColor.getValue(), () -> endBGColor.getValue(), FrameSource.CONFIG, i, DEFAULT_BORDER_SIZE, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
+						FrameDefinition frameDefinition = new FrameDefinition(TooltipDecor.DEFAULT_BORDERS, frameIndex, () -> startColor.getValue(), () -> endColor.getValue(), () -> startBGColor.getValue(), () -> endBGColor.getValue(), FrameSource.CONFIG, i, DEFAULT_FRAME_WIDTH, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
 						frameDefinitionCache.put(item, frameDefinition);
 						return frameDefinition;
 					}
