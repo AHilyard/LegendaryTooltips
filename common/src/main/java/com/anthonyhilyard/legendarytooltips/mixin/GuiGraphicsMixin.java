@@ -17,6 +17,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
+import net.minecraft.resources.ResourceLocation;
 
 @Mixin(value = GuiGraphics.class, priority = 1001)
 public class GuiGraphicsMixin
@@ -48,7 +49,7 @@ public class GuiGraphicsMixin
 	}
 
 	@Inject(method = "renderTooltipInternal", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I", ordinal = 0))
-	private void centerTitle(Font font, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, CallbackInfo info)
+	private void centerTitle(Font font, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, ResourceLocation resourceLocation, CallbackInfo info)
 	{
 		if (!components.isEmpty() && font != null && LegendaryTooltipsConfig.getInstance().centeredTitle.get())
 		{

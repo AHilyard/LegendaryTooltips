@@ -15,7 +15,7 @@ public class PaddingComponent implements TooltipComponent, ClientTooltipComponen
 	}
 
 	@Override
-	public int getHeight() { return height; }
+	public int getHeight(Font font) { return height; }
 
 	@Override
 	public int getWidth(Font font) { return 0; }
