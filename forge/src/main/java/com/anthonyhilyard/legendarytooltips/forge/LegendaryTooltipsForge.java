@@ -9,8 +9,8 @@ import net.minecraftforge.fml.common.Mod;
 @Mod(LegendaryTooltips.MODID)
 public final class LegendaryTooltipsForge
 {
-	public LegendaryTooltipsForge()
+	public LegendaryTooltipsForge(ModLoadingContext context)
 	{
-		ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "ANY", (remote, isServer) -> true));
+		context.registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "ANY", (remote, isServer) -> true));
 	}
 }

@@ -159,11 +159,11 @@ public class TooltipDecor
 					ClientTooltipComponent component = components.get(i);
 					if (component instanceof ClientTextTooltip)
 					{
-						offset += Math.max(component.getHeight(), font.lineHeight);
+						offset += Math.max(component.getHeight(font), font.lineHeight);
 					}
 					else
 					{
-						offset += component.getHeight();
+						offset += component.getHeight(font);
 						if (i <= titleStart)
 						{
 							offset += 2;

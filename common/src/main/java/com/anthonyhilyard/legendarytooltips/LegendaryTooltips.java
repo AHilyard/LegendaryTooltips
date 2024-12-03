@@ -20,6 +20,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.ChatFormatting;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -215,9 +216,9 @@ public class LegendaryTooltips
 		}
 	}
 
-	public static ColorExtResult onTooltipColorEvent(ItemStack stack, GuiGraphics graphics, int x, int y, Font font, int backgroundStart, int backgroundEnd, int borderStart, int borderEnd, List<ClientTooltipComponent> components, boolean comparison, int index)
+	public static ColorExtResult onTooltipColorEvent(ItemStack stack, GuiGraphics graphics, int x, int y, Font font, int backgroundStart, int backgroundEnd, int borderStart, int borderEnd, List<ClientTooltipComponent> components, boolean comparison, int index, ResourceLocation resource, boolean gradientBackground, boolean gradientBorder)
 	{
-		ColorExtResult result = new ColorExtResult(backgroundStart, backgroundEnd, borderStart, borderEnd);
+		ColorExtResult result = new ColorExtResult(backgroundStart, backgroundEnd, borderStart, borderEnd, gradientBackground, gradientBorder);
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.level == null || minecraft.level.registryAccess() == null)
 		{
@@ -225,6 +226,8 @@ public class LegendaryTooltips
 		}
 
 		FrameDefinition frameDefinition = getDefinitionColors(stack, borderStart, borderEnd, backgroundStart, backgroundEnd, minecraft.level.registryAccess());
+		gradientBackground = LegendaryTooltipsConfig.showGradientBackground(resource);
+		gradientBorder = LegendaryTooltipsConfig.showGradientBorder(resource);
 
 		// Every tooltip will send a color event before a posttext event, so we can store the color here.
 		TooltipDecor.setCurrentTooltipBorderStart(frameDefinition.startBorder().get());
@@ -235,11 +238,11 @@ public class LegendaryTooltips
 		// If this is a comparison tooltip, we will make the border transparent here so that we can redraw it later.
 		if (comparison)
 		{
-			result = new ColorExtResult(frameDefinition.startBackground().get(), frameDefinition.endBackground().get(), 0, 0);
+			result = new ColorExtResult(frameDefinition.startBackground().get(), frameDefinition.endBackground().get(), 0, 0, gradientBackground, gradientBorder);
 		}
 		else
 		{
-			result = new ColorExtResult(frameDefinition.startBackground().get(), frameDefinition.endBackground().get(), frameDefinition.startBorder().get(), frameDefinition.endBorder().get());
+			result = new ColorExtResult(frameDefinition.startBackground().get(), frameDefinition.endBackground().get(), frameDefinition.startBorder().get(), frameDefinition.endBorder().get(), gradientBackground, gradientBorder);
 		}
 
 		return result;

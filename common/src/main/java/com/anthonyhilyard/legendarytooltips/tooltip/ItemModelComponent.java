@@ -58,7 +58,7 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 		if (customItemRenderer == null)
 		{
 			Minecraft minecraft = Minecraft.getInstance();
-			customItemRenderer = new CustomItemRenderer(minecraft.getTextureManager(), minecraft.getModelManager(), minecraft.itemColors, minecraft.getItemRenderer().blockEntityRenderer, minecraft);
+			customItemRenderer = new CustomItemRenderer(minecraft, minecraft.getModelManager(), minecraft.itemColors, minecraft.getItemRenderer().blockEntityRenderer);
 		}
 	}
 
@@ -66,13 +66,13 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 	public int getRenderWidth() { return 22; }
 	
 	@Override
-	public int getHeight() { return 4; }
+	public int getHeight(Font font) { return 4; }
 
 	@Override
-	public int getWidth(Font p_169952_) { return getRenderWidth(); }
+	public int getWidth(Font font) { return getRenderWidth(); }
 
 	@Override
-	public void renderImage(Font font, int x, int y, GuiGraphics graphics)
+	public void renderImage(Font font, int x, int y, int width, int height, GuiGraphics graphics)
 	{
 		// We need to flush the GuiGraphics immediately since we are utilizing the modelViewStack for rendering the item model.
 		graphics.flush();
@@ -110,7 +110,6 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 		modelViewStack.mul(matrix);
 		modelViewStack.translate(x + margin - 1, y + margin - 1, 0.0f);
 		modelViewStack.scale(1.25f, 1.25f, 1.0f);
-		RenderSystem.applyModelViewMatrix();
 
 		float rotationAngle = 0.0f;
 		if (LegendaryTooltipsConfig.getInstance().modelRotationSpeed.get() > 0)
@@ -121,7 +120,6 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 		customItemRenderer.renderDetailModelIntoGUI(itemStack, 0, 0, Axis.YP.rotationDegrees(rotationAngle), graphics);
 
 		modelViewStack.popMatrix();
-		RenderSystem.applyModelViewMatrix();
 	}
 
 	public static void registerFactory()

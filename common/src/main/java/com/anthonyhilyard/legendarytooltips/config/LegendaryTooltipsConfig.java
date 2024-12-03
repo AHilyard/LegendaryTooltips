@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.locale.Language;
@@ -75,11 +76,18 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 	private static final FrameDefinition STANDARD_BORDER = new FrameDefinition(null, LegendaryTooltips.STANDARD, null, null, null, null, FrameSource.NONE, 0, DEFAULT_FRAME_WIDTH, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
 	private static final FrameDefinition NO_BORDER = new FrameDefinition(null, LegendaryTooltips.NO_BORDER, null, null, null, null, FrameSource.NONE, 0, 0, 0, 0, 0);
 
-	public enum ModelRenderType
+	private enum ModelRenderType
 	{
 		NONE,
 		EQUIPMENT,
 		ALL
+	}
+
+	private enum RenderMode
+	{
+		RESOURCES,
+		GRADIENT,
+		AUTO
 	}
 
 	public final Supplier<Boolean> nameSeparator;
@@ -91,6 +99,8 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 	public final Supplier<Boolean> compactTooltips;
 	public final Supplier<ModelRenderType> renderItemModel;
 	public final Supplier<Double> modelRotationSpeed;
+	public final Supplier<RenderMode> backgroundRenderMode;
+	public final Supplier<RenderMode> borderRenderMode;
 
 	final TextColor[] startColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
 	final TextColor[] endColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
@@ -137,6 +147,9 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 		compactTooltips = build.comment(" If enabled, some unnecessary text and spacing will be removed from equipment tooltips.").add("compact_tooltips", true);
 		renderItemModel = build.comment(" Which items should have a 3D model rendered in the tooltip.  If set to \"equipment\", the model will only be rendered for items with durability.").addEnum("render_item_model", ModelRenderType.EQUIPMENT);
 		modelRotationSpeed = build.comment(" The speed at which 3D models in tooltips will rotate.  Lower values rotate faster, set to 0 to disable rotation.").addInRange("model_rotation_speed", 12.0, 0, 50.0);
+		backgroundRenderMode = build.comment(" How the tooltip background should be rendered.  If set to \"resources\", the background will always use vanilla or resource-pack provided\n" +
+											 " background image, \"gradient\" will use classic Legendary Tooltips rendering, and \"auto\" will use background images when item-specific resources are provided and gradient otherwise.").addEnum("background_render_mode", RenderMode.AUTO);
+		borderRenderMode = build.comment(" How the tooltip border should be rendered. Uses the same options as background_render_mode.").addEnum("border_render_mode", RenderMode.AUTO);
 
 		build.pop().comment(String.format(" Custom borders are broken into %d \"levels\", with level 0 being intended for the \"best\" or \"rarest\" items. Only level 0 has a custom border built-in, but others can be added with resource packs.", LegendaryTooltips.NUM_FRAMES)).push("custom_borders");
 
@@ -238,6 +251,34 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 				return !itemStack.isEmpty();
 			case EQUIPMENT:
 				return !itemStack.isEmpty() && itemStack.isDamageableItem();
+		}
+	}
+
+	public static boolean showGradientBackground(ResourceLocation backgroundStyle)
+	{
+		switch (getInstance().backgroundRenderMode.get())
+		{
+			case RESOURCES:
+				return true;
+			case GRADIENT:
+				return false;
+			case AUTO:
+			default:
+				return backgroundStyle == TooltipRenderUtil.BACKGROUND_SPRITE || backgroundStyle == null;
+		}
+	}
+
+	public static boolean showGradientBorder(ResourceLocation borderStyle)
+	{
+		switch (getInstance().borderRenderMode.get())
+		{
+			case RESOURCES:
+				return true;
+			case GRADIENT:
+				return false;
+			case AUTO:
+			default:
+				return borderStyle == TooltipRenderUtil.FRAME_SPRITE || borderStyle == null;
 		}
 	}
 

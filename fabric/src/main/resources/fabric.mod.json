@@ -33,9 +33,9 @@
 	],
 
 	"depends": {
-		"fabricloader": ">=0.15.0",
+		"fabricloader": ">=0.16.0",
 		"fabric": "*",
-		"minecraft": ">=1.21",
+		"minecraft": ">=1.21.3",
 		"java": ">=21",
 		"iceberg": ">=1.2.3",
 		"prism": "*"
