@@ -95,18 +95,9 @@ public class TooltipDecor
 
 	public static void drawBorder(PoseStack poseStack, int x, int y, int width, int height, ItemStack item, List<ClientTooltipComponent> components, Font font, FrameDefinition frameDefinition, boolean comparison, int index)
 	{
-		// If this is a comparison tooltip, we need to draw the actual border lines first.
+		// If this is a comparison tooltip, we need to draw a separator under the "equipped" badge.
 		if (comparison)
 		{
-			poseStack.pushPose();
-			Matrix4f matrix = poseStack.last().pose();
-			GuiHelper.drawGradientRect(matrix, 400, x - 3, y - 3 + 1, x - 3 + 1, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
-			GuiHelper.drawGradientRect(matrix, 400, x + width + 2, y - 3 + 1, x + width + 3, y + height + 3 - 1, currentTooltipBorderStart, currentTooltipBorderEnd);
-			GuiHelper.drawGradientRect(matrix, 400, x - 3, y - 3, x + width + 3, y - 3 + 1, currentTooltipBorderStart, currentTooltipBorderStart);
-			GuiHelper.drawGradientRect(matrix, 400, x - 3, y + height + 2, x + width + 3, y + height + 3, currentTooltipBorderEnd, currentTooltipBorderEnd);
-			poseStack.popPose();
-
-			// Now draw a separator under the "equipped" badge.
 			drawSeparator(poseStack, x - 3 + 1, y - 3 + 1 + 10, width, currentTooltipBorderStart);
 		}
 

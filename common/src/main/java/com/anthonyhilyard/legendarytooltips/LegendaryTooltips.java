@@ -235,10 +235,10 @@ public class LegendaryTooltips
 		TooltipDecor.setCurrentTooltipBackgroundStart(frameDefinition.startBackground().get());
 		TooltipDecor.setCurrentTooltipBackgroundEnd(frameDefinition.endBackground().get());
 
-		// If this is a comparison tooltip, we will make the border transparent here so that we can redraw it later.
+		// If this is a comparison tooltip, we will make the border and background transparent here so that we can redraw them later.
 		if (comparison)
 		{
-			result = new ColorExtResult(frameDefinition.startBackground().get(), frameDefinition.endBackground().get(), 0, 0, gradientBackground, gradientBorder);
+			result = new ColorExtResult(0, 0, 0, 0, gradientBackground, gradientBorder);
 		}
 		else
 		{

@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[51,)"
+loaderVersion="[53,)"
 license="CC BY-NC-ND 4.0"
 
 [[mods]]
@@ -15,7 +15,7 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="forge"
 	mandatory=true
-	versionRange="[51,)"
+	versionRange="[53,)"
 	ordering="NONE"
 	side="BOTH"
 
