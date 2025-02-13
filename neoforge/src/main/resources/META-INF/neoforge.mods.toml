@@ -22,7 +22,7 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="minecraft"
 	type="required"
-	versionRange="[1.21.3,)"
+	versionRange="[1.21.4,)"
 	ordering="NONE"
 	side="BOTH"
 
@@ -49,3 +49,6 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 
 [[mixins]]
 	config="legendarytooltips.mixins.json"
+
+[[mixins]]
+	config="legendarytooltips.neoforge.mixins.json"

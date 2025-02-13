@@ -1,10 +1,9 @@
 {
 	"required": true,
-	"package": "com.anthonyhilyard.legendarytooltips.mixin",
+	"package": "com.anthonyhilyard.legendarytooltips.neoforge.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"client": [
-		"GuiGraphicsMixin",
-		"ItemStackMixin"
+		"AttributeUtilMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -58,7 +58,7 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 		if (customItemRenderer == null)
 		{
 			Minecraft minecraft = Minecraft.getInstance();
-			customItemRenderer = new CustomItemRenderer(minecraft, minecraft.getModelManager(), minecraft.itemColors, minecraft.getItemRenderer().blockEntityRenderer);
+			customItemRenderer = new CustomItemRenderer(minecraft, minecraft.getModelManager(), minecraft.getItemModelResolver());
 		}
 	}
 

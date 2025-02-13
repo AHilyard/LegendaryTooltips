@@ -22,7 +22,7 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="minecraft"
 	mandatory=true
-	versionRange="[1.21.3,)"
+	versionRange="[1.21.4,)"
 	ordering="NONE"
 	side="BOTH"
 

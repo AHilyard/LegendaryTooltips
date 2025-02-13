@@ -101,6 +101,7 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 	public final Supplier<Double> modelRotationSpeed;
 	public final Supplier<RenderMode> backgroundRenderMode;
 	public final Supplier<RenderMode> borderRenderMode;
+	public final Supplier<Boolean> fixMC271840;
 
 	final TextColor[] startColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
 	final TextColor[] endColors = new TextColor[LegendaryTooltips.NUM_FRAMES];
@@ -150,6 +151,7 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 		backgroundRenderMode = build.comment(" How the tooltip background should be rendered.  If set to \"resources\", the background will always use vanilla or resource-pack provided\n" +
 											 " background image, \"gradient\" will use classic Legendary Tooltips rendering, and \"auto\" will use background images when item-specific resources are provided and gradient otherwise.").addEnum("background_render_mode", RenderMode.AUTO);
 		borderRenderMode = build.comment(" How the tooltip border should be rendered. Uses the same options as background_render_mode.").addEnum("border_render_mode", RenderMode.AUTO);
+		fixMC271840 = build.comment(" If enabled, fixes a vanilla bug where displayed tooltip damage values are incorrect for weapons with the Sharpness enchantment.").add("fix_mc271840", true);
 
 		build.pop().comment(String.format(" Custom borders are broken into %d \"levels\", with level 0 being intended for the \"best\" or \"rarest\" items. Only level 0 has a custom border built-in, but others can be added with resource packs.", LegendaryTooltips.NUM_FRAMES)).push("custom_borders");
 
