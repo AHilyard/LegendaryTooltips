@@ -6,7 +6,7 @@ import com.anthonyhilyard.iceberg.services.Services;
 import com.anthonyhilyard.legendarytooltips.tooltip.ItemModelComponent;
 import com.anthonyhilyard.legendarytooltips.tooltip.PaddingComponent;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltips;
 import com.anthonyhilyard.legendarytooltips.config.FrameResourceParser;
@@ -23,6 +23,6 @@ public class LegendaryTooltipsClient
 		RenderTooltipEvents.POSTEXT.register(LegendaryTooltips::onPostTooltipEvent);
 		RenderTickEvents.START.register(LegendaryTooltips::onRenderTick);
 
-		Services.getReloadListenerRegistrar().registerListener(FrameResourceParser.INSTANCE, ResourceLocation.fromNamespaceAndPath(LegendaryTooltips.MODID, "frame_definitions"));
+		Services.getReloadListenerRegistrar().registerListener(FrameResourceParser.INSTANCE, Identifier.fromNamespaceAndPath(LegendaryTooltips.MODID, "frame_definitions"));
 	}
 }

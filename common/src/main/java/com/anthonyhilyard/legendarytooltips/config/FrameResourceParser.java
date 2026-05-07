@@ -20,7 +20,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -72,7 +72,7 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 		
 		try
 		{
-			for (Resource resource : resourceManager.getResourceStack(ResourceLocation.fromNamespaceAndPath(LegendaryTooltips.MODID, "frame_definitions.json")))
+			for (Resource resource : resourceManager.getResourceStack(Identifier.fromNamespaceAndPath(LegendaryTooltips.MODID, "frame_definitions.json")))
 			{
 				try (InputStream inputStream = resource.open())
 				{
@@ -85,7 +85,7 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 						for (int i = 0; i < definitions.size(); i++)
 						{
 							JsonObject definitionObject = GsonHelper.convertToJsonObject(definitions.get(i), String.format("definitions[%d]", i));
-							ResourceLocation image = TooltipDecor.DEFAULT_BORDERS;
+							Identifier image = TooltipDecor.DEFAULT_BORDERS;
 							int index = 0;
 							int priority = 0;
 							int frameWidth = LegendaryTooltipsConfig.DEFAULT_FRAME_WIDTH;
@@ -112,10 +112,10 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 							if (definitionObject.has("image"))
 							{
 								String parsedImage = GsonHelper.getAsString(definitionObject, "image");
-								ResourceLocation imageResourceLocation = ResourceLocation.tryParse(parsedImage);
-								if (imageResourceLocation != null)
+								Identifier imageIdentifier = Identifier.tryParse(parsedImage);
+								if (imageIdentifier != null)
 								{
-									image = imageResourceLocation;
+									image = imageIdentifier;
 								}
 							}
 							if (definitionObject.has("sizes"))

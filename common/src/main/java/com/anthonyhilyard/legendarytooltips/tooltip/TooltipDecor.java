@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import org.joml.Matrix4f;
@@ -26,7 +26,7 @@ import org.lwjgl.opengl.GL11;
 
 public class TooltipDecor
 {
-	public static final ResourceLocation DEFAULT_BORDERS = ResourceLocation.fromNamespaceAndPath(LegendaryTooltips.MODID, "textures/gui/tooltip_borders.png");
+	public static final Identifier DEFAULT_BORDERS = Identifier.fromNamespaceAndPath(LegendaryTooltips.MODID, "textures/gui/tooltip_borders.png");
 	
 	static int currentTooltipBorderStart = 0;
 	static int currentTooltipBorderEnd = 0;
