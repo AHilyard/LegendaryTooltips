@@ -2,7 +2,7 @@ architectury {
 	common {
 		clear()
 		add(rootProject.enabledPlatforms.split(','))
-		forgeUsesMojangMappings = true
+		//forgeUsesMojangMappings = true
 	}
 }
 
