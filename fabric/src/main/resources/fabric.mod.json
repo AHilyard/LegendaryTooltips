@@ -35,9 +35,9 @@
 	"depends": {
 		"fabricloader": ">=0.16.0",
 		"fabric-api": "*",
-		"minecraft": ">=1.21.4",
+		"minecraft": "=1.21.11",
 		"java": ">=21",
-		"iceberg": ">=1.2.3",
+		"iceberg": ">=1.4.0",
 		"prism": "*"
 	},
 	"suggests": {

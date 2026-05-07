@@ -34,8 +34,8 @@ subprojects {
 		minecraft "net.minecraft:minecraft:$rootProject.minecraftVersion"
 		mappings loom.officialMojangMappings()
 
-		modImplementation files("../libs/Iceberg-1.21.4-common-1.2.10.jar")
-		modImplementation files("../libs/Prism-1.21.4-common-1.0.10.jar")
+		modImplementation files("../libs/Iceberg-1.21.11-common-1.4.0.jar")
+		modImplementation files("../libs/Prism-1.21.11-common-1.1.0.jar")
 	}
 
 	java {
