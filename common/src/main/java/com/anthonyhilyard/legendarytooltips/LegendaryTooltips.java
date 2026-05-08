@@ -263,29 +263,27 @@ public class LegendaryTooltips
 			return;
 		}
 
-		PoseStack poseStack = graphics.pose();
-
 		// If tooltip shadows are enabled, draw one now.
 		if (LegendaryTooltipsConfig.getInstance().tooltipShadow.get())
 		{
 			if (comparison)
 			{
-				TooltipDecor.drawShadow(poseStack, x, y - 11, width, height + 11);
+				TooltipDecor.drawShadow(graphics, x, y - 11, width, height + 11);
 			}
 			else
 			{
-				TooltipDecor.drawShadow(poseStack, x, y, width, height);
+				TooltipDecor.drawShadow(graphics, x, y, width, height);
 			}
 		}
 
 		// If this item has a defined border, draw it.
 		if (comparison)
 		{
-			TooltipDecor.drawBorder(poseStack, x, y - 11, width, height + 11, itemStack, components, font, frameDefinition, comparison, index);
+			TooltipDecor.drawBorder(graphics, x, y - 11, width, height + 11, itemStack, components, font, frameDefinition, comparison, index);
 		}
 		else
 		{
-			TooltipDecor.drawBorder(poseStack, x, y, width, height, itemStack, components, font, frameDefinition, comparison, index);
+			TooltipDecor.drawBorder(graphics, x, y, width, height, itemStack, components, font, frameDefinition, comparison, index);
 		}
 	}
 }

@@ -76,7 +76,7 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 			{
 				try (InputStream inputStream = resource.open())
 				{
-					JsonObject rootObject = GsonHelper.parse(new InputStreamReader(inputStream, Charsets.UTF_8), true);
+					JsonObject rootObject = GsonHelper.parse(new InputStreamReader(inputStream, Charsets.UTF_8));
 
 					// If the definitions key exists, handle it.  It's okay if it's missing.
 					if (rootObject.has("definitions"))
