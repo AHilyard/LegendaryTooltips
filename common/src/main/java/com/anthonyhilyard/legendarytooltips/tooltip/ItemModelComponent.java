@@ -35,7 +35,7 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 		double rotationInterval = LegendaryTooltipsConfig.getInstance().modelRotationSpeed.get();
 		if (rotationInterval > 0)
 		{
-			rotationTimer += partialTick;
+			rotationTimer += partialTick / 10.0;
 			if (rotationTimer > rotationInterval)
 			{
 				rotationTimer -= rotationInterval;
@@ -56,6 +56,7 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 		{
 			Minecraft minecraft = Minecraft.getInstance();
 			customItemRenderer = new CustomItemRenderer(minecraft);
+			customItemRenderer.render3DArmor = true;
 		}
 	}
 
@@ -109,7 +110,7 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 
 		graphics.nextStratum(); // New Layer
 
-		customItemRenderer.renderDetailModelIntoGUI(itemStack, 0, 0, Axis.YP.rotationDegrees(rotationAngle), graphics);
+		customItemRenderer.renderDetailModelIntoGUI(itemStack, 0, 0, Axis.YP.rotationDegrees(-rotationAngle), graphics);
 
 		poseStack.popMatrix();
 	}
