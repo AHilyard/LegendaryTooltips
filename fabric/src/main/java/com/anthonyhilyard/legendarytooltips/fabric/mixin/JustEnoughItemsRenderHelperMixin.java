@@ -33,7 +33,6 @@ import net.minecraft.world.item.ItemStack;
 public class JustEnoughItemsRenderHelperMixin
 {
 	// For JEI versions prior to 19.5.
-	/*
 	@Surrogate
 	private void setTooltipStack(Screen screen,
 		GuiGraphics graphics,
@@ -78,5 +77,4 @@ public class JustEnoughItemsRenderHelperMixin
 		List<? extends FormattedText> textElements = elements.stream().map(e -> e.map(text -> text, component -> null)).filter(e -> e != null).toList();
 		return new ArrayList<>(Tooltips.gatherTooltipComponents(itemStack, textElements, itemStack.getTooltipImage(), x, screen.width, screen.height, null, screen.font, -1));
 	}
-	*/
 }
