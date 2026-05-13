@@ -32,7 +32,8 @@ public class RoughlyEnoughItemsScreenOverlayImplFabricMixin
 		EntryStack<?> entryStack = tooltip.getContextStack();
 		ItemStack itemStack = entryStack.getType() == VanillaEntryTypes.ITEM ? entryStack.castValue() : ItemStack.EMPTY;
 
-		if (graphics instanceof ITooltipAccess tooltipAccess) {
+		if (graphics instanceof ITooltipAccess tooltipAccess)
+		{
 			tooltipAccess.setIcebergTooltipStack(itemStack);
 		}
 	}

@@ -60,7 +60,8 @@ public class ItemStackMixin
 	}
 
 	private void modifyFormatting(MutableBoolean mutableBoolean, EquipmentSlotGroup equipmentSlotGroup, Consumer<Component> consumer,
-								  AttributeModifier attributeModifier, Player player, ItemAttributeModifiers.Display display, Holder<Attribute> holder) {
+								  AttributeModifier attributeModifier, Player player, ItemAttributeModifiers.Display display, Holder<Attribute> holder)
+	{
 		if (mutableBoolean.isTrue())
 		{
 			consumer.accept(CommonComponents.EMPTY);

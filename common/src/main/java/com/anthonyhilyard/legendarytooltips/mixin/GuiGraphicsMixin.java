@@ -18,10 +18,12 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositione
 import net.minecraft.resources.Identifier;
 
 @Mixin(value = GuiGraphics.class, priority = 1001)
-public class GuiGraphicsMixin {
+public class GuiGraphicsMixin
+{
 
 	@Inject(method = "renderTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/Identifier;)V", at = @At("HEAD"))
-	private void applyLegendaryFormatting(Font font, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, Identifier resourceLocation, CallbackInfo info) {
+	private void applyLegendaryFormatting(Font font, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, Identifier resourceLocation, CallbackInfo info)
+	{
 		if (components.isEmpty() || font == null) return;
 
 		boolean enforceWidth = LegendaryTooltipsConfig.getInstance().enforceMinimumWidth.get();
