@@ -13,10 +13,9 @@ import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.Frame
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameSource;
 import com.anthonyhilyard.legendarytooltips.tooltip.TooltipDecor;
 import com.google.common.base.Charsets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 
+import com.google.gson.stream.JsonReader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import net.minecraft.network.chat.TextColor;
@@ -76,7 +75,10 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 			{
 				try (InputStream inputStream = resource.open())
 				{
-					JsonObject rootObject = GsonHelper.parse(new InputStreamReader(inputStream, Charsets.UTF_8));
+					// Use a lenient reader so that the comments do not throw errors.
+					JsonReader reader = new JsonReader(new InputStreamReader(inputStream, Charsets.UTF_8));
+					reader.setStrictness(Strictness.LENIENT);
+					JsonObject rootObject = JsonParser.parseReader(reader).getAsJsonObject();
 
 					// If the definitions key exists, handle it.  It's okay if it's missing.
 					if (rootObject.has("definitions"))
