@@ -108,7 +108,7 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 			rotationAngle = Mth.lerp(rotationTimer / LegendaryTooltipsConfig.getInstance().modelRotationSpeed.get().floatValue(), 0, 360.0f);
 		}
 
-		graphics.nextStratum(); // New Layer
+		graphics.nextStratum();
 
 		customItemRenderer.renderDetailModelIntoGUI(itemStack, 0, 0, Axis.YP.rotationDegrees(rotationAngle), graphics);
 

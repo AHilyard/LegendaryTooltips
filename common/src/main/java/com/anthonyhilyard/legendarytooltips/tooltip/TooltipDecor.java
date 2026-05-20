@@ -64,7 +64,7 @@ public class TooltipDecor
 	{
 		int shadowColor = 0x44000000;
 
-		graphics.nextStratum(); // New layer
+		graphics.nextStratum();
 		GuiHelper.drawGradientRect(graphics, x - 1,         y + height + 4, x + width + 4, y + height + 5, shadowColor, shadowColor);
 		GuiHelper.drawGradientRect(graphics, x + width + 4, y - 1,          x + width + 5, y + height + 5, shadowColor, shadowColor);
 		GuiHelper.drawGradientRect(graphics, x + width + 3, y + height + 3, x + width + 4, y + height + 4, shadowColor, shadowColor);
@@ -74,7 +74,7 @@ public class TooltipDecor
 
 	public static void drawSeparator(GuiGraphics graphics, int x, int y, int width, int color)
 	{
-		graphics.nextStratum(); // New layer
+		graphics.nextStratum();
 
 		GuiHelper.drawGradientRectHorizontal(graphics, x, y, x + width / 2, y + 1, color & 0xFFFFFF, color);
 		GuiHelper.drawGradientRectHorizontal(graphics, x + width / 2, y, x + width, y + 1, color, color & 0xFFFFFF);
