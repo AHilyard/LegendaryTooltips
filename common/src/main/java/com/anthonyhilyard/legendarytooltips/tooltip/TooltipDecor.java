@@ -1,5 +1,6 @@
 package com.anthonyhilyard.legendarytooltips.tooltip;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -15,6 +16,7 @@ import com.anthonyhilyard.iceberg.util.Tooltips;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltips;
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameDefinition;
+import org.lwjgl.opengl.GL11;
 
 public class TooltipDecor
 {
@@ -197,6 +199,10 @@ public class TooltipDecor
 			}
 		}
 
+		// Grab the width and height of the texture.  This should be 128x128, but old resource packs could still be using 64x64.
+		int textureWidth = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
+		int textureHeight = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+
 		final int frameIndex = frameDefinition.index();
 		final int frameWidth = frameDefinition.frameWidth();
 		final int partSize = frameDefinition.partSize();
@@ -206,9 +212,6 @@ public class TooltipDecor
 		final int partWidth = frameWidth - partSize * 2;
 
 		graphics.nextStratum();
-
-		int textureWidth = 128;
-		int textureHeight = 128;
 
 		GuiHelper.blit(graphics, frameDefinition.resource(), x - partSize + cornerOffset, y - partSize + cornerOffset, partSize, partSize, (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight, partSize, partSize, textureWidth, textureHeight);
 		GuiHelper.blit(graphics, frameDefinition.resource(), x + width - cornerOffset, y - partSize + cornerOffset, partSize, partSize, (frameWidth - partSize) + (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight, partSize, partSize, textureWidth, textureHeight);

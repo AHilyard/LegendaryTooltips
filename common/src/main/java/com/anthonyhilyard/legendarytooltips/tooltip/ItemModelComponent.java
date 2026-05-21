@@ -35,7 +35,7 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 		double rotationInterval = LegendaryTooltipsConfig.getInstance().modelRotationSpeed.get();
 		if (rotationInterval > 0)
 		{
-			rotationTimer += partialTick / 3.0;
+			rotationTimer += partialTick;
 			if (rotationTimer > rotationInterval)
 			{
 				rotationTimer -= rotationInterval;

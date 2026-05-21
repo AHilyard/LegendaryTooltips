@@ -194,7 +194,7 @@ public class LegendaryTooltips
 
 		Minecraft minecraft = Minecraft.getInstance();
 
-		float deltaTime = tracker.getRealtimeDeltaTicks() / 50.0f;
+		float deltaTime = tracker.getRealtimeDeltaTicks() / 20.0f;
 		TooltipDecor.updateTimer(deltaTime);
 		ItemModelComponent.updateTimer(deltaTime);
 
