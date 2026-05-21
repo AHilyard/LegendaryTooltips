@@ -20,10 +20,9 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.ChatFormatting;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
 
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;
@@ -194,7 +193,7 @@ public class LegendaryTooltips
 
 		Minecraft minecraft = Minecraft.getInstance();
 
-		float deltaTime = tracker.getRealtimeDeltaTicks() / 50.0f;
+		float deltaTime = tracker.getRealtimeDeltaTicks() / 20.0f;
 		TooltipDecor.updateTimer(deltaTime);
 		ItemModelComponent.updateTimer(deltaTime);
 
@@ -216,7 +215,7 @@ public class LegendaryTooltips
 		}
 	}
 
-	public static ColorExtResult onTooltipColorEvent(ItemStack stack, GuiGraphics graphics, int x, int y, Font font, int backgroundStart, int backgroundEnd, int borderStart, int borderEnd, List<ClientTooltipComponent> components, boolean comparison, int index, ResourceLocation resource, boolean gradientBackground, boolean gradientBorder)
+	public static ColorExtResult onTooltipColorEvent(ItemStack stack, GuiGraphics graphics, int x, int y, Font font, int backgroundStart, int backgroundEnd, int borderStart, int borderEnd, List<ClientTooltipComponent> components, boolean comparison, int index, Identifier resource, boolean gradientBackground, boolean gradientBorder)
 	{
 		ColorExtResult result = new ColorExtResult(backgroundStart, backgroundEnd, borderStart, borderEnd, gradientBackground, gradientBorder);
 		Minecraft minecraft = Minecraft.getInstance();
@@ -263,29 +262,27 @@ public class LegendaryTooltips
 			return;
 		}
 
-		PoseStack poseStack = graphics.pose();
-
 		// If tooltip shadows are enabled, draw one now.
 		if (LegendaryTooltipsConfig.getInstance().tooltipShadow.get())
 		{
 			if (comparison)
 			{
-				TooltipDecor.drawShadow(poseStack, x, y - 11, width, height + 11);
+				TooltipDecor.drawShadow(graphics, x, y - 11, width, height + 11);
 			}
 			else
 			{
-				TooltipDecor.drawShadow(poseStack, x, y, width, height);
+				TooltipDecor.drawShadow(graphics, x, y, width, height);
 			}
 		}
 
 		// If this item has a defined border, draw it.
 		if (comparison)
 		{
-			TooltipDecor.drawBorder(poseStack, x, y - 11, width, height + 11, itemStack, components, font, frameDefinition, comparison, index);
+			TooltipDecor.drawBorder(graphics, x, y - 11, width, height + 11, itemStack, components, font, frameDefinition, comparison, index);
 		}
 		else
 		{
-			TooltipDecor.drawBorder(poseStack, x, y, width, height, itemStack, components, font, frameDefinition, comparison, index);
+			TooltipDecor.drawBorder(graphics, x, y, width, height, itemStack, components, font, frameDefinition, comparison, index);
 		}
 	}
 }

@@ -17,55 +17,42 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 @Mixin(value = GuiGraphics.class, priority = 1001)
 public class GuiGraphicsMixin
 {
-	@ModifyVariable(method = "renderTooltipInternal", ordinal = 0, at = @At(value = "LOAD", ordinal = 0), argsOnly = true)
-	private List<ClientTooltipComponent> mutableComponents(List<ClientTooltipComponent> components)
+	@ModifyVariable(method = "renderTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/Identifier;)V", at = @At("HEAD"), argsOnly = true)
+	private List<ClientTooltipComponent> makeTooltipMutable(List<ClientTooltipComponent> components)
 	{
-		if (LegendaryTooltipsConfig.getInstance().centeredTitle.get())
-		{
-			return new ArrayList<>(components);
-		}
-		else
-		{
-			return components;
-		}
+		// Makes the components list mutable.
+		return new ArrayList<>(components);
 	}
 
-	@ModifyVariable(method = "renderTooltipInternal", ordinal = 2, at = @At(value = "INVOKE", target = "Ljava/util/List;size()I", ordinal = 0))
-	private int setMinimumWidth(int width)
+	@Inject(method = "renderTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/Identifier;)V", at = @At("HEAD"))
+	private void applyLegendaryFormatting(Font font, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, Identifier resourceLocation, CallbackInfo info)
 	{
-		if (LegendaryTooltipsConfig.getInstance().enforceMinimumWidth.get())
-		{
-			return Math.max(width, 48);
-		}
-		else
-		{
-			return width;
-		}
-	}
+		if (components.isEmpty() || font == null) return;
 
-	@Inject(method = "renderTooltipInternal", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I", ordinal = 0))
-	private void centerTitle(Font font, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, ResourceLocation resourceLocation, CallbackInfo info)
-	{
-		if (!components.isEmpty() && font != null && LegendaryTooltipsConfig.getInstance().centeredTitle.get())
+		boolean enforceWidth = LegendaryTooltipsConfig.getInstance().enforceMinimumWidth.get();
+		boolean centerTitle = LegendaryTooltipsConfig.getInstance().centeredTitle.get();
+
+		if (centerTitle || enforceWidth)
 		{
-			// Calculate tooltip width first.
-			int tooltipWidth = 0;
-			if (LegendaryTooltipsConfig.getInstance().enforceMinimumWidth.get())
+			int minWidth = enforceWidth ? 48 : 0;
+			int currentWidth = new TooltipInfo(components, font, 1).getMaxLineWidth(minWidth);
+
+			if (centerTitle)
 			{
-				tooltipWidth = 48;
+				List<ClientTooltipComponent> centered = Tooltips.centerTitle(components, font, currentWidth, Tooltips.calculateTitleLines(components));
+				components.clear();
+				components.addAll(centered);
 			}
-
-			tooltipWidth = new TooltipInfo(components, font, 1).getMaxLineWidth(tooltipWidth);
-
-			// Replace the first component with the newly-centered version.
-			List<ClientTooltipComponent> centeredComponents = Tooltips.centerTitle(components, font, tooltipWidth, Tooltips.calculateTitleLines(components));
-			components.clear();
-			components.addAll(centeredComponents);
+			else if (enforceWidth)
+			{
+				List<ClientTooltipComponent> padded = Tooltips.centerTitle(components, font, currentWidth, 1);
+				components.set(0, padded.get(0));
+			}
 		}
 	}
 }

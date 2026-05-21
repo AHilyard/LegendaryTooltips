@@ -2,6 +2,7 @@ package com.anthonyhilyard.legendarytooltips.config;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,15 +13,13 @@ import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.Color
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameDefinition;
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameSource;
 import com.anthonyhilyard.legendarytooltips.tooltip.TooltipDecor;
-import com.google.common.base.Charsets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 
+import com.google.gson.stream.JsonReader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -69,14 +68,20 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 
 		// First clear the data frames in case a definitions file was removed.
 		LegendaryTooltipsConfig.getInstance().clearDataFrames();
+
+		// Clear the tooltip decor texture cache.
+		TooltipDecor.clearTextureSizeCache();
 		
 		try
 		{
-			for (Resource resource : resourceManager.getResourceStack(ResourceLocation.fromNamespaceAndPath(LegendaryTooltips.MODID, "frame_definitions.json")))
+			for (Resource resource : resourceManager.getResourceStack(Identifier.fromNamespaceAndPath(LegendaryTooltips.MODID, "frame_definitions.json")))
 			{
 				try (InputStream inputStream = resource.open())
 				{
-					JsonObject rootObject = GsonHelper.parse(new InputStreamReader(inputStream, Charsets.UTF_8), true);
+					// Use a lenient reader so that the comments do not throw errors.
+					JsonReader reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+					reader.setStrictness(Strictness.LENIENT);
+					JsonObject rootObject = JsonParser.parseReader(reader).getAsJsonObject();
 
 					// If the definitions key exists, handle it.  It's okay if it's missing.
 					if (rootObject.has("definitions"))
@@ -85,7 +90,7 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 						for (int i = 0; i < definitions.size(); i++)
 						{
 							JsonObject definitionObject = GsonHelper.convertToJsonObject(definitions.get(i), String.format("definitions[%d]", i));
-							ResourceLocation image = TooltipDecor.DEFAULT_BORDERS;
+							Identifier image = TooltipDecor.DEFAULT_BORDERS;
 							int index = 0;
 							int priority = 0;
 							int frameWidth = LegendaryTooltipsConfig.DEFAULT_FRAME_WIDTH;
@@ -112,10 +117,10 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 							if (definitionObject.has("image"))
 							{
 								String parsedImage = GsonHelper.getAsString(definitionObject, "image");
-								ResourceLocation imageResourceLocation = ResourceLocation.tryParse(parsedImage);
-								if (imageResourceLocation != null)
+								Identifier imageIdentifier = Identifier.tryParse(parsedImage);
+								if (imageIdentifier != null)
 								{
-									image = imageResourceLocation;
+									image = imageIdentifier;
 								}
 							}
 							if (definitionObject.has("sizes"))

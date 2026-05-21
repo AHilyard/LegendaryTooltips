@@ -17,3 +17,6 @@ run
 logs
 libs
 .architectury-transformer
+
+# IntelliJ IDEA
+.idea

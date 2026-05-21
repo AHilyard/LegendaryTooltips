@@ -9,34 +9,34 @@ displayName="Legendary Tooltips"
 displayURL="https://anthonyhilyard.com/"
 updateJSONURL="https://mc-update-check.anthonyhilyard.com/532127"
 logoFile="icon.png"
-authors="Grend"
+authors="Grend, Mat0u5"
 description='''Gives rare items a fancy tooltip and adds additional tooltip configuration options.'''
 
 [[dependencies.legendarytooltips]]
 	modId="forge"
 	mandatory=true
-	versionRange="[53,)"
+	versionRange="[61,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="minecraft"
 	mandatory=true
-	versionRange="[1.21.4,)"
+	versionRange="[1.21.11]"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.2.3,)"
+	versionRange="[1.4.0,)"
 	ordering="AFTER"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="prism"
 	mandatory=true
-	versionRange="[1.0.8,)"
+	versionRange="[1.1.0,)"
 	ordering="AFTER"
 	side="BOTH"
 

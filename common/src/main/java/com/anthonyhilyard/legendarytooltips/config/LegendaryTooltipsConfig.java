@@ -36,7 +36,7 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
@@ -72,7 +72,7 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 		ColorType.BG_END, TextColor.fromRgb(0xE8160A00)
 	);
 
-	public record FrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, FrameSource source, int priority, int frameWidth, int partSize, int partOffset, int cornerOffset) {};
+	public record FrameDefinition(Identifier resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, FrameSource source, int priority, int frameWidth, int partSize, int partOffset, int cornerOffset) {};
 	private static final FrameDefinition STANDARD_BORDER = new FrameDefinition(null, LegendaryTooltips.STANDARD, null, null, null, null, FrameSource.NONE, 0, DEFAULT_FRAME_WIDTH, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
 	private static final FrameDefinition NO_BORDER = new FrameDefinition(null, LegendaryTooltips.NO_BORDER, null, null, null, null, FrameSource.NONE, 0, 0, 0, 0, 0);
 
@@ -256,7 +256,7 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 		}
 	}
 
-	public static boolean showGradientBackground(ResourceLocation backgroundStyle)
+	public static boolean showGradientBackground(Identifier backgroundStyle)
 	{
 		switch (getInstance().backgroundRenderMode.get())
 		{
@@ -270,7 +270,7 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 		}
 	}
 
-	public static boolean showGradientBorder(ResourceLocation borderStyle)
+	public static boolean showGradientBorder(Identifier borderStyle)
 	{
 		switch (getInstance().borderRenderMode.get())
 		{
@@ -336,7 +336,7 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 		return getColor(value, null, null, 0, null);
 	}
 
-	public static TextColor getColor(Object value, TextColor defaultColor, ResourceLocation borderImage, int index, ColorType colorType)
+	public static TextColor getColor(Object value, TextColor defaultColor, Identifier borderImage, int index, ColorType colorType)
 	{
 		TextColor color = (TextColor)(Object)ConfigHelper.parseColor(value);
 		if (color == null)
@@ -451,22 +451,22 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 	 * Adds a new custom frame definition.  If the same frame definition already exists, 
 	 * the provided selectors are added after the already-configured selectors.
 	 */
-	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> background, int priority, List<String> selectors)
+	public void addFrameDefinition(Identifier resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> background, int priority, List<String> selectors)
 	{
 		addFrameDefinition(resource, index, startBorder, endBorder, background, background, priority, selectors, DEFAULT_FRAME_WIDTH, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
 	}
 
-	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, int priority, List<String> selectors)
+	public void addFrameDefinition(Identifier resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, int priority, List<String> selectors)
 	{
 		addFrameDefinition(resource, index, startBorder, endBorder, startBackground, endBackground, priority, selectors, DEFAULT_FRAME_WIDTH, DEFAULT_PART_SIZE, DEFAULT_PART_OFFSET, DEFAULT_CORNER_OFFSET);
 	}
 
-	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> background, int priority, List<String> selectors, int frameWidth, int partSize, int partOffset, int cornerOffset)
+	public void addFrameDefinition(Identifier resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> background, int priority, List<String> selectors, int frameWidth, int partSize, int partOffset, int cornerOffset)
 	{
 		addFrameDefinition(resource, index, startBorder, endBorder, background, background, priority, selectors, frameWidth, partSize, partOffset, cornerOffset);
 	}
 
-	public void addFrameDefinition(ResourceLocation resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, int priority, List<String> selectors, int frameWidth, int partSize, int partOffset, int cornerOffset)
+	public void addFrameDefinition(Identifier resource, int index, Supplier<Integer> startBorder, Supplier<Integer> endBorder, Supplier<Integer> startBackground, Supplier<Integer> endBackground, int priority, List<String> selectors, int frameWidth, int partSize, int partOffset, int cornerOffset)
 	{
 		FrameDefinition definition = new FrameDefinition(resource, index, startBorder, endBorder, startBackground, endBackground, FrameSource.API, priority, frameWidth, partSize, partOffset, cornerOffset);
 		addFrameDefinition(definition, selectors);

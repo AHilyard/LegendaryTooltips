@@ -2,8 +2,7 @@ package com.anthonyhilyard.legendarytooltips.tooltip;
 
 import java.util.List;
 
-import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
+import org.joml.Matrix3x2fStack;
 
 import com.anthonyhilyard.iceberg.events.client.RegisterTooltipComponentFactoryEvent;
 import com.anthonyhilyard.iceberg.renderer.CustomItemRenderer;
@@ -13,8 +12,6 @@ import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;
 import com.anthonyhilyard.prism.text.DynamicColor;
 import com.anthonyhilyard.prism.util.ColorUtil;
 import com.anthonyhilyard.prism.util.ConfigHelper;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.Minecraft;
@@ -58,7 +55,7 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 		if (customItemRenderer == null)
 		{
 			Minecraft minecraft = Minecraft.getInstance();
-			customItemRenderer = new CustomItemRenderer(minecraft, minecraft.getModelManager(), minecraft.getItemModelResolver());
+			customItemRenderer = new CustomItemRenderer(minecraft);
 		}
 	}
 
@@ -74,12 +71,8 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 	@Override
 	public void renderImage(Font font, int x, int y, int width, int height, GuiGraphics graphics)
 	{
-		// We need to flush the GuiGraphics immediately since we are utilizing the modelViewStack for rendering the item model.
-		graphics.flush();
-
 		y--;
 		x--;
-		int z = 0;
 		final int margin = 2;
 
 		DynamicColor borderStartColor = DynamicColor.fromRgb(TooltipDecor.currentTooltipBorderStart);
@@ -90,26 +83,23 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 		int backgroundStart = ColorUtil.combineARGB((int)(backgroundStartColor.alpha() * 0.15f), backgroundStartColor.red(), backgroundStartColor.green(), backgroundStartColor.blue());
 		int backgroundEnd = ColorUtil.combineARGB((int)(backgroundEndColor.alpha() * 0.6f), backgroundEndColor.red(), backgroundEndColor.green(), backgroundEndColor.blue());
 
-		PoseStack poseStack = graphics.pose();
-		Matrix4f matrix = poseStack.last().pose();
-
 		// Draw the background first.
-		GuiHelper.drawGradientRect(matrix, z, x + margin + 1, y + margin + 1, x + getRenderWidth() - margin - 1, y + getRenderHeight() - margin - 1, backgroundStart, backgroundEnd);
-		GuiHelper.drawGradientRect(matrix, z, x + margin + 1, y + margin + 1, x + getRenderWidth() - margin - 1, y + getRenderHeight() - margin - 1, backgroundEnd, backgroundStart);
-		GuiHelper.drawGradientRectHorizontal(matrix, z, x + margin + 1, y + margin + 1, x + getRenderWidth() - margin - 1, y + getRenderHeight() - margin - 1, backgroundStart, backgroundEnd);
-		GuiHelper.drawGradientRectHorizontal(matrix, z, x + margin + 1, y + margin + 1, x + getRenderWidth() - margin - 1, y + getRenderHeight() - margin - 1, backgroundEnd, backgroundStart);
-		
-		// Draw the border.
-		GuiHelper.drawGradientRect(matrix, z, x + margin + 1, y + margin, x + getRenderWidth() - margin - 1, y + margin + 1, borderStart, borderStart);
-		GuiHelper.drawGradientRect(matrix, z, x + margin + 1, y + getRenderHeight() - margin - 1, x + getRenderWidth() - margin - 1, y + getRenderHeight() - margin, borderStart, borderStart);
-		GuiHelper.drawGradientRect(matrix, z, x + margin, y + margin + 1, x + margin + 1, y + getRenderHeight() - margin - 1, borderStart, borderStart);
-		GuiHelper.drawGradientRect(matrix, z, x + getRenderWidth() - margin - 1, y + margin + 1, x + getRenderWidth() - margin, y + getRenderHeight() - margin - 1, borderStart, borderStart);
+		GuiHelper.drawGradientRect(graphics, x + margin + 1, y + margin + 1, x + getRenderWidth() - margin - 1, y + getRenderHeight() - margin - 1, backgroundStart, backgroundEnd);
+		GuiHelper.drawGradientRect(graphics, x + margin + 1, y + margin + 1, x + getRenderWidth() - margin - 1, y + getRenderHeight() - margin - 1, backgroundEnd, backgroundStart);
+		GuiHelper.drawGradientRectHorizontal(graphics, x + margin + 1, y + margin + 1, x + getRenderWidth() - margin - 1, y + getRenderHeight() - margin - 1, backgroundStart, backgroundEnd);
+		GuiHelper.drawGradientRectHorizontal(graphics, x + margin + 1, y + margin + 1, x + getRenderWidth() - margin - 1, y + getRenderHeight() - margin - 1, backgroundEnd, backgroundStart);
 
-		final Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
-		modelViewStack.pushMatrix();
-		modelViewStack.mul(matrix);
-		modelViewStack.translate(x + margin - 1, y + margin - 1, 0.0f);
-		modelViewStack.scale(1.25f, 1.25f, 1.0f);
+		// Draw the border.
+		GuiHelper.drawGradientRect(graphics, x + margin + 1, y + margin, x + getRenderWidth() - margin - 1, y + margin + 1, borderStart, borderStart);
+		GuiHelper.drawGradientRect(graphics, x + margin + 1, y + getRenderHeight() - margin - 1, x + getRenderWidth() - margin - 1, y + getRenderHeight() - margin, borderStart, borderStart);
+		GuiHelper.drawGradientRect(graphics, x + margin, y + margin + 1, x + margin + 1, y + getRenderHeight() - margin - 1, borderStart, borderStart);
+		GuiHelper.drawGradientRect(graphics, x + getRenderWidth() - margin - 1, y + margin + 1, x + getRenderWidth() - margin, y + getRenderHeight() - margin - 1, borderStart, borderStart);
+
+		Matrix3x2fStack poseStack = graphics.pose();
+		poseStack.pushMatrix();
+
+		poseStack.translate(x + margin - 1, y + margin - 1);
+		poseStack.scale(1.25f, 1.25f);
 
 		float rotationAngle = 0.0f;
 		if (LegendaryTooltipsConfig.getInstance().modelRotationSpeed.get() > 0)
@@ -117,9 +107,11 @@ public class ItemModelComponent implements TooltipComponent, ClientTooltipCompon
 			rotationAngle = Mth.lerp(rotationTimer / LegendaryTooltipsConfig.getInstance().modelRotationSpeed.get().floatValue(), 0, 360.0f);
 		}
 
+		graphics.nextStratum();
+
 		customItemRenderer.renderDetailModelIntoGUI(itemStack, 0, 0, Axis.YP.rotationDegrees(rotationAngle), graphics);
 
-		modelViewStack.popMatrix();
+		poseStack.popMatrix();
 	}
 
 	public static void registerFactory()

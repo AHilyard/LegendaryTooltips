@@ -1,32 +1,28 @@
 package com.anthonyhilyard.legendarytooltips.tooltip;
 
+import com.mojang.blaze3d.textures.GpuTexture;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
-import org.joml.Matrix4f;
-
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.anthonyhilyard.iceberg.util.GuiHelper;
 import com.anthonyhilyard.iceberg.util.Tooltips;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltips;
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameDefinition;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import org.lwjgl.opengl.GL11;
 
 public class TooltipDecor
 {
-	public static final ResourceLocation DEFAULT_BORDERS = ResourceLocation.fromNamespaceAndPath(LegendaryTooltips.MODID, "textures/gui/tooltip_borders.png");
+	public static final Identifier DEFAULT_BORDERS = Identifier.fromNamespaceAndPath(LegendaryTooltips.MODID, "textures/gui/tooltip_borders.png");
 	
 	static int currentTooltipBorderStart = 0;
 	static int currentTooltipBorderEnd = 0;
@@ -34,6 +30,28 @@ public class TooltipDecor
 	static int currentTooltipBackgroundEnd = 0;
 
 	private static float shineTimer = 2.5f;
+	private record TextureDimensions(int width, int height) {}
+	private static final Map<Identifier, TextureDimensions> textureSizeCache = new HashMap<>();
+
+	public static void clearTextureSizeCache()
+	{
+		textureSizeCache.clear();
+	}
+
+	private static TextureDimensions getTextureDimensions(Identifier resource)
+	{
+		return textureSizeCache.computeIfAbsent(resource, res -> {
+			try
+			{
+				GpuTexture gpuTexture = Minecraft.getInstance().getTextureManager().getTexture(res).getTexture();
+				return new TextureDimensions(gpuTexture.getWidth(0), gpuTexture.getHeight(0));
+			}
+			catch (Exception e){}
+
+			// Fallback dimensions if anything goes wrong.
+			return new TextureDimensions(128, 128);
+		});
+	}
 
 	public static void setCurrentTooltipBorderStart(int color)
 	{
@@ -67,38 +85,35 @@ public class TooltipDecor
 	{
 		shineTimer = 2.5f;
 	}
-	
-	public static void drawShadow(PoseStack poseStack, int x, int y, int width, int height)
+
+	public static void drawShadow(GuiGraphics graphics, int x, int y, int width, int height)
 	{
 		int shadowColor = 0x44000000;
-		
-		poseStack.pushPose();
-		Matrix4f matrix = poseStack.last().pose();
-		GuiHelper.drawGradientRect(matrix, 390, x - 1,         y + height + 4, x + width + 4, y + height + 5, shadowColor, shadowColor);
-		GuiHelper.drawGradientRect(matrix, 390, x + width + 4, y - 1,          x + width + 5, y + height + 5, shadowColor, shadowColor);
 
-		GuiHelper.drawGradientRect(matrix, 390, x + width + 3, y + height + 3, x + width + 4, y + height + 4, shadowColor, shadowColor);
-
-		GuiHelper.drawGradientRect(matrix, 390, x,             y + height + 5, x + width + 5, y + height + 6, shadowColor, shadowColor);
-		GuiHelper.drawGradientRect(matrix, 390, x + width + 5, y,              x + width + 6, y + height + 5, shadowColor, shadowColor);
-		poseStack.popPose();
+		graphics.nextStratum();
+		GuiHelper.drawGradientRect(graphics, x - 1,         y + height + 4, x + width + 4, y + height + 5, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(graphics, x + width + 4, y - 1,          x + width + 5, y + height + 5, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(graphics, x + width + 3, y + height + 3, x + width + 4, y + height + 4, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(graphics, x,             y + height + 5, x + width + 5, y + height + 6, shadowColor, shadowColor);
+		GuiHelper.drawGradientRect(graphics, x + width + 5, y,              x + width + 6, y + height + 5, shadowColor, shadowColor);
 	}
 
-	public static void drawSeparator(PoseStack poseStack, int x, int y, int width, int color)
+	public static void drawSeparator(GuiGraphics graphics, int x, int y, int width, int color)
 	{
-		poseStack.pushPose();
-		Matrix4f matrix = poseStack.last().pose();
-		GuiHelper.drawGradientRectHorizontal(matrix, 402, x, y, x + width / 2, y + 1, color & 0xFFFFFF, color);
-		GuiHelper.drawGradientRectHorizontal(matrix, 402, x + width / 2, y, x + width, y + 1, color, color & 0xFFFFFF);
-		poseStack.popPose();
+		graphics.nextStratum();
+
+		GuiHelper.drawGradientRectHorizontal(graphics, x, y, x + width / 2, y + 1, color & 0xFFFFFF, color);
+		GuiHelper.drawGradientRectHorizontal(graphics, x + width / 2, y, x + width, y + 1, color, color & 0xFFFFFF);
 	}
 
-	public static void drawBorder(PoseStack poseStack, int x, int y, int width, int height, ItemStack item, List<ClientTooltipComponent> components, Font font, FrameDefinition frameDefinition, boolean comparison, int index)
+	public static void drawBorder(GuiGraphics graphics, int x, int y, int width, int height, ItemStack item, List<ClientTooltipComponent> components, Font font, FrameDefinition frameDefinition, boolean comparison, int index)
 	{
+		graphics.nextStratum();
+
 		// If this is a comparison tooltip, we need to draw a separator under the "equipped" badge.
 		if (comparison)
 		{
-			drawSeparator(poseStack, x - 3 + 1, y - 3 + 1 + 10, width, currentTooltipBorderStart);
+			drawSeparator(graphics, x - 3 + 1, y - 3 + 1 + 10, width, currentTooltipBorderStart);
 		}
 
 		// If the separate name border is enabled, draw it now.
@@ -169,7 +184,7 @@ public class TooltipDecor
 				}
 
 				// Now draw the separator under the title.
-				drawSeparator(poseStack, x - 3 + 1, y - 3 + 2 + offset, width, currentTooltipBorderStart);
+				drawSeparator(graphics, x - 3 + 1, y - 3 + 2 + offset, width, currentTooltipBorderStart);
 			}
 		}
 
@@ -181,9 +196,7 @@ public class TooltipDecor
 		if (LegendaryTooltipsConfig.getInstance().shineEffect.get())
 		{
 			// Draw shiny effect here.
-			poseStack.pushPose();
-			Matrix4f matrix = poseStack.last().pose();
-
+			graphics.nextStratum();
 			if (shineTimer >= 0.5f && shineTimer <= 2.0f)
 			{
 				float interval = Mth.clamp(shineTimer - 0.5f, 0.0f, 1.0f);
@@ -192,8 +205,9 @@ public class TooltipDecor
 				int horizontalMin = x - 3;
 				int horizontalMax = x + width + 3;
 				int horizontalInterval = (int)Mth.lerp(interval * interval, horizontalMax, horizontalMin);
-				GuiHelper.drawGradientRectHorizontal(matrix, 402, Math.max(horizontalInterval - 36, horizontalMin), y - 3, Math.min(horizontalInterval, horizontalMax), y - 3 + 1, 0x00FFFFFF, 0x00FFFFFF | alpha);
-				GuiHelper.drawGradientRectHorizontal(matrix, 402, Math.max(horizontalInterval, horizontalMin), y - 3, Math.min(horizontalInterval + 36, horizontalMax), y - 3 + 1, 0x00FFFFFF | alpha, 0x00FFFFFF);
+
+				GuiHelper.drawGradientRectHorizontal(graphics, Math.max(horizontalInterval - 36, horizontalMin), y - 3, Math.min(horizontalInterval, horizontalMax), y - 3 + 1, 0x00FFFFFF, 0x00FFFFFF | alpha);
+				GuiHelper.drawGradientRectHorizontal(graphics, Math.max(horizontalInterval, horizontalMin), y - 3, Math.min(horizontalInterval + 36, horizontalMax), y - 3 + 1, 0x00FFFFFF | alpha, 0x00FFFFFF);
 			}
 
 			if (shineTimer <= 1.0f)
@@ -204,24 +218,16 @@ public class TooltipDecor
 				int verticalMin = y - 3 + 1;
 				int verticalMax = y + height + 3 - 1;
 				int verticalInterval = (int)Mth.lerp(interval * interval, verticalMax, verticalMin);
-				GuiHelper.drawGradientRect(matrix, 402, x - 3, Math.max(verticalInterval - 12, verticalMin), x - 3 + 1, Math.min(verticalInterval, verticalMax), 0x00FFFFFF, 0x00FFFFFF | alpha);
-				GuiHelper.drawGradientRect(matrix, 402, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
+
+				GuiHelper.drawGradientRect(graphics, x - 3, Math.max(verticalInterval - 12, verticalMin), x - 3 + 1, Math.min(verticalInterval, verticalMax), 0x00FFFFFF, 0x00FFFFFF | alpha);
+				GuiHelper.drawGradientRect(graphics, x - 3, Math.max(verticalInterval, verticalMin), x - 3 + 1, Math.min(verticalInterval + 12, verticalMax), 0x00FFFFFF | alpha, 0x00FFFFFF);
 			}
-			
-			poseStack.popPose();
 		}
 
-		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-		RenderSystem.setShaderTexture(0, frameDefinition.resource());
-
-		// We have to bind the texture to be able to query it, so do that.
-		final Minecraft minecraft = Minecraft.getInstance();
-		AbstractTexture borderTexture = minecraft.getTextureManager().getTexture(frameDefinition.resource());
-		borderTexture.bind();
-
 		// Grab the width and height of the texture.  This should be 128x128, but old resource packs could still be using 64x64.
-		int textureWidth = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
-		int textureHeight = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+		TextureDimensions dims = getTextureDimensions(frameDefinition.resource());
+		int textureWidth = dims.width();
+		int textureHeight = dims.height();
 
 		final int frameIndex = frameDefinition.index();
 		final int frameWidth = frameDefinition.frameWidth();
@@ -231,33 +237,18 @@ public class TooltipDecor
 		final int frameHeight = partSize * 2;
 		final int partWidth = frameWidth - partSize * 2;
 
-		// Here we will overlay a 6-patch border over the tooltip to make it look fancy.
-		poseStack.pushPose();
-		poseStack.translate(0, 0, 410.0);
+		graphics.nextStratum();
 
-		// Render top-left corner.
-		GuiHelper.blit(poseStack, x - partSize + cornerOffset, y - partSize + cornerOffset, partSize, partSize, (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight, partSize, partSize, textureWidth, textureHeight);
-
-		// Render top-right corner.
-		GuiHelper.blit(poseStack, x + width - cornerOffset, y - partSize + cornerOffset, partSize, partSize, (frameWidth - partSize) + (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight, partSize, partSize, textureWidth, textureHeight);
-
-		// Render bottom-left corner.
-		GuiHelper.blit(poseStack, x - partSize + cornerOffset, y + height - cornerOffset, partSize, partSize, (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight + partSize, partSize, partSize, textureWidth, textureHeight);
-
-		// Render bottom-right corner.
-		GuiHelper.blit(poseStack, x + width - cornerOffset, y + height - cornerOffset, partSize, partSize, (frameWidth - partSize) + (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight + partSize, partSize, partSize, textureWidth, textureHeight);
+		GuiHelper.blit(graphics, frameDefinition.resource(), x - partSize + cornerOffset, y - partSize + cornerOffset, partSize, partSize, (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight, partSize, partSize, textureWidth, textureHeight);
+		GuiHelper.blit(graphics, frameDefinition.resource(), x + width - cornerOffset, y - partSize + cornerOffset, partSize, partSize, (frameWidth - partSize) + (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight, partSize, partSize, textureWidth, textureHeight);
+		GuiHelper.blit(graphics, frameDefinition.resource(), x - partSize + cornerOffset, y + height - cornerOffset, partSize, partSize, (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight + partSize, partSize, partSize, textureWidth, textureHeight);
+		GuiHelper.blit(graphics, frameDefinition.resource(), x + width - cornerOffset, y + height - cornerOffset, partSize, partSize, (frameWidth - partSize) + (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight + partSize, partSize, partSize, textureWidth, textureHeight);
 
 		// Only render central embellishments if the tooltip is 48 pixels wide or more.
 		if (width >= partWidth)
 		{
-			// Render top central embellishment.
-			GuiHelper.blit(poseStack, x + (width / 2) - (partWidth / 2), y - partSize + partOffset, partWidth, partSize, partSize + (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight, partWidth, partSize, textureWidth, textureHeight);
-
-			// Render bottom central embellishment.
-			GuiHelper.blit(poseStack, x + (width / 2) - (partWidth / 2), y + height - partOffset, partWidth, partSize, partSize + (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight + partSize, partWidth, partSize, textureWidth, textureHeight);
+			GuiHelper.blit(graphics, frameDefinition.resource(), x + (width / 2) - (partWidth / 2), y - partSize + partOffset, partWidth, partSize, partSize + (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight, partWidth, partSize, textureWidth, textureHeight);
+			GuiHelper.blit(graphics, frameDefinition.resource(), x + (width / 2) - (partWidth / 2), y + height - partOffset, partWidth, partSize, partSize + (frameIndex / 8) * frameWidth, (frameIndex * frameHeight) % textureHeight + partSize, partWidth, partSize, textureWidth, textureHeight);
 		}
-
-		poseStack.popPose();
-
 	}
 }
