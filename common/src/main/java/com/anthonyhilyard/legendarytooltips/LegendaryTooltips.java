@@ -23,7 +23,6 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.ChatFormatting;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
 
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;

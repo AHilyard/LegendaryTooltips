@@ -39,12 +39,17 @@ public class ItemStackMixin
 	@Inject(method = "addAttributeTooltips", at = @At("HEAD"), cancellable = true)
 	private void injectBaseAttackDamageFix(Consumer<Component> consumer, TooltipDisplay tooltipDisplay, @Nullable Player player, CallbackInfo ci)
 	{
-		if (player == null) return;
-		if (!LegendaryTooltipsConfig.getInstance().fixMC271840.get()) return;
+		if (player == null || !LegendaryTooltipsConfig.getInstance().fixMC271840.get())
+		{
+			return;
+		}
 
 		ci.cancel();
 
-		if (!tooltipDisplay.shows(DataComponents.ATTRIBUTE_MODIFIERS)) return;
+		if (!tooltipDisplay.shows(DataComponents.ATTRIBUTE_MODIFIERS))
+		{
+			return;
+		}
 
 		for (EquipmentSlotGroup equipmentSlotGroup : EquipmentSlotGroup.values())
 		{
