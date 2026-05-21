@@ -1,22 +1,27 @@
 package com.anthonyhilyard.legendarytooltips.tooltip;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.Font;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.anthonyhilyard.iceberg.util.GuiHelper;
 import com.anthonyhilyard.iceberg.util.Tooltips;
 import com.anthonyhilyard.legendarytooltips.LegendaryTooltips;
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameDefinition;
-import org.lwjgl.opengl.GL11;
 
 public class TooltipDecor
 {
@@ -28,6 +33,31 @@ public class TooltipDecor
 	static int currentTooltipBackgroundEnd = 0;
 
 	private static float shineTimer = 2.5f;
+	private record TextureDimensions(int width, int height) {}
+	private static final Map<Identifier, TextureDimensions> textureSizeCache = new HashMap<>();
+
+	private static TextureDimensions getTextureDimensions(Identifier resource)
+	{
+		return textureSizeCache.computeIfAbsent(resource, res -> {
+			try
+			{
+				// Try and get the dimensions from the image itself.
+				Optional<Resource> resourceOpt = Minecraft.getInstance().getResourceManager().getResource(res);
+				if (resourceOpt.isPresent())
+				{
+					try (InputStream stream = resourceOpt.get().open();
+						 NativeImage image = NativeImage.read(stream))
+					{
+						return new TextureDimensions(image.getWidth(), image.getHeight());
+					}
+				}
+			}
+			catch (Exception e){}
+
+			// Fallback dimensions if anything goes wrong.
+			return new TextureDimensions(128, 128);
+		});
+	}
 
 	public static void setCurrentTooltipBorderStart(int color)
 	{
@@ -201,8 +231,9 @@ public class TooltipDecor
 		}
 
 		// Grab the width and height of the texture.  This should be 128x128, but old resource packs could still be using 64x64.
-		int textureWidth = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_WIDTH);
-		int textureHeight = GlStateManager._getTexLevelParameter(GL11.GL_TEXTURE_2D, 0, GL11.GL_TEXTURE_HEIGHT);
+		TextureDimensions dims = getTextureDimensions(frameDefinition.resource());
+		int textureWidth = dims.width();
+		int textureHeight = dims.height();
 
 		final int frameIndex = frameDefinition.index();
 		final int frameWidth = frameDefinition.frameWidth();
