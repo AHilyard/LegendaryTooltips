@@ -2,6 +2,7 @@ package com.anthonyhilyard.legendarytooltips.config;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +13,6 @@ import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.Color
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameDefinition;
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig.FrameSource;
 import com.anthonyhilyard.legendarytooltips.tooltip.TooltipDecor;
-import com.google.common.base.Charsets;
 import com.google.gson.*;
 
 import com.google.gson.stream.JsonReader;
@@ -76,7 +76,7 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 				try (InputStream inputStream = resource.open())
 				{
 					// Use a lenient reader so that the comments do not throw errors.
-					JsonReader reader = new JsonReader(new InputStreamReader(inputStream, Charsets.UTF_8));
+					JsonReader reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 					reader.setStrictness(Strictness.LENIENT);
 					JsonObject rootObject = JsonParser.parseReader(reader).getAsJsonObject();
 

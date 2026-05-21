@@ -86,6 +86,7 @@ public class TooltipDecor
 	{
 		graphics.nextStratum();
 
+		// If this is a comparison tooltip, we need to draw a separator under the "equipped" badge.
 		if (comparison)
 		{
 			drawSeparator(graphics, x - 3 + 1, y - 3 + 1 + 10, width, currentTooltipBorderStart);
