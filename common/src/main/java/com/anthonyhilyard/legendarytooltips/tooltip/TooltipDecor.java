@@ -1,21 +1,18 @@
 package com.anthonyhilyard.legendarytooltips.tooltip;
 
-import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.Font;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.anthonyhilyard.iceberg.util.GuiHelper;
 import com.anthonyhilyard.iceberg.util.Tooltips;
@@ -36,21 +33,18 @@ public class TooltipDecor
 	private record TextureDimensions(int width, int height) {}
 	private static final Map<Identifier, TextureDimensions> textureSizeCache = new HashMap<>();
 
+	public static void clearTextureSizeCache()
+	{
+		textureSizeCache.clear();
+	}
+
 	private static TextureDimensions getTextureDimensions(Identifier resource)
 	{
 		return textureSizeCache.computeIfAbsent(resource, res -> {
 			try
 			{
-				// Try and get the dimensions from the image itself.
-				Optional<Resource> resourceOpt = Minecraft.getInstance().getResourceManager().getResource(res);
-				if (resourceOpt.isPresent())
-				{
-					try (InputStream stream = resourceOpt.get().open();
-						 NativeImage image = NativeImage.read(stream))
-					{
-						return new TextureDimensions(image.getWidth(), image.getHeight());
-					}
-				}
+				GpuTexture gpuTexture = Minecraft.getInstance().getTextureManager().getTexture(res).getTexture();
+				return new TextureDimensions(gpuTexture.getWidth(0), gpuTexture.getHeight(0));
 			}
 			catch (Exception e){}
 

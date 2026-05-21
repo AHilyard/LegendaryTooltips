@@ -68,6 +68,9 @@ public final class FrameResourceParser implements ResourceManagerReloadListener
 
 		// First clear the data frames in case a definitions file was removed.
 		LegendaryTooltipsConfig.getInstance().clearDataFrames();
+
+		// Clear the tooltip decor texture cache.
+		TooltipDecor.clearTextureSizeCache();
 		
 		try
 		{
