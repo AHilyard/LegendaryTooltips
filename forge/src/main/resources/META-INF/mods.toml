@@ -15,28 +15,28 @@ description='''Gives rare items a fancy tooltip and adds additional tooltip conf
 [[dependencies.legendarytooltips]]
 	modId="forge"
 	mandatory=true
-	versionRange="[61,)"
+	versionRange="[64,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="minecraft"
 	mandatory=true
-	versionRange="[1.21.11]"
+	versionRange="[26.1,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="iceberg"
 	mandatory=true
-	versionRange="[1.4.0,)"
+	versionRange="[1.4.1,)"
 	ordering="AFTER"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="prism"
 	mandatory=true
-	versionRange="[1.1.0,)"
+	versionRange="[1.1.1,)"
 	ordering="AFTER"
 	side="BOTH"
 
