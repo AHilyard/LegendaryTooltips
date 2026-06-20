@@ -2,13 +2,13 @@ package com.anthonyhilyard.legendarytooltips;
 
 import java.util.List;
 
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.HolderLookup;
@@ -215,7 +215,7 @@ public class LegendaryTooltips
 		}
 	}
 
-	public static ColorExtResult onTooltipColorEvent(ItemStack stack, GuiGraphics graphics, int x, int y, Font font, int backgroundStart, int backgroundEnd, int borderStart, int borderEnd, List<ClientTooltipComponent> components, boolean comparison, int index, Identifier resource, boolean gradientBackground, boolean gradientBorder)
+	public static ColorExtResult onTooltipColorEvent(ItemStack stack, GuiGraphicsExtractor graphics, int x, int y, Font font, int backgroundStart, int backgroundEnd, int borderStart, int borderEnd, List<ClientTooltipComponent> components, boolean comparison, int index, Identifier resource, boolean gradientBackground, boolean gradientBorder)
 	{
 		ColorExtResult result = new ColorExtResult(backgroundStart, backgroundEnd, borderStart, borderEnd, gradientBackground, gradientBorder);
 		Minecraft minecraft = Minecraft.getInstance();
@@ -247,7 +247,7 @@ public class LegendaryTooltips
 		return result;
 	}
 
-	public static void onPostTooltipEvent(ItemStack itemStack, GuiGraphics graphics, int x, int y, Font font, int width, int height, List<ClientTooltipComponent> components, boolean comparison, int index)
+	public static void onPostTooltipEvent(ItemStack itemStack, GuiGraphicsExtractor graphics, int x, int y, Font font, int width, int height, List<ClientTooltipComponent> components, boolean comparison, int index)
 	{
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.level == null || minecraft.level.registryAccess() == null)
