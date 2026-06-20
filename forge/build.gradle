@@ -53,7 +53,7 @@ shadowJar {
 
 	manifest {
 		attributes(
-				'MixinConfigs': 'legendarytooltips.mixins.json,legendarytooltips.forge.mixins.json'
+				'MixinConfigs': 'legendarytooltips.mixins.json'
 		)
 	}
 
