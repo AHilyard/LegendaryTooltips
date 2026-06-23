@@ -2,7 +2,7 @@ package com.anthonyhilyard.legendarytooltips.tooltip;
 
 import com.mojang.blaze3d.textures.GpuTexture;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.Font;
@@ -86,7 +86,7 @@ public class TooltipDecor
 		shineTimer = 2.5f;
 	}
 
-	public static void drawShadow(GuiGraphics graphics, int x, int y, int width, int height)
+	public static void drawShadow(GuiGraphicsExtractor graphics, int x, int y, int width, int height)
 	{
 		int shadowColor = 0x44000000;
 
@@ -98,7 +98,7 @@ public class TooltipDecor
 		GuiHelper.drawGradientRect(graphics, x + width + 5, y,              x + width + 6, y + height + 5, shadowColor, shadowColor);
 	}
 
-	public static void drawSeparator(GuiGraphics graphics, int x, int y, int width, int color)
+	public static void drawSeparator(GuiGraphicsExtractor graphics, int x, int y, int width, int color)
 	{
 		graphics.nextStratum();
 
@@ -106,7 +106,7 @@ public class TooltipDecor
 		GuiHelper.drawGradientRectHorizontal(graphics, x + width / 2, y, x + width, y + 1, color, color & 0xFFFFFF);
 	}
 
-	public static void drawBorder(GuiGraphics graphics, int x, int y, int width, int height, ItemStack item, List<ClientTooltipComponent> components, Font font, FrameDefinition frameDefinition, boolean comparison, int index)
+	public static void drawBorder(GuiGraphicsExtractor graphics, int x, int y, int width, int height, ItemStack item, List<ClientTooltipComponent> components, Font font, FrameDefinition frameDefinition, boolean comparison, int index)
 	{
 		graphics.nextStratum();
 

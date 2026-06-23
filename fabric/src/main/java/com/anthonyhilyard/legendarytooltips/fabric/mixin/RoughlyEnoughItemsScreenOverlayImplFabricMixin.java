@@ -5,6 +5,7 @@ import java.util.List;
 import com.anthonyhilyard.iceberg.util.ITooltipAccess;
 import com.anthonyhilyard.iceberg.util.Tooltips;
 
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,7 +17,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.impl.client.gui.fabric.ScreenOverlayImplFabric;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
@@ -25,7 +25,7 @@ import net.minecraft.world.item.ItemStack;
 @Mixin(value = ScreenOverlayImplFabric.class, remap = false)
 public class RoughlyEnoughItemsScreenOverlayImplFabricMixin
 {
-	@Inject(method = "renderTooltipInner(Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/client/gui/GuiGraphics;Lme/shedaniel/rei/api/client/gui/widgets/Tooltip;II)V",
+	@Inject(method = "renderTooltipInner(Lnet/minecraft/client/gui/screens/Screen;Lme/shedaniel/rei/api/client/gui/compat/GuiGraphics;Lme/shedaniel/rei/api/client/gui/widgets/Tooltip;II)V",
 			at = @At(value = "HEAD"), require = 0)
 	private void addItemStackAccess(Screen screen, GuiGraphics graphics, Tooltip tooltip, int mouseX, int mouseY, CallbackInfo info)
 	{
@@ -38,8 +38,8 @@ public class RoughlyEnoughItemsScreenOverlayImplFabricMixin
 		}
 	}
 
-	@ModifyVariable(method = "renderTooltipInner(Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/client/gui/GuiGraphics;Lme/shedaniel/rei/api/client/gui/widgets/Tooltip;II)V",
-			at = @At(value = "INVOKE", target = "Lme/shedaniel/rei/impl/client/gui/fabric/ScreenOverlayImplFabric;renderTooltipInner(Lnet/minecraft/client/gui/GuiGraphics;Ljava/util/List;IILnet/minecraft/resources/Identifier;)V"),
+	@ModifyVariable(method = "renderTooltipInner(Lnet/minecraft/client/gui/screens/Screen;Lme/shedaniel/rei/api/client/gui/compat/GuiGraphics;Lme/shedaniel/rei/api/client/gui/widgets/Tooltip;II)V",
+			at = @At(value = "INVOKE", target = "Lme/shedaniel/rei/impl/client/gui/fabric/ScreenOverlayImplFabric;renderTooltipInner(Lme/shedaniel/rei/api/client/gui/compat/GuiGraphics;Ljava/util/List;IILnet/minecraft/resources/Identifier;)V"),
 			require = 0)
 	private List<ClientTooltipComponent> formatTooltipComponents(List<ClientTooltipComponent> originalLines, Screen screen, GuiGraphics graphics, Tooltip tooltip, int mouseX, int mouseY)
 	{

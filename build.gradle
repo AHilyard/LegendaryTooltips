@@ -1,7 +1,7 @@
 plugins {
-	id 'io.github.goooler.shadow' version '8.1.7' apply false
-	id 'dev.architectury.loom' version '1.13-SNAPSHOT' apply false
-	id 'architectury-plugin' version '3.4-SNAPSHOT'
+	id "architectury-plugin" version "3.5-SNAPSHOT"
+	id "dev.architectury.loom-no-remap" version "1.17-SNAPSHOT" apply false
+	id 'com.gradleup.shadow' version '9.4.2' apply false
 }
 
 apply plugin: 'architectury-plugin'
@@ -16,7 +16,7 @@ allprojects {
 }
 
 subprojects {
-	apply plugin: 'dev.architectury.loom'
+	apply plugin: 'dev.architectury.loom-no-remap'
 	apply plugin: 'architectury-plugin'
 
 	base {
@@ -32,22 +32,32 @@ subprojects {
 
 	dependencies {
 		minecraft "net.minecraft:minecraft:$rootProject.minecraftVersion"
-		mappings loom.officialMojangMappings()
 
-		modImplementation files("../libs/Iceberg-1.21.11-common-1.4.0.jar")
-		modImplementation files("../libs/Prism-1.21.11-common-1.1.0.jar")
+		implementation files("../libs/Iceberg-26.1.2-common-1.4.1.jar")
+		implementation files("../libs/Prism-26.1.2-common-1.1.1.jar")
 	}
 
 	java {
-		sourceCompatibility = JavaVersion.VERSION_21
-		targetCompatibility = JavaVersion.VERSION_21
+		sourceCompatibility = JavaVersion.VERSION_25
+		targetCompatibility = JavaVersion.VERSION_25
 	}
 
 	tasks.withType(JavaCompile).configureEach {
-		it.options.release = 21
+		it.options.release = 25
 	}
 
-	remapJar {
-		destinationDirectory = file("$buildDir/../../output")
+	plugins.withId('com.gradleup.shadow') {
+		tasks.named('assemble').configure {
+			dependsOn tasks.named('shadowJar')
+		}
+	}
+
+	afterEvaluate {
+		if (project.name == 'common') {
+			tasks.named('jar').configure {
+				archiveClassifier = null
+				destinationDirectory = file("$buildDir/../../output")
+			}
+		}
 	}
 }
