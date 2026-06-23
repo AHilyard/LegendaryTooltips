@@ -35,7 +35,7 @@ public class JustEnoughItemsRenderHelperMixin
 	// For JEI versions prior to 19.5.
 	@Surrogate
 	private void setTooltipStack(Screen screen,
-		 GuiGraphicsExtractor graphics,
+		GuiGraphicsExtractor graphics,
 		List<Component> textComponents,
 		Optional<TooltipComponent> tooltipComponent,
 		int x, int y,
@@ -60,7 +60,7 @@ public class JustEnoughItemsRenderHelperMixin
 	@Redirect(method = "renderTooltip",
 			  at = @At(value = "INVOKE", target = "Ljava/util/stream/Stream;collect(Ljava/util/stream/Collector;)Ljava/lang/Object;", remap = false))
 	private Object formatTooltipComponents(Stream<ClientTooltipComponent> stream, Collector<ClientTooltipComponent, ?, ?> collector,
-	   GuiGraphicsExtractor graphics,
+		GuiGraphicsExtractor graphics,
 		List<Either<FormattedText, TooltipComponent>> elements,
 		int x, int y,
 		Font font,
