@@ -32,8 +32,8 @@ dependencies {
 	implementation "net.fabricmc:fabric-loader:$rootProject.fabricLoaderVersion"
 	implementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabricVersion"
 
-	compileOnly "curse.maven:roughlyenoughitems-310111:8271476"
-	implementation "curse.maven:justenoughitems-238222:8108850"
+	compileOnly "curse.maven:roughlyenoughitems-310111:8271755"
+	implementation "curse.maven:justenoughitems-238222:8309508"
 
 	common(project(path: ":common")) { transitive false }
 	shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
