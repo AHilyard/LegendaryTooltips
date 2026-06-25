@@ -67,7 +67,7 @@ public class JustEnoughItemsRenderHelperMixin
 		ItemStack itemStack)
 	{
 		Minecraft minecraft = Minecraft.getInstance();
-		Screen screen = minecraft.screen;
+		Screen screen = minecraft.gui.screen();
 
 		if (screen == null)
 		{

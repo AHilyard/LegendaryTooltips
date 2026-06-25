@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.renderer.Rect2i;
@@ -302,9 +303,10 @@ public class LegendaryTooltipsConfig extends IcebergConfig<LegendaryTooltipsConf
 		// TODO: Check if the title itself has a custom font set?
 
 		// Check if the current screen specifies a font.
-		if (minecraft.screen != null && minecraft.screen.font != null && minecraft.screen.font != minecraft.font)
+		Screen screen = minecraft.gui.screen();
+		if (screen != null && screen.font != null && screen.font != minecraft.font)
 		{
-			result = minecraft.screen.font;
+			result = screen.font;
 		}
 		// Then check if minecraft has a font set.
 		else
