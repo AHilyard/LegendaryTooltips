@@ -197,9 +197,9 @@ public class LegendaryTooltips
 		TooltipDecor.updateTimer(deltaTime);
 		ItemModelComponent.updateTimer(deltaTime);
 
-		if (minecraft.screen != null)
+		if (minecraft.gui.screen() != null)
 		{
-			if (minecraft.screen instanceof AbstractContainerScreen<?> containerScreen)
+			if (minecraft.gui.screen() instanceof AbstractContainerScreen<?> containerScreen)
 			{
 				if (containerScreen.hoveredSlot != null &&
 					containerScreen.hoveredSlot.hasItem())
