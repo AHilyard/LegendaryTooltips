@@ -44,7 +44,7 @@
 	"suggests": {
 		"equipmentcompare": ">=1.3.0",
 		"roughlyenoughitems": ">=16.0.729",
-		"jei": ">=19.5.2.66"
+		"jei": ">=29.28.0.75"
 	},
 	"custom": {
 		"modupdater": {
