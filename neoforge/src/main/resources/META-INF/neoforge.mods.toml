@@ -8,28 +8,28 @@ version="${version}"
 displayName="Legendary Tooltips"
 displayURL="https://anthonyhilyard.com/"
 updateJSONURL="https://mc-update-check.anthonyhilyard.com/532127"
-logoFile="icon.png"
+iconFile="icon.png"
 authors="Grend, Mat0u5"
 description='''Gives rare items a fancy tooltip and adds additional tooltip configuration options.'''
 
 [[dependencies.legendarytooltips]]
 	modId="neoforge"
 	type="required"
-	versionRange="[26.2,)"
+	versionRange="[26.3,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="minecraft"
 	type="required"
-	versionRange="[26.2,)"
+	versionRange="[26.3,)"
 	ordering="NONE"
 	side="BOTH"
 
 [[dependencies.legendarytooltips]]
 	modId="iceberg"
 	type="required"
-	versionRange="[1.4.2,)"
+	versionRange="[1.4.3,)"
 	ordering="AFTER"
 	side="BOTH"
 

@@ -32,8 +32,9 @@ dependencies {
 	implementation "net.fabricmc:fabric-loader:$rootProject.fabricLoaderVersion"
 	implementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabricVersion"
 
+	// REI has not been updated to 26.3 yet, check compatibility later.
 	compileOnly "curse.maven:roughlyenoughitems-310111:8271755"
-	implementation "curse.maven:justenoughitems-238222:8648478"
+	implementation "curse.maven:justenoughitems-238222:8928168"
 
 	common(project(path: ":common")) { transitive false }
 	shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
