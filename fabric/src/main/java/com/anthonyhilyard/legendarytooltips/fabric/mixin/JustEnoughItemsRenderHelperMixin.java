@@ -3,8 +3,6 @@ package com.anthonyhilyard.legendarytooltips.fabric.mixin;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
-import java.util.stream.Stream;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -15,8 +13,6 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.anthonyhilyard.iceberg.util.ITooltipAccess;
@@ -27,7 +23,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
@@ -35,18 +30,6 @@ import net.minecraft.world.item.ItemStack;
 @Mixin(RenderHelper.class)
 public class JustEnoughItemsRenderHelperMixin
 {
-	// For JEI versions prior to 19.5.
-	@Surrogate
-	private void setTooltipStack(Screen screen,
-		GuiGraphicsExtractor graphics,
-		List<Component> textComponents,
-		Optional<TooltipComponent> tooltipComponent,
-		int x, int y,
-		Font font,
-		ItemStack itemStack, CallbackInfo info)
-	{
-		((ITooltipAccess)graphics).setIcebergTooltipStack(itemStack);
-	}
 
 	@Inject(method = "renderTooltip",
 			at = @At(value = "HEAD"), require = 0)
@@ -60,34 +43,13 @@ public class JustEnoughItemsRenderHelperMixin
 		((ITooltipAccess)graphics).setIcebergTooltipStack(itemStack);
 	}
 
-	@Redirect(method = "renderTooltip",
-			  at = @At(value = "INVOKE", target = "Ljava/util/stream/Stream;collect(Ljava/util/stream/Collector;)Ljava/lang/Object;", remap = false), require = 0)
-	private Object formatTooltipComponentsOld(Stream<ClientTooltipComponent> stream, Collector<ClientTooltipComponent, ?, ?> collector,
-		GuiGraphicsExtractor graphics,
-		List<Either<FormattedText, TooltipComponent>> elements,
-		int x, int y,
-		Font font,
-		ItemStack itemStack)
-	{
-		Minecraft minecraft = Minecraft.getInstance();
-		Screen screen = minecraft.gui.screen();
-
-		if (screen == null)
-		{
-			return stream.collect(collector);
-		}
-
-		List<? extends FormattedText> textElements = elements.stream().map(e -> e.map(text -> text, component -> null)).filter(e -> e != null).toList();
-		return new ArrayList<>(Tooltips.gatherTooltipComponents(itemStack, textElements, itemStack.getTooltipImage(), x, screen.width, screen.height, null, screen.font, -1));
-	}
-
 	@WrapOperation(
 			method = {
 					"renderTooltip(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Ljava/util/List;IILnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;)V",
 					"renderTooltip(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Ljava/util/List;IILnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;)V"
 			},
 			at = @At(value = "INVOKE", target = "Lmezz/jei/fabric/platform/RenderHelper;createClientTooltipComponents(Ljava/util/List;Lnet/minecraft/client/gui/Font;)Ljava/util/List;"), require = 0)
-	private List<ClientTooltipComponent> formatTooltipComponentsNew(
+	private List<ClientTooltipComponent> formatTooltipComponents(
 			RenderHelper instance,
 			List<Either<FormattedText, TooltipComponent>> elements,
 			Font font,
