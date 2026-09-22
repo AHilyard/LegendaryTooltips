@@ -247,7 +247,7 @@ public class LegendaryTooltips
 		return result;
 	}
 
-	public static void onPostTooltipEvent(ItemStack itemStack, GuiGraphicsExtractor graphics, int x, int y, Font font, int width, int height, List<ClientTooltipComponent> components, boolean comparison, int index)
+	public static void onPostTooltipEvent(ItemStack itemStack, GuiGraphicsExtractor graphics, int x, int y, Font font, int width, int height, List<ClientTooltipComponent> components, boolean comparison, int index, boolean extraSpaceAfterFirstLine)
 	{
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.level == null || minecraft.level.registryAccess() == null)
