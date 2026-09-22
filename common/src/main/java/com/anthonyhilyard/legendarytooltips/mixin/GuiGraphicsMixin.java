@@ -8,6 +8,7 @@ import com.anthonyhilyard.iceberg.util.Tooltips.TooltipInfo;
 import com.anthonyhilyard.legendarytooltips.config.LegendaryTooltipsConfig;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,7 +31,7 @@ public class GuiGraphicsMixin
 	}
 
 	@Inject(method = "tooltip", at = @At("HEAD"))
-	private void applyLegendaryFormatting(Font font, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, Identifier resourceLocation, CallbackInfo info)
+	private void applyLegendaryFormatting(Font font, List<ClientTooltipComponent> components, int x, int y, ClientTooltipPositioner positioner, Identifier resourceLocation, boolean extraSpaceAfterFirstLine, CallbackInfo info)
 	{
 		if (components.isEmpty() || font == null) return;
 
